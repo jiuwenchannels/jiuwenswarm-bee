@@ -39,4 +39,5 @@ items to [changelog.md](changelog.md).
 | Gateway protocol drift | All framing is isolated in `bee/src/gateway/`; version is visible via `ack.protocol_version` |
 | Duplicate config facts across README/docs/.env | Canonical values live in `bee/src/gateway/config.ts` and `bee/.env.example`; docs link rather than restate |
 | Shells can drift apart | Electron and Tauri implement the same feature set by hand; the mapping table in `architecture.md` is the contract |
+| Gateway token auth | The `connect` token path exists (`VITE_GATEWAY_TOKEN`) but has never been exercised |
 | Signing | Installers are unsigned; expect SmartScreen/AV warnings until a signing certificate is configured |

@@ -9,4 +9,3 @@ published as end-user documentation — that lives in [`../docs`](../docs).
 | [naming.md](naming.md) | Names, the character, and the hive vocabulary (`pollen`/`waggle`/`honey`) |
 | [roadmap.md](roadmap.md) | Planned work and known gaps |
 | [changelog.md](changelog.md) | User-visible changes per release |
-| [design/jiuwenswarm-bee-channel.md](design/jiuwenswarm-bee-channel.md) | Original channel design and plan |
