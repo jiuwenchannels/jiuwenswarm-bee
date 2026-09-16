@@ -11,6 +11,7 @@ items to [changelog.md](changelog.md).
 - Light/dark themes, mobile layout, accessibility basics
 - UI localization (`en` / `zh`) with a per-locale mascot name (Buzz / 嗡嗡)
 - Speech input (dictation) in the web app where the Web Speech API is available
+- Native Android voice: TTS + speech recognition via `window.AndroidVoice` (used by the app and overlay)
 - Electron and Tauri desktop shells with voice + lip-sync
 - Android app (Capacitor): avatar view + interactive floating overlay (PiP fallback)
 - Installer packaging (NSIS) for both shells
@@ -21,8 +22,6 @@ items to [changelog.md](changelog.md).
 
 - **Runtime gateway URL**: a connection field in the UI, persisted locally, so the
   Android app (and any device) can point at the PC's LAN IP without a rebuild.
-- **Native voice on Android**: use Android `TextToSpeech` / `SpeechRecognizer` (Web
-  Speech is unreliable in the WebView).
 - **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
   [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
   `honey` cue when an answer finishes.

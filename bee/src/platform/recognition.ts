@@ -1,10 +1,16 @@
 /**
- * Speech-to-text (dictation) via the Web Speech API — the mirror of the TTS in
- * `speech.ts`. Feature-detected, so the UI can hide the microphone where it isn't
- * available (Firefox, and typically Electron / Android WebView).
- *
- * The module only holds plain types and callbacks so it is safe to import in tests.
+ * Speech-to-text (dictation). Prefers the Android app's native recognizer
+ * (`window.AndroidVoice`, via `nativeVoice.ts`); otherwise uses the Web Speech API.
+ * Feature-detected, so the UI can hide the microphone where neither is available.
  */
+
+import {
+  androidVoice,
+  hasNativeVoice,
+  installNativeVoice,
+  setListeningHandler,
+  setTranscriptHandler,
+} from './nativeVoice';
 
 // Minimal structural types for the (prefixed) Web Speech recognition API. Defined
 // here rather than relying on the experimental `SpeechRecognition` DOM typings.
@@ -56,7 +62,7 @@ function recognitionCtor(): RecognitionCtor | undefined {
 }
 
 export function isRecognitionSupported(): boolean {
-  return Boolean(recognitionCtor());
+  return Boolean(recognitionCtor()) || hasNativeVoice();
 }
 
 /** Flatten a recognition result list into committed (`final`) and live (`interim`) text. */
@@ -73,20 +79,42 @@ export function readTranscript(results: RecognitionResultList): { final: string;
 }
 
 export interface DictationCallbacks {
-  /** Full transcript of the current dictation (final + interim). */
+  /** Latest transcript of the current dictation (partial results replace earlier ones). */
   onTranscript?: (text: string) => void;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: string) => void;
 }
 
-/** A single dictation session. `available` is false when the API is unsupported. */
+/** BCP-47 language tag for dictation, from the app locale. */
+export function recognitionLang(locale: string): string {
+  return locale === 'zh' ? 'zh-CN' : 'en-US';
+}
+
+/** A single dictation session. `available` is false when nothing supports capture. */
 export class Dictation {
   private readonly callbacks: DictationCallbacks;
+  private readonly lang: string;
+  private readonly native: boolean;
   private readonly recognition: RecognitionLike | null;
 
   constructor(lang: string, callbacks: DictationCallbacks = {}) {
     this.callbacks = callbacks;
+    this.lang = lang;
+    this.native = hasNativeVoice();
+
+    if (this.native) {
+      installNativeVoice();
+      this.recognition = null;
+      setTranscriptHandler((text) => this.callbacks.onTranscript?.(text));
+      setListeningHandler((state) => {
+        if (state === 'start') this.callbacks.onStart?.();
+        else if (state === 'error') this.callbacks.onError?.('native');
+        else this.callbacks.onEnd?.();
+      });
+      return;
+    }
+
     const Ctor = recognitionCtor();
     if (!Ctor) {
       this.recognition = null;
@@ -108,10 +136,14 @@ export class Dictation {
   }
 
   get available(): boolean {
-    return this.recognition !== null;
+    return this.native || this.recognition !== null;
   }
 
   start(): void {
+    if (this.native) {
+      androidVoice()?.startListening?.(this.lang);
+      return;
+    }
     try {
       this.recognition?.start();
     } catch {
@@ -120,15 +152,14 @@ export class Dictation {
   }
 
   stop(): void {
+    if (this.native) {
+      androidVoice()?.stopListening?.();
+      return;
+    }
     try {
       this.recognition?.stop();
     } catch {
       // Not started — ignore.
     }
   }
-}
-
-/** BCP-47 language tag for dictation, from the app locale. */
-export function recognitionLang(locale: string): string {
-  return locale === 'zh' ? 'zh-CN' : 'en-US';
 }

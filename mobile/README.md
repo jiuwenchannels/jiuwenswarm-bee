@@ -92,6 +92,23 @@ planned follow-up so this is configurable on the device.
   `POST_NOTIFICATIONS`, `usesCleartextTraffic`, the `specialUse` service declaration, and
   `supportsPictureInPicture` on the activity.
 
+## Voice
+
+`VoiceBridge.java` exposes native voice to the web app as `window.AndroidVoice`:
+
+- **TTS** — Android `TextToSpeech`; `onRangeStart` drives the avatar's mouth. Used
+  instead of the (unreliable) Web Speech synthesis in the WebView.
+- **Speech recognition** — Android `SpeechRecognizer` for dictation, with partial
+  results. Used instead of Web Speech recognition.
+
+It's installed on both the main activity's WebView (`MainActivity`) and the overlay
+WebView (`OverlayService`), and pushes events back through `window.__beeVoice`
+(see `bee/src/platform/nativeVoice.ts`). The web modules `speech.ts` and
+`recognition.ts` prefer it automatically when present, so the same UI gets browser
+speech on the web and native speech on Android.
+
+Requires the `RECORD_AUDIO` permission (requested on first launch).
+
 ## Notes / limits
 
 - **Cleartext** is required because the gateway is `ws://` on the LAN.

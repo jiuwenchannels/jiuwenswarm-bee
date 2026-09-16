@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Rational;
+import android.webkit.WebView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -31,6 +32,20 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
         requestOverlayPermissionOnce();
         requestNotificationPermissionOnce();
+        requestAudioPermissionOnce();
+        installVoiceBridge();
+    }
+
+    /** Expose native TTS + speech recognition to the web app as `window.AndroidVoice`. */
+    private void installVoiceBridge() {
+        try {
+            WebView webView = getBridge().getWebView();
+            if (webView != null) {
+                webView.addJavascriptInterface(new VoiceBridge(this, webView), "AndroidVoice");
+            }
+        } catch (Exception ignored) {
+            // Voice bridge is optional.
+        }
     }
 
     @Override
@@ -77,6 +92,14 @@ public class MainActivity extends BridgeActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this, new String[] {Manifest.permission.POST_NOTIFICATIONS}, 1001);
+        }
+    }
+
+    private void requestAudioPermissionOnce() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this, new String[] {Manifest.permission.RECORD_AUDIO}, 1002);
         }
     }
 

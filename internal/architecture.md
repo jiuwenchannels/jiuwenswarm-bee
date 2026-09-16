@@ -111,3 +111,8 @@ interactive `TYPE_APPLICATION_OVERLAY` window (a WebView at `#avatar`) so the be
 over other apps and its inline chat works; `window.AndroidBee.setExpanded(...)` resizes
 it. If the overlay permission isn't granted, `MainActivity` falls back to
 Picture-in-Picture. Cleartext is enabled for the LAN `ws://` gateway.
+
+Voice is native on Android: `VoiceBridge` exposes `window.AndroidVoice` (Android
+`TextToSpeech` + `SpeechRecognizer`) and pushes events through `window.__beeVoice`, so
+`bee/src/platform/speech.ts` and `recognition.ts` prefer it over the Web Speech API when
+present. The same bridge is installed in both the activity and the overlay WebView.

@@ -60,6 +60,7 @@ public class OverlayService extends Service {
     private WindowManager.LayoutParams params;
     private LinearLayout root;
     private WebView webView;
+    private VoiceBridge voiceBridge;
 
     private final Handler main = new Handler(Looper.getMainLooper());
 
@@ -186,6 +187,8 @@ public class OverlayService extends Service {
                     }
                 });
         webView.addJavascriptInterface(new BeeBridge(), "AndroidBee");
+        voiceBridge = new VoiceBridge(getApplicationContext(), webView);
+        webView.addJavascriptInterface(voiceBridge, "AndroidVoice");
         webView.loadUrl(OVERLAY_URL);
 
         root.addView(
@@ -272,6 +275,10 @@ public class OverlayService extends Service {
 
     @Override
     public void onDestroy() {
+        if (voiceBridge != null) {
+            voiceBridge.shutdown();
+            voiceBridge = null;
+        }
         if (root != null && windowManager != null) {
             windowManager.removeView(root);
             root = null;

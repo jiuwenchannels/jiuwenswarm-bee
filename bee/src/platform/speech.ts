@@ -1,10 +1,12 @@
 /**
- * Text-to-speech via the Web Speech API (built into Chromium/WebView2), with
- * lightweight lip-sync hooks: `onBoundary` fires on word boundaries so the
- * avatar's mouth can pulse while it speaks.
+ * Text-to-speech with lip-sync hooks.
  *
- * The module is browser-only; everything is guarded so imports are safe in tests.
+ * Prefers the Android app's native `TextToSpeech` (`window.AndroidVoice`, see
+ * `nativeVoice.ts`); otherwise uses the Web Speech API (Chromium/WebView2). In both
+ * cases `onStart` / `onEnd` / `onBoundary` fire so the avatar's mouth can move.
  */
+
+import { androidVoice, hasNativeVoice, installNativeVoice, setSpeechHandler } from './nativeVoice';
 
 export interface SpeakerCallbacks {
   onStart?: () => void;
@@ -14,6 +16,7 @@ export interface SpeakerCallbacks {
 }
 
 export function isSpeechSupported(): boolean {
+  if (hasNativeVoice()) return true;
   return (
     typeof window !== 'undefined' &&
     'speechSynthesis' in window &&
@@ -55,6 +58,7 @@ export function splitSentences(text: string): string[] {
 
 export class Speaker {
   private readonly callbacks: SpeakerCallbacks;
+  private readonly native: boolean;
   private voice: SpeechSynthesisVoice | undefined;
   private queue: string[] = [];
   private speaking = false;
@@ -62,6 +66,18 @@ export class Speaker {
 
   constructor(callbacks: SpeakerCallbacks = {}) {
     this.callbacks = callbacks;
+    this.native = hasNativeVoice();
+
+    if (this.native) {
+      installNativeVoice();
+      setSpeechHandler((state) => {
+        if (state === 'start') this.callbacks.onStart?.();
+        else if (state === 'boundary') this.callbacks.onBoundary?.();
+        else this.callbacks.onEnd?.();
+      });
+      return;
+    }
+
     if (isSpeechSupported()) {
       this.refreshVoices();
       window.speechSynthesis.addEventListener?.('voiceschanged', () => this.refreshVoices());
@@ -78,6 +94,11 @@ export class Speaker {
   }
 
   speak(text: string): void {
+    if (this.native) {
+      const clean = stripForSpeech(text);
+      if (clean) androidVoice()?.speak?.(clean);
+      return;
+    }
     if (!isSpeechSupported()) return;
     const sentences = splitSentences(text);
     if (sentences.length === 0) return;
@@ -87,6 +108,10 @@ export class Speaker {
   }
 
   cancel(): void {
+    if (this.native) {
+      androidVoice()?.stopSpeaking?.();
+      return;
+    }
     if (!isSpeechSupported()) return;
     this.cancelled = true;
     this.queue = [];
