@@ -11,7 +11,7 @@ items to [changelog.md](changelog.md).
 - Light/dark themes, mobile layout, accessibility basics
 - UI localization (`en` / `zh`) with a per-locale mascot name (Buzz / 嗡嗡)
 - Electron and Tauri desktop shells with voice + lip-sync
-- Android app (Capacitor): avatar view + Picture-in-Picture floating
+- Android app (Capacitor): avatar view + interactive floating overlay (PiP fallback)
 - Installer packaging (NSIS) for both shells
 - ESLint + Prettier configured and wired into CI
 - Repository organised by domain; CI for the web app and shell syntax

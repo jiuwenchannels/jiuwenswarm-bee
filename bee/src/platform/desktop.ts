@@ -15,12 +15,22 @@ interface TauriGlobal {
   core?: { invoke: (command: string, args?: Record<string, unknown>) => Promise<unknown> };
 }
 
+/** Native overlay bridge exposed by the Android app (`OverlayService`). */
+interface AndroidOverlayBridge {
+  setExpanded?: (expanded: boolean) => void;
+  close?: () => void;
+}
+
 function tauri(): TauriGlobal | undefined {
   return (window as unknown as { __TAURI__?: TauriGlobal }).__TAURI__;
 }
 
 function electron(): ElectronBridge | undefined {
   return (window as unknown as { bee?: ElectronBridge }).bee;
+}
+
+function androidOverlay(): AndroidOverlayBridge | undefined {
+  return (window as unknown as { AndroidBee?: AndroidOverlayBridge }).AndroidBee;
 }
 
 export function isDesktop(): boolean {
@@ -41,6 +51,7 @@ export const desktop = {
   setExpanded(expanded: boolean): void {
     electron()?.setExpanded?.(expanded);
     void tauri()?.core?.invoke('set_avatar_expanded', { expanded });
+    androidOverlay()?.setExpanded?.(expanded);
   },
 
   setClickThrough(enabled: boolean): void {

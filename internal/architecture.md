@@ -106,6 +106,8 @@ bridges are no-ops.
 
 The Android app (`mobile/`) is a Capacitor wrapper around the same `bee/dist`. It opens
 into the avatar view (`isNativeApp()` in `platform/desktop.ts` makes an empty hash mean
-"avatar"), and `MainActivity` enters Picture-in-Picture on `onUserLeaveHint`, so the bee
-keeps floating when the user leaves the app. Cleartext is enabled for the LAN `ws://`
-gateway.
+"avatar"). When the user leaves the app, `OverlayService` adds a transparent, draggable,
+interactive `TYPE_APPLICATION_OVERLAY` window (a WebView at `#avatar`) so the bee floats
+over other apps and its inline chat works; `window.AndroidBee.setExpanded(...)` resizes
+it. If the overlay permission isn't granted, `MainActivity` falls back to
+Picture-in-Picture. Cleartext is enabled for the LAN `ws://` gateway.

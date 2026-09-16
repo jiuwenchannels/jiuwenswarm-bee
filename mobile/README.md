@@ -7,9 +7,16 @@ live in [`../bee`](../bee).
 ## What it does
 
 - Loads `../bee/dist` and **opens straight into the avatar view** (`#avatar`).
-- **Picture-in-Picture**: pressing Home (or the PiP button) shrinks the avatar into a
-  small always-on-top window over other apps — the Android equivalent of the desktop pet.
+- **Floating overlay** (the real pet): when you leave the app, a transparent, draggable,
+  fully interactive bee window stays on top of other apps. Tap the bee to expand the
+  inline chat (with the soft keyboard). This is a `TYPE_APPLICATION_OVERLAY` window
+  hosted by a foreground service — not a WebView-in-an-app.
+- **Picture-in-Picture fallback**: if overlay permission isn't granted, leaving the app
+  uses the system PiP window instead (view-only; you can't type in it).
 - Talks to the JiuwenSwarm product gateway over the LAN: `ws://<pc-ip>:19000/ws`.
+
+The first launch asks for **"Display over other apps"** (required for the overlay); deny
+it and the app still works with the PiP fallback.
 
 ## Prerequisites (one-time)
 
@@ -72,18 +79,24 @@ The app connects to whatever `VITE_JIUWENSWARM_URL` was at **web build time** (s
 changes, rebuild (`npm run build:web && npm run sync`). A runtime gateway setting is a
 planned follow-up so this is configurable on the device.
 
-## Where the PiP lives
+## Where the floating window lives
 
-- `android/app/src/main/AndroidManifest.xml` — `android:supportsPictureInPicture="true"`
-  and `android:usesCleartextTraffic="true"` on the main activity.
-- `android/app/src/main/java/com/jiuwenswarm/beechat/MainActivity.java` — enters PiP on
-  `onUserLeaveHint` (when the user presses Home).
+- `android/app/src/main/java/com/jiuwenswarm/beechat/OverlayService.java` — the
+  foreground service that adds a transparent `TYPE_APPLICATION_OVERLAY` window hosting a
+  WebView at `https://localhost/public/index.html#avatar`. It resizes between collapsed
+  and expanded via `window.AndroidBee.setExpanded(...)` (see `bee/src/platform/desktop.ts`)
+  and drags by a native handle.
+- `MainActivity.java` — requests the overlay + notification permissions; on
+  `onUserLeaveHint` it starts `OverlayService` (if allowed) or falls back to PiP.
+- `AndroidManifest.xml` — `SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE(_SPECIAL_USE)`,
+  `POST_NOTIFICATIONS`, `usesCleartextTraffic`, the `specialUse` service declaration, and
+  `supportsPictureInPicture` on the activity.
 
 ## Notes / limits
 
 - **Cleartext** is required because the gateway is `ws://` on the LAN.
-- **Voice**: Web Speech synthesis is unreliable in Android WebView; native TTS is a
-  follow-up.
-- PiP is a system window (rounded, size-limited); it is not a free-floating overlay.
-  A true transparent always-on-top overlay would need `SYSTEM_ALERT_WINDOW` and a
-  foreground service.
+- **Voice**: Web Speech is unreliable in the Android WebView; native TTS is a follow-up.
+- The overlay needs **"Display over other apps"** and shows a **persistent notification**
+  (foreground service). Play Store scrutinizes overlay apps; sideloading is fine.
+- The overlay WebView is a plain WebView (no Capacitor bridge); it loads the avatar view
+  directly, so Capacitor plugins aren't available there.
