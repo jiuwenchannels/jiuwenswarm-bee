@@ -1,0 +1,58 @@
+:root,
+[data-theme='light'] {
+  --bee-bg: #fdf8ea;
+  --bee-bg-accent: #fff4cf;
+  --bee-surface: #ffffff;
+  --bee-border: #e7dcc0;
+  --bee-text: #2b2a26;
+  --bee-text-muted: #6f6a5c;
+  --bee-accent: #f2b705;
+  --bee-accent-text: #2b2a26;
+  --bee-link: #a5660a;
+
+  --bee-bubble-user-bg: #2b2a26;
+  --bee-bubble-user-text: #fdf8ea;
+  --bee-bubble-bee-bg: #ffffff;
+
+  --bee-danger-bg: #fdecea;
+  --bee-danger-text: #a3231a;
+  --bee-ok: #2e7d32;
+  --bee-warn: #c07a00;
+
+  --bee-scrollbar-thumb: #e0d3ac;
+  --bee-scrollbar-thumb-hover: #cbb98a;
+  --bee-scrollbar-track: transparent;
+
+  /* Avatar character */
+  --avatar-skin: #f3c9a4;
+  --avatar-hair: #3b2f2c;
+  --avatar-shirt: #f2b705;
+  --avatar-collar: #e0a800;
+  --avatar-pupil: #2b2a26;
+  --avatar-cheek: #ef9f86;
+}
+
+[data-theme='dark'] {
+  --bee-bg: #17161a;
+  --bee-bg-accent: #211f17;
+  --bee-surface: #201f24;
+  --bee-border: #38363d;
+  --bee-text: #f2efe6;
+  --bee-text-muted: #a9a396;
+  --bee-accent: #f2c040;
+  --bee-accent-text: #1b1a16;
+  --bee-link: #f2c040;
+
+  --bee-bubble-user-bg: #f2c040;
+  --bee-bubble-user-text: #1b1a16;
+  --bee-bubble-bee-bg: #2a282e;
+
+  --bee-danger-bg: #3a1f1d;
+  --bee-danger-text: #ffb4ad;
+  --bee-ok: #7bd88a;
+  --bee-warn: #f2c040;
+
+  --bee-scrollbar-thumb: #3d3a44;
+  --bee-scrollbar-thumb-hover: #4f4b57;
+  --bee-scrollbar-track: transparent;
+}

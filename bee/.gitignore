@@ -1,0 +1,17 @@
+# Web app (Vite + React)
+node_modules/
+dist/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Local env (VITE_JIUWENSWARM_URL, tokens, …) — keep .env.example
+.env
+.env.local
+.env.*.local
+*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*

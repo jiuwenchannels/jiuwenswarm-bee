@@ -1,0 +1,12 @@
+# Electron shell
+node_modules/
+
+# electron-builder output (installers + unpacked app)
+release/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# NOTE: build/icon.png is a source asset for electron-builder — do not ignore it.

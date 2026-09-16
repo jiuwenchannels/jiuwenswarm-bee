@@ -1,0 +1,14 @@
+# Tauri shell
+node_modules/
+dist/
+
+# Rust build output / generated code
+src-tauri/target/
+src-tauri/gen/
+
+# Tauri-generated mobile icons (desktop icons under icons/ are committed)
+src-tauri/icons/android/
+src-tauri/icons/ios/
+
+# Logs
+*.log

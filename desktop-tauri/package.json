@@ -1,0 +1,15 @@
+{
+  "name": "jiuwenswarm-bee-desktop-tauri",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BeeChat desktop avatar (Tauri) — a lightweight always-on-top bee companion",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "icon": "tauri icon ../bee/src/assets/bee-static.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  }
+}

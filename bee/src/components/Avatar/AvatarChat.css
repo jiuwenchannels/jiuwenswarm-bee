@@ -1,0 +1,129 @@
+.avatar-chat {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: transparent;
+  overflow: hidden;
+}
+
+.avatar-chat__grip {
+  height: 16px;
+  flex: 0 0 auto;
+  cursor: grab;
+  /* Electron frameless drag; Tauri uses the data attribute. */
+  -webkit-app-region: drag;
+}
+
+.avatar-chat__grip:active {
+  cursor: grabbing;
+}
+
+.avatar-chat__bubbles {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 12px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: var(--bee-surface);
+  border: 1px solid var(--bee-border);
+  border-radius: 16px 16px 4px 16px;
+  margin: 0 4px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.avatar-chat__hello {
+  margin: 0;
+  color: var(--bee-text-muted);
+  font-size: 13px;
+}
+
+.avatar-chat__stage {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 4px 0 2px;
+}
+
+.avatar-chat__char {
+  width: 168px;
+  height: 210px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.avatar-chat__composer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 10px calc(10px + env(safe-area-inset-bottom));
+  background: var(--bee-surface);
+  border: 1px solid var(--bee-border);
+  border-radius: 14px;
+  margin: 0 4px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.avatar-chat__composer .composer__input,
+.avatar-chat__composer .composer__send {
+  -webkit-app-region: no-drag;
+}
+
+.avatar-chat__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--bee-text-muted);
+}
+
+.avatar-chat__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.avatar-chat__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bee-text-muted);
+}
+
+.avatar-chat__status[data-variant='connected'] .avatar-chat__dot {
+  background: var(--bee-ok);
+}
+
+.avatar-chat__status[data-variant='connecting'] .avatar-chat__dot,
+.avatar-chat__status[data-variant='reconnecting'] .avatar-chat__dot {
+  background: var(--bee-warn);
+}
+
+.avatar-chat__status[data-variant='disconnected'] .avatar-chat__dot {
+  background: var(--bee-danger-text);
+}
+
+.avatar-chat__mute,
+.avatar-chat__style,
+.avatar-chat__retry {
+  border: none;
+  background: transparent;
+  color: var(--bee-link);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  -webkit-app-region: no-drag;
+}
+
+.avatar-chat__retry {
+  color: var(--bee-danger-text);
+}

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+bee/dist/
+desktop/release/
+desktop-tauri/src-tauri/target/
+desktop-tauri/src-tauri/gen/
+.vite/
+coverage/
+
+# Tauri-generated mobile icons (desktop icons are committed)
+desktop-tauri/src-tauri/icons/android/
+desktop-tauri/src-tauri/icons/ios/
+
+# Env / secrets (keep the examples)
+.env
+.env.local
+.env.*.local
+*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
