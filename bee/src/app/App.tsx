@@ -1,4 +1,4 @@
-import { Menu, Plus, Settings } from 'lucide-react';
+import { Menu, Plus, Search, Settings } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AvatarChat } from '../components/avatar/AvatarChat';
@@ -36,7 +36,6 @@ function ChatApp() {
     regenerate,
     retryMessage,
     editMessage,
-    feedback,
     reconnect,
     url,
     conversations,
@@ -55,6 +54,13 @@ function ChatApp() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const hasError = messages.some((message) => message.error);
+  const isMac =
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.userAgent);
+
+  const startNewChat = useCallback(() => {
+    newChat();
+    requestAnimationFrame(() => composerRef.current?.focus());
+  }, [newChat]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
     const el = mainRef.current;
@@ -140,10 +146,36 @@ function ChatApp() {
           {messages.length > 0 ? <BeeAvatar state={avatar} compact /> : null}
         </div>
         <div className="app__controls">
-          <div className="app__status" data-testid="bee-status" data-variant={status}>
-            <span className="app__status-dot" aria-hidden="true" />
-            <span className="app__status-label">{t.status[status]}</span>
-          </div>
+          {status !== 'connected' ? (
+            <div className="app__status" data-testid="bee-status" data-variant={status}>
+              <span className="app__status-dot" aria-hidden="true" />
+              <span className="app__status-label">{t.status[status]}</span>
+            </div>
+          ) : null}
+          <button
+            className="app__cmd"
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            title={t.command.title}
+            aria-label={t.command.title}
+            aria-keyshortcuts="Control+K Meta+K"
+            data-testid="bee-palette-toggle"
+          >
+            <Search className="app__cmd-icon" size={13} aria-hidden="true" />
+            <span className="app__cmd-keys" aria-hidden="true">
+              {isMac ? (
+                <>
+                  <kbd>⌘</kbd>
+                  <kbd>K</kbd>
+                </>
+              ) : (
+                <>
+                  <kbd>Ctrl</kbd>
+                  <kbd>K</kbd>
+                </>
+              )}
+            </span>
+          </button>
           <button
             className="icon-btn"
             type="button"
@@ -156,7 +188,7 @@ function ChatApp() {
           <button
             className="icon-btn"
             type="button"
-            onClick={newChat}
+            onClick={startNewChat}
             aria-label={t.actions.newChat}
             data-testid="bee-new-chat-header"
           >
@@ -177,7 +209,6 @@ function ChatApp() {
           <MessageList
             messages={messages}
             busy={busy}
-            onFeedback={feedback}
             onRegenerate={regenerate}
             onRetry={retryMessage}
             onEdit={editMessage}
@@ -223,18 +254,28 @@ function ChatApp() {
           onStop={stop}
           draftKey={activeId}
         />
+        <p className="app__hint" aria-hidden="true">
+          {t.composer.hint}
+        </p>
       </footer>
 
       {historyOpen ? (
-        <HistorySidebar
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={selectConversation}
-          onNew={newChat}
-          onRename={renameConversation}
-          onDelete={deleteConversation}
-          onClose={() => setHistoryOpen(false)}
-        />
+        <>
+          <div
+            className="app__scrim"
+            data-testid="bee-history-backdrop"
+            onClick={() => setHistoryOpen(false)}
+          />
+          <HistorySidebar
+            conversations={conversations}
+            activeId={activeId}
+            onSelect={selectConversation}
+            onNew={startNewChat}
+            onRename={renameConversation}
+            onDelete={deleteConversation}
+            onClose={() => setHistoryOpen(false)}
+          />
+        </>
       ) : null}
 
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
@@ -242,7 +283,7 @@ function ChatApp() {
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
-        onNewChat={newChat}
+        onNewChat={startNewChat}
         onToggleTheme={cycleTheme}
         onSwitchLanguage={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
         onOpenSettings={() => setSettingsOpen(true)}

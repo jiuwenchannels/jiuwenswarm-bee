@@ -23,6 +23,12 @@ A client-only polish pass on the web app (no gateway/backend changes).
 - **Visual polish**: consistent Lucide icon set, toasts, day separators, hover actions,
   refined tokens, depth, and motion (all respecting reduced motion).
 - **PWA manifest + icon**.
+- **Second polish pass**: syntax-highlighted code, copy-as-plain-text, edited
+  markers and hover timestamps, themed bee cut-out (fixes dark mode), streaming
+  replies render as text then Markdown, settings grouped with an Advanced fold,
+  localized + grouped history sidebar, sidebar scrim/swipe, top toasts, ⌘K chip,
+  composer hint + autofocus, reduced aria-live noise, Inter variable font, and an
+  offline service worker (still no backend changes).
 
 ## 0.1.0
 

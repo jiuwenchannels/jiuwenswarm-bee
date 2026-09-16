@@ -18,21 +18,25 @@ items to [changelog.md](changelog.md).
 - ESLint + Prettier configured and wired into CI
 - Repository organised by domain; CI for the web app and shell syntax
 - Rich Markdown + GFM rendering (tables, links) with code blocks + copy (sanitized)
-- Per-message actions: copy, edit & resend, regenerate, thumbs feedback
+- Per-message actions: copy, edit & resend, regenerate
 - Local conversation history (searchable sidebar, rename/delete) with persisted drafts
 - Light/dark/system themes and a settings panel with a runtime gateway URL
 - Command palette, stop-generation, starter prompts, toasts
 - PWA manifest + icon
+- Syntax highlighting, copy-as-plain-text, edited markers, hover timestamps
+- Dark-mode-correct transparent bee cut-out (`bee-mark.png`)
+- Grouped/localized history sidebar, sidebar scrim + swipe, top toasts
+- Offline app shell (service worker) and long-thread rendering via `content-visibility`
+- Inter variable font, ⌘K affordance, composer hint
 
 ## Next
 
-- **Virtualized message list**: only window the DOM for very long threads.
-- **Full offline PWA**: a service worker for the app shell (needs a cache-version story so updates aren't stale).
 - **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
   [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
   `honey` cue when an answer finishes.
 - **Avatar art**: only two bee poses ship (`bee-static`, `bee-flying`); add dedicated
-  thinking / talking frames so the state machine maps to real art.
+  thinking / talking frames so the state machine maps to real art, and give the flying
+  pose a transparent cut-out for dark mode.
 - **Release automation**: a script to bump the version manifests together and tag.
 - **Golden-path E2E**: a smoke test that runs the app against a stub gateway in CI
   (the gateway is not yet available headless).

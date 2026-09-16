@@ -61,99 +61,114 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
         </header>
 
         <div className="modal__body">
-          <section className="field">
-            <span className="field__label">{t.settings.theme}</span>
-            <div className="segmented" role="group" aria-label={t.settings.theme}>
-              {themes.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className="segmented__item"
-                  data-active={settings.theme === option.value ? 'true' : undefined}
-                  aria-pressed={settings.theme === option.value}
-                  onClick={() => update({ theme: option.value })}
-                >
-                  {option.label}
-                </button>
-              ))}
+          <section className="field-group">
+            <h3 className="field-group__title">{t.settings.appearance}</h3>
+
+            <div className="field">
+              <span className="field__label">{t.settings.theme}</span>
+              <div className="segmented" role="group" aria-label={t.settings.theme}>
+                {themes.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className="segmented__item"
+                    data-active={settings.theme === option.value ? 'true' : undefined}
+                    aria-pressed={settings.theme === option.value}
+                    onClick={() => update({ theme: option.value })}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="field">
+              <span className="field__label">{t.settings.language}</span>
+              <div className="segmented" role="group" aria-label={t.settings.language}>
+                {LOCALE_LABELS.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className="segmented__item"
+                    data-active={locale === option.value ? 'true' : undefined}
+                    aria-pressed={locale === option.value}
+                    onClick={() => setLocale(option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </section>
 
-          <section className="field">
-            <span className="field__label">{t.settings.language}</span>
-            <div className="segmented" role="group" aria-label={t.settings.language}>
-              {LOCALE_LABELS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className="segmented__item"
-                  data-active={locale === option.value ? 'true' : undefined}
-                  aria-pressed={locale === option.value}
-                  onClick={() => setLocale(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
+          <section className="field-group">
+            <h3 className="field-group__title">{t.settings.assistant}</h3>
+            <div className="field">
+              <label className="field__row">
+                <span className="field__label">{t.settings.voice}</span>
+                <input
+                  type="checkbox"
+                  className="switch"
+                  checked={settings.voiceEnabled}
+                  onChange={(event) => update({ voiceEnabled: event.target.checked })}
+                />
+              </label>
+              <p className="field__hint">{t.settings.voiceHint}</p>
             </div>
           </section>
 
-          <section className="field">
-            <label className="field__row">
-              <span className="field__label">{t.settings.voice}</span>
-              <input
-                type="checkbox"
-                className="switch"
-                checked={settings.voiceEnabled}
-                onChange={(event) => update({ voiceEnabled: event.target.checked })}
-              />
-            </label>
-            <p className="field__hint">{t.settings.voiceHint}</p>
-          </section>
-
-          <section className="field">
-            <label className="field__label" htmlFor="gateway-url">
-              {t.settings.gatewayUrl}
-            </label>
-            <input
-              id="gateway-url"
-              className="field__input"
-              type="text"
-              inputMode="url"
-              spellCheck={false}
-              placeholder={t.settings.gatewayPlaceholder}
-              value={gatewayUrl}
-              onChange={(event) => setGatewayUrl(event.target.value)}
-            />
-            <p className="field__hint">{t.settings.gatewayHint}</p>
-          </section>
-
-          <section className="field field--split">
-            <div>
-              <label className="field__label" htmlFor="agent-id">
-                {t.settings.agentId}
+          <section className="field-group">
+            <h3 className="field-group__title">{t.settings.connection}</h3>
+            <div className="field">
+              <label className="field__label" htmlFor="gateway-url">
+                {t.settings.gatewayUrl}
               </label>
               <input
-                id="agent-id"
+                id="gateway-url"
                 className="field__input"
                 type="text"
+                inputMode="url"
                 spellCheck={false}
-                value={agentId}
-                onChange={(event) => setAgentId(event.target.value)}
+                placeholder={t.settings.gatewayPlaceholder}
+                value={gatewayUrl}
+                onChange={(event) => setGatewayUrl(event.target.value)}
               />
+              <p className="field__hint">{t.settings.gatewayHint}</p>
             </div>
-            <div>
-              <label className="field__label" htmlFor="agent-mode">
-                {t.settings.mode}
-              </label>
-              <input
-                id="agent-mode"
-                className="field__input"
-                type="text"
-                spellCheck={false}
-                value={mode}
-                onChange={(event) => setMode(event.target.value)}
-              />
-            </div>
+
+            <details className="advanced">
+              <summary>{t.settings.advanced}</summary>
+              <div className="field field--split">
+                <div>
+                  <label className="field__label" htmlFor="agent-id">
+                    {t.settings.agentId}
+                  </label>
+                  <input
+                    id="agent-id"
+                    className="field__input"
+                    type="text"
+                    spellCheck={false}
+                    value={agentId}
+                    onChange={(event) => setAgentId(event.target.value)}
+                  />
+                  <p className="field__hint">{t.settings.agentHint}</p>
+                </div>
+                <div>
+                  <label className="field__label" htmlFor="agent-mode">
+                    {t.settings.mode}
+                  </label>
+                  <input
+                    id="agent-mode"
+                    className="field__input"
+                    type="text"
+                    spellCheck={false}
+                    value={mode}
+                    onChange={(event) => setMode(event.target.value)}
+                  />
+                  <p className="field__hint">{t.settings.modeHint}</p>
+                </div>
+              </div>
+            </details>
           </section>
         </div>
 

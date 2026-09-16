@@ -29,6 +29,7 @@ export interface Strings {
     send: string;
     stop: string;
     ariaLabel: string;
+    hint: string;
     dictateStart: string;
     dictateStop: string;
   };
@@ -39,17 +40,20 @@ export interface Strings {
     latest: string;
     copy: string;
     copied: string;
+    copyText: string;
     copyCode: string;
     regenerate: string;
     edit: string;
     stop: string;
     stopped: string;
+    edited: string;
     save: string;
     cancel: string;
     delete: string;
     rename: string;
     search: string;
     close: string;
+    more: string;
   };
   offline: (url: string) => string;
   voice: {
@@ -68,9 +72,16 @@ export interface Strings {
     searchPlaceholder: string;
     empty: string;
     deleteConfirm: string;
+    today: string;
+    previous7: string;
+    older: string;
   };
   settings: {
     title: string;
+    appearance: string;
+    assistant: string;
+    connection: string;
+    advanced: string;
     theme: string;
     language: string;
     voice: string;
@@ -79,7 +90,9 @@ export interface Strings {
     gatewayPlaceholder: string;
     gatewayHint: string;
     agentId: string;
+    agentHint: string;
     mode: string;
+    modeHint: string;
     reset: string;
     close: string;
   };

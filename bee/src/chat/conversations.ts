@@ -85,7 +85,7 @@ function sanitizeMessage(raw: unknown): ChatMessage | null {
     streaming: false,
     error: raw.error === true,
     stopped: raw.stopped === true,
-    feedback: raw.feedback === 'up' || raw.feedback === 'down' ? raw.feedback : undefined,
+    edited: raw.edited === true,
   };
 }
 

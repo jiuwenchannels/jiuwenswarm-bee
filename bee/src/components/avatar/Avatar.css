@@ -18,12 +18,14 @@
 .bee-avatar__image {
   width: 128px;
   height: auto;
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
   transform-origin: 50% 60%;
 }
 
-[data-theme='dark'] .bee-avatar__image {
-  mix-blend-mode: normal;
+/* The flying art is opaque with a light background: `multiply` hides it on the
+   light page. The neutral (mark) cut-out needs no blending. */
+.bee-avatar__image[data-image='flying'] {
+  mix-blend-mode: multiply;
 }
 
 .bee-avatar__label {

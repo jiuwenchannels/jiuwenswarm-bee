@@ -55,3 +55,62 @@
   color: var(--bee-code-text);
   white-space: pre;
 }
+
+/* Syntax colors tuned for the dark code surface in both themes. */
+.hljs-comment,
+.hljs-quote {
+  color: #7f8593;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-type {
+  color: #c792ea;
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-addition {
+  color: #a5d6a7;
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-meta {
+  color: #f78c6c;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #82aaff;
+}
+
+.hljs-built_in,
+.hljs-class .hljs-title {
+  color: #ffcb6b;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: #eeffff;
+}
+
+.hljs-tag,
+.hljs-name {
+  color: #89ddff;
+}
+
+.hljs-deletion {
+  color: #f07178;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}

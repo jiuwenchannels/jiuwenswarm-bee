@@ -25,14 +25,14 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 ## Features
 
 - One-screen Q&A conversation with streaming tokens
-- Rich **Markdown + GFM** replies (tables, lists, links) with code blocks and a copy button, sanitized by `rehype-sanitize`
-- Per-message actions: copy, edit & resend, regenerate, and thumbs feedback
+- Rich **Markdown + GFM** replies (tables, lists, links) with **syntax-highlighted** code blocks and a copy button, sanitized by `rehype-sanitize`
+- Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
-- Local **conversation history**: searchable sidebar with rename/delete, persisted across reloads, per-chat drafts
+- Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
-- Connection status with automatic reconnect (exponential backoff) and stop-generation
+- Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint
 - Command palette (**⌘/Ctrl + K**), keyboard-first input (Enter to send, Shift+Enter for newline, `/` to focus)
-- Mobile layout, PWA manifest, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
+- Mobile layout, **installable PWA with an offline app shell**, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
 - Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app
 - Zero backend: talks to the JiuwenSwarm WebSocket gateway directly (no gateway changes needed)
 
@@ -143,9 +143,10 @@ jiuwenswarm-bee/
       avatar/            Avatar state machine + style preference
       settings/         Persisted user settings + provider
       platform/         Desktop-shell bridge and Web Speech TTS
+      lib/              Clipboard, Markdown stripping, code highlighting
       theme/            Theme resolution + design tokens (light/dark)
-      assets/           bee-static.png, bee-flying.webp (shared with the shells)
-  public/               PWA manifest + icon
+      assets/           bee-static.png, bee-flying.webp, bee-mark.png (cut-out)
+  public/               PWA manifest, icon, offline service worker
   desktop/
     electron/           Electron shell: always-on-top bee avatar + chat window
     tauri/              Tauri v2 shell: same app, lightweight native (Rust) wrapper

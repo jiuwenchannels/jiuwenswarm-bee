@@ -3,7 +3,6 @@
  * is the "honey" in the hive vocabulary (internal/naming.md).
  */
 export type Role = 'user' | 'assistant';
-export type Feedback = 'up' | 'down';
 
 export interface ChatMessage {
   id: string;
@@ -14,8 +13,8 @@ export interface ChatMessage {
   error?: boolean;
   /** Set when the user stopped generation before the reply finished. */
   stopped?: boolean;
-  /** Local thumbs feedback (not sent to the gateway yet). */
-  feedback?: Feedback;
+  /** Set when the user edited and resent this message. */
+  edited?: boolean;
 }
 
 function makeId(prefix: string): string {
@@ -73,9 +72,9 @@ export function truncateFrom(messages: ChatMessage[], id: string): ChatMessage[]
   return index < 0 ? messages : messages.slice(0, index);
 }
 
-export function setFeedback(messages: ChatMessage[], id: string, feedback?: Feedback): ChatMessage[] {
+export function markEdited(messages: ChatMessage[], id: string, text: string): ChatMessage[] {
   return messages.map((message) =>
-    message.id === id ? { ...message, feedback: message.feedback === feedback ? undefined : feedback } : message,
+    message.id === id ? { ...message, text, edited: true } : message,
   );
 }
 

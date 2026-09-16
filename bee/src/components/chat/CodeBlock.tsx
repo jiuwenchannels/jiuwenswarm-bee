@@ -1,8 +1,9 @@
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 
-import { copyText } from '../../lib/clipboard';
 import { useStrings } from '../../i18n/LocaleContext';
+import { copyText } from '../../lib/clipboard';
+import { highlightCode } from '../../lib/highlight';
 import './CodeBlock.css';
 
 export function CodeBlock({ code, language }: { code: string; language?: string }) {
@@ -31,7 +32,11 @@ export function CodeBlock({ code, language }: { code: string; language?: string 
         </button>
       </div>
       <pre className="code-block__pre">
-        <code>{code}</code>
+        <code
+          className="hljs"
+          // `highlightCode` escapes all text and only emits hljs span markup.
+          dangerouslySetInnerHTML={{ __html: highlightCode(code, language) }}
+        />
       </pre>
     </div>
   );

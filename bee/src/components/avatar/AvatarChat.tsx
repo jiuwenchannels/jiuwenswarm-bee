@@ -28,7 +28,6 @@ export function AvatarChat() {
     regenerate,
     retryMessage,
     editMessage,
-    feedback,
   } = useChat(config);
   const [expanded, setExpanded] = useState(false);
   const [muted, setMuted] = useState(() => !isSpeechSupported() || !settings.voiceEnabled);
@@ -191,7 +190,6 @@ export function AvatarChat() {
             <MessageList
               messages={messages}
               busy={busy}
-              onFeedback={feedback}
               onRegenerate={regenerate}
               onRetry={retryMessage}
               onEdit={editMessage}

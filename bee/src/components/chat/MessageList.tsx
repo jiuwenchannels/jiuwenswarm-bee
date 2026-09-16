@@ -1,13 +1,12 @@
 import { Fragment, useMemo } from 'react';
 
-import { type ChatMessage, type Feedback } from '../../chat/messages';
+import { type ChatMessage } from '../../chat/messages';
 import { MessageBubble } from './MessageBubble';
 import './Chat.css';
 
 export interface MessageListProps {
   messages: ChatMessage[];
   busy: boolean;
-  onFeedback: (id: string, value: Feedback) => void;
   onRegenerate: () => void;
   onRetry: (id: string) => void;
   onEdit: (id: string, text: string) => void;
@@ -33,7 +32,6 @@ function formatDay(timestamp: number): string {
 export function MessageList({
   messages,
   busy,
-  onFeedback,
   onRegenerate,
   onRetry,
   onEdit,
@@ -46,7 +44,13 @@ export function MessageList({
   }, [messages]);
 
   return (
-    <ul className="messages" data-testid="bee-message-list" aria-live="polite" aria-atomic="false">
+    <ul
+      className="messages"
+      data-testid="bee-message-list"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-busy={busy}
+    >
       {messages.map((message, index) => {
         const previous = messages[index - 1];
         const showDay = index > 0 && previous && !sameDay(previous.createdAt, message.createdAt);
@@ -61,7 +65,6 @@ export function MessageList({
               message={message}
               isLastAssistant={message.id === lastAssistantId}
               busy={busy}
-              onFeedback={onFeedback}
               onRegenerate={onRegenerate}
               onRetry={onRetry}
               onEdit={onEdit}

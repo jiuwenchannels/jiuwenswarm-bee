@@ -7,12 +7,11 @@ import type { ChatGateway, GatewayEvents, GatewayStatus } from '../gateway/proto
 import { type AvatarEvent, type AvatarState, nextAvatarState } from '../avatar/avatar';
 import {
   type ChatMessage,
-  type Feedback,
   addUserMessage,
   appendToLastAssistant,
   failLastAssistant,
   finishLastAssistant,
-  setFeedback,
+  markEdited,
   startAssistantMessage,
   stopLastAssistant,
   truncateFrom,
@@ -43,7 +42,6 @@ export interface UseChatResult {
   regenerate: () => void;
   retryMessage: (id: string) => void;
   editMessage: (id: string, text: string) => void;
-  feedback: (id: string, value: Feedback) => void;
   reconnect: () => void;
   conversations: Conversation[];
   activeId: string;
@@ -264,11 +262,7 @@ export function useChat(config: AppConfig): UseChatResult {
       const current = activeRef.current?.messages ?? [];
       const index = current.findIndex((message) => message.id === id);
       if (index < 0) return;
-      updateActive((previous) =>
-        previous
-          .slice(0, index + 1)
-          .map((message) => (message.id === id ? { ...message, text: trimmed } : message)),
-      );
+      updateActive((previous) => markEdited(previous.slice(0, index + 1), id, trimmed));
       runChat(trimmed, false);
     },
     [runChat, updateActive],
@@ -280,13 +274,6 @@ export function useChat(config: AppConfig): UseChatResult {
     if (errored) retryMessage(errored.id);
     else regenerate();
   }, [regenerate, retryMessage]);
-
-  const feedback = useCallback(
-    (id: string, value: Feedback) => {
-      updateActive((previous) => setFeedback(previous, id, value));
-    },
-    [updateActive],
-  );
 
   const newChat = useCallback(() => {
     const conversation = createConversation();
@@ -365,7 +352,6 @@ export function useChat(config: AppConfig): UseChatResult {
     regenerate,
     retryMessage,
     editMessage,
-    feedback,
     reconnect,
     conversations: chat.conversations,
     activeId: chat.activeId,

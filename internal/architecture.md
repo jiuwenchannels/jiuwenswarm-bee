@@ -47,6 +47,8 @@ with inline chat (what the desktop shells open by default).
 | `bee/src/avatar/` | Pure avatar state machine + style preference |
 | `bee/src/platform/` | Desktop-shell bridge (`window.bee` / `__TAURI__`) and Web Speech TTS |
 | `bee/src/theme/` | Theme resolution (`light`/`dark`/`system`) and `tokens.css` |
+| `bee/src/lib/` | Small pure helpers: clipboard, Markdown stripping, code highlighting |
+| `bee/public/` | PWA manifest, icon, and the offline service worker (`sw.js`) |
 
 Conversations, drafts, settings, avatar style and language are all stored in
 `localStorage`; nothing is sent to the gateway beyond the existing chat frames. The
