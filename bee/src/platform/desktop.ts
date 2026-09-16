@@ -27,6 +27,13 @@ export function isDesktop(): boolean {
   return Boolean(electron()) || Boolean(tauri()?.core);
 }
 
+/** True when running inside a Capacitor native shell (the Android app). */
+export function isNativeApp(): boolean {
+  const capacitor = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } })
+    .Capacitor;
+  return Boolean(capacitor?.isNativePlatform?.());
+}
+
 export const desktop = {
   isDesktop,
 

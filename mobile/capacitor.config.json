@@ -1,0 +1,11 @@
+{
+  "appId": "com.jiuwenswarm.beechat",
+  "appName": "BeeChat",
+  "webDir": "../bee/dist",
+  "server": {
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

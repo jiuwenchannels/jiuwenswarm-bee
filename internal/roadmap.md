@@ -11,19 +11,23 @@ items to [changelog.md](changelog.md).
 - Light/dark themes, mobile layout, accessibility basics
 - UI localization (`en` / `zh`) with a per-locale mascot name (Buzz / 嗡嗡)
 - Electron and Tauri desktop shells with voice + lip-sync
+- Android app (Capacitor): avatar view + Picture-in-Picture floating
 - Installer packaging (NSIS) for both shells
+- ESLint + Prettier configured and wired into CI
 - Repository organised by domain; CI for the web app and shell syntax
 
 ## Next
 
+- **Runtime gateway URL**: a connection field in the UI, persisted locally, so the
+  Android app (and any device) can point at the PC's LAN IP without a rebuild.
+- **Native voice on Android**: use Android `TextToSpeech` / `SpeechRecognizer` (Web
+  Speech is unreliable in the WebView).
 - **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
   [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
   `honey` cue when an answer finishes.
 - **Avatar art**: only two bee poses ship (`bee-static`, `bee-flying`); add dedicated
   thinking / talking frames so the state machine maps to real art.
-- **Lint/format**: add ESLint + Prettier and wire them into CI.
-- **Release automation**: a script to bump the three version manifests together and
-  tag, instead of editing them by hand.
+- **Release automation**: a script to bump the version manifests together and tag.
 - **Golden-path E2E**: a smoke test that runs the app against a stub gateway in CI
   (the gateway is not yet available headless).
 - **Chinese docs**: complete `docs/zh/` (currently an index plus a partial user guide).

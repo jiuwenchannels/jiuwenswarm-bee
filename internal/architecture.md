@@ -23,6 +23,7 @@ One web build (`bee/dist`) serves three launchers and two views:
 | Browser | `bee/` (`npm run dev`) | the app itself |
 | Electron | `desktop/electron/` | native shell (bundled Chromium + Node) |
 | Tauri v2 | `desktop/tauri/` | native shell (Rust + OS WebView2) |
+| Android | `mobile/` (Capacitor) | native app; opens in the avatar view and floats via Picture-in-Picture |
 
 Views are selected by URL hash: no hash → full site; `#avatar` → the floating avatar
 with inline chat (what the desktop shells open by default).
@@ -102,3 +103,9 @@ Both shells load the same `bee/dist` and add only OS behaviour:
 
 The web app detects the shell in `bee/src/platform/desktop.ts`; in a plain browser both
 bridges are no-ops.
+
+The Android app (`mobile/`) is a Capacitor wrapper around the same `bee/dist`. It opens
+into the avatar view (`isNativeApp()` in `platform/desktop.ts` makes an empty hash mean
+"avatar"), and `MainActivity` enters Picture-in-Picture on `onUserLeaveHint`, so the bee
+keeps floating when the user leaves the app. Cleartext is enabled for the LAN `ws://`
+gateway.

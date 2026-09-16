@@ -7,6 +7,7 @@ import { MessageList } from '../components/chat/MessageList';
 import { LanguageToggle } from '../components/common/LanguageToggle';
 import { config } from '../gateway/config';
 import { useStrings } from '../i18n/LocaleContext';
+import { isNativeApp } from '../platform/desktop';
 import { useChat } from '../chat/useChat';
 import '../styles.css';
 
@@ -119,8 +120,9 @@ function ChatApp() {
 
 export default function App() {
   // `#avatar` renders the inline avatar chat (used by the desktop shells).
-  const avatarMode =
-    typeof window !== 'undefined' && window.location.hash.replace(/^#/, '') === 'avatar';
+  // The Android app (Capacitor) has no hash and opens straight into the avatar.
+  const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '';
+  const avatarMode = hash === 'avatar' || (isNativeApp() && hash === '');
 
   useEffect(() => {
     document.documentElement.dataset.mode = avatarMode ? 'avatar' : 'app';

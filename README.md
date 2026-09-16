@@ -104,6 +104,17 @@ Both give: a draggable assistant (position remembered), click-to-expand inline c
 - The character is an inline **SVG** (`bee/src/components/avatar/AvatarCharacter.tsx`) with states `idle / thinking / answering / error` — **swap the SVG (or drop in a Lottie/Rive renderer) without touching the chat logic**.
 - Voice uses the **Web Speech API** (`speechSynthesis`, built into WebView2/Chromium) with `onboundary` driving the mouth; no API key needed.
 
+## Android app
+
+`mobile/` wraps the same web build in a Capacitor app that opens straight into the **avatar view** and shrinks into **Picture-in-Picture** when you leave it — the bee floats over other apps on the phone. It talks to the gateway over the LAN (`ws://<pc-ip>:19000/ws`).
+
+```bash
+cd bee && npm install && npm run build   # build the web app
+cd ../mobile && npm install && npm run sync && npm run open   # build/run in Android Studio
+```
+
+Requires JDK 21 + Android SDK (see [`mobile/README.md`](mobile/README.md)).
+
 ## Development
 
 ```bash
@@ -132,6 +143,7 @@ jiuwenswarm-bee/
   desktop/
     electron/           Electron shell: always-on-top bee avatar + chat window
     tauri/              Tauri v2 shell: same app, lightweight native (Rust) wrapper
+  mobile/               Android app (Capacitor): avatar view + Picture-in-Picture
   docs/
     en/                 User + development docs (English)
     zh/                 User docs (Chinese)

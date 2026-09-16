@@ -7,7 +7,11 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   server: {
+    // Listen on all interfaces so phones/other devices on the LAN can reach the
+    // dev server (e.g. http://192.168.x.x:5175). Dev only.
+    host: true,
     port: 5175,
+    strictPort: true,
   },
   test: {
     environment: 'jsdom',
