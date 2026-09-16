@@ -85,7 +85,7 @@ html[data-mode='avatar'] body {
   height: 100dvh;
   max-width: 760px;
   margin: 0 auto;
-  padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+  padding: 0 16px calc(16px + env(safe-area-inset-bottom) + var(--kb-inset, 0px));
   background: linear-gradient(180deg, var(--bee-bg-accent) 0%, var(--bee-bg) 240px);
 }
 
@@ -683,5 +683,61 @@ html[data-mode='avatar'] body {
 @media (prefers-reduced-motion: reduce) {
   .app__scrim {
     animation: none;
+  }
+}
+
+/* --- Offline banner (sticky, below the header) -------------------------- */
+
+.app__banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--bee-danger-text);
+  border-radius: 12px;
+  background: var(--bee-danger-bg);
+  color: var(--bee-danger-text);
+  font-size: 12px;
+}
+
+.app__banner-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app__banner-btn {
+  flex: 0 0 auto;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.app__banner-btn:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+/* --- Docked history sidebar on wide screens ----------------------------- */
+
+@media (min-width: 1024px) {
+  html[data-history='open'] body {
+    padding-left: 320px;
+  }
+
+  .history {
+    width: 320px;
+    animation: none;
+    box-shadow: none;
+  }
+
+  html[data-history='open'] .app__scrim {
+    display: none;
   }
 }

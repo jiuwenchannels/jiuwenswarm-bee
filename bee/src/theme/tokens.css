@@ -76,3 +76,17 @@
   --bee-shadow-soft: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 35%);
   --bee-shadow-float: 0 8px 40px rgb(0 0 0 / 55%);
 }
+
+/* Higher-contrast borders and muted text when the OS asks for it. */
+@media (prefers-contrast: more) {
+  :root,
+  [data-theme='light'] {
+    --bee-border: #b3a273;
+    --bee-text-muted: #45413a;
+  }
+
+  [data-theme='dark'] {
+    --bee-border: #6f6b7a;
+    --bee-text-muted: #d6d0c4;
+  }
+}

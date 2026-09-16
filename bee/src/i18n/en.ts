@@ -5,6 +5,7 @@ export const en: Strings = {
   poweredBy: 'JiuwenSwarm',
   attribution: 'OpenJiuwen',
   hello: "I'm Buzz — your bee in the swarm. Ask me anything.",
+  tagline: 'Your bee in the swarm',
   status: {
     disconnected: 'Offline',
     connecting: 'Connecting…',
@@ -54,6 +55,12 @@ export const en: Strings = {
     search: 'Search',
     close: 'Close',
     more: 'More',
+    undo: 'Undo',
+    showMore: 'Show more',
+    showLess: 'Show less',
+    configure: 'Gateway settings',
+    speak: 'Read aloud',
+    stopSpeaking: 'Stop reading',
   },
   offline: (url) => `Can't reach JiuwenSwarm at ${url}.`,
   voice: {
@@ -75,6 +82,9 @@ export const en: Strings = {
     searchPlaceholder: 'Search chats…',
     empty: 'No chats yet',
     deleteConfirm: 'Delete this chat?',
+    deleted: 'Chat deleted',
+    you: 'You',
+    exported: 'Exported as Markdown',
     today: 'Today',
     previous7: 'Previous 7 days',
     older: 'Older',
@@ -107,6 +117,12 @@ export const en: Strings = {
     switchLanguage: 'Switch language',
     openSettings: 'Open settings',
     focusComposer: 'Focus the message box',
+    export: 'Export chat as Markdown',
+    find: 'Find in conversation',
     noResults: 'No matching commands',
+  },
+  find: {
+    placeholder: 'Find in conversation…',
+    none: 'No matches',
   },
 };

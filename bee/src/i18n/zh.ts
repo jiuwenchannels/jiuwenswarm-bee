@@ -5,6 +5,7 @@ export const zh: Strings = {
   poweredBy: 'JiuwenSwarm',
   attribution: 'OpenJiuwen',
   hello: '我是嗡嗡 —— 你在蜂群中的那只蜜蜂。有什么想问的，尽管说。',
+  tagline: '蜂群中的那只蜜蜂',
   status: {
     disconnected: '离线',
     connecting: '连接中…',
@@ -54,6 +55,12 @@ export const zh: Strings = {
     search: '搜索',
     close: '关闭',
     more: '更多',
+    undo: '撤销',
+    showMore: '显示更多',
+    showLess: '收起',
+    configure: '网关设置',
+    speak: '朗读',
+    stopSpeaking: '停止朗读',
   },
   offline: (url) => `无法连接到 JiuwenSwarm（${url}）。`,
   voice: {
@@ -75,6 +82,9 @@ export const zh: Strings = {
     searchPlaceholder: '搜索对话…',
     empty: '还没有对话',
     deleteConfirm: '删除这个对话？',
+    deleted: '对话已删除',
+    you: '你',
+    exported: '已导出为 Markdown',
     today: '今天',
     previous7: '过去 7 天',
     older: '更早',
@@ -107,6 +117,12 @@ export const zh: Strings = {
     switchLanguage: '切换语言',
     openSettings: '打开设置',
     focusComposer: '聚焦输入框',
+    export: '导出对话为 Markdown',
+    find: '在对话中查找',
     noResults: '没有匹配的命令',
+  },
+  find: {
+    placeholder: '在对话中查找…',
+    none: '没有匹配',
   },
 };

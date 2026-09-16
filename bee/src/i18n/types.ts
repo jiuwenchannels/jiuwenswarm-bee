@@ -15,7 +15,10 @@ export interface Strings {
   poweredBy: string;
   /** Credit link phrase shown beneath `poweredBy`. */
   attribution: string;
+  /** Greeting shown in the empty conversation state. */
   hello: string;
+  /** Short brand line, used for the avatar tooltip and sidebar footer. */
+  tagline: string;
   status: Record<GatewayStatus, string>;
   avatar: Record<AvatarState, string>;
   /** Alt text for the mascot image. */
@@ -54,6 +57,12 @@ export interface Strings {
     search: string;
     close: string;
     more: string;
+    undo: string;
+    showMore: string;
+    showLess: string;
+    configure: string;
+    speak: string;
+    stopSpeaking: string;
   };
   offline: (url: string) => string;
   voice: {
@@ -72,6 +81,9 @@ export interface Strings {
     searchPlaceholder: string;
     empty: string;
     deleteConfirm: string;
+    deleted: string;
+    you: string;
+    exported: string;
     today: string;
     previous7: string;
     older: string;
@@ -104,6 +116,12 @@ export interface Strings {
     switchLanguage: string;
     openSettings: string;
     focusComposer: string;
+    export: string;
+    find: string;
     noResults: string;
+  };
+  find: {
+    placeholder: string;
+    none: string;
   };
 }

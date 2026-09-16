@@ -50,7 +50,6 @@ export function HistorySidebar({
   const { locale } = useLocaleContext();
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
   const touchStart = useRef<number | null>(null);
 
   const filtered = useMemo(() => {
@@ -164,6 +163,13 @@ export function HistorySidebar({
                         <span className="history__item-time">
                           {relativeTime(conversation.updatedAt, locale)}
                         </span>
+                        {conversation.messages.length > 0 ? (
+                          <span className="history__item-preview">
+                            {conversation.messages[conversation.messages.length - 1].text
+                              .replace(/\s+/g, ' ')
+                              .slice(0, 72)}
+                          </span>
+                        ) : null}
                       </button>
                     )}
 
@@ -189,28 +195,14 @@ export function HistorySidebar({
                           <Pencil size={14} aria-hidden="true" />
                         </button>
                       )}
-                      {confirmId === conversation.id ? (
-                        <button
-                          className="icon-btn icon-btn--sm icon-btn--danger"
-                          type="button"
-                          onClick={() => {
-                            onDelete(conversation.id);
-                            setConfirmId(null);
-                          }}
-                          aria-label={t.actions.delete}
-                        >
-                          <Check size={14} aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <button
-                          className="icon-btn icon-btn--sm"
-                          type="button"
-                          onClick={() => setConfirmId(conversation.id)}
-                          aria-label={t.actions.delete}
-                        >
-                          <Trash2 size={14} aria-hidden="true" />
-                        </button>
-                      )}
+                      <button
+                        className="icon-btn icon-btn--sm"
+                        type="button"
+                        onClick={() => onDelete(conversation.id)}
+                        aria-label={t.actions.delete}
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
                     </div>
                   </div>
                 );
@@ -219,6 +211,10 @@ export function HistorySidebar({
           ))
         )}
       </nav>
+
+      <footer className="history__footer">
+        {t.tagline}
+      </footer>
     </aside>
   );
 }

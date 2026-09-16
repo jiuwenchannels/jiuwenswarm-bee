@@ -31,6 +31,8 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
 - Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint
+- Find in conversation (**⌘/Ctrl + F**), export a chat as Markdown, read replies aloud
+- Docked history sidebar on wide screens; undo-delete; focus-trapped dialogs
 - Command palette (**⌘/Ctrl + K**), keyboard-first input (Enter to send, Shift+Enter for newline, `/` to focus)
 - Mobile layout, **installable PWA with an offline app shell**, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
 - Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app

@@ -1,12 +1,14 @@
 import { Fragment, useMemo } from 'react';
 
 import { type ChatMessage } from '../../chat/messages';
+import { useLocaleContext } from '../../i18n/LocaleContext';
 import { MessageBubble } from './MessageBubble';
 import './Chat.css';
 
 export interface MessageListProps {
   messages: ChatMessage[];
   busy: boolean;
+  findQuery?: string;
   onRegenerate: () => void;
   onRetry: (id: string) => void;
   onEdit: (id: string, text: string) => void;
@@ -22,20 +24,26 @@ function sameDay(a: number, b: number): boolean {
   );
 }
 
-function formatDay(timestamp: number): string {
+function formatDay(timestamp: number, locale: string): string {
+  const tag = locale === 'zh' ? 'zh-CN' : 'en';
   const date = new Date(timestamp);
   const today = new Date();
-  if (sameDay(date.getTime(), today.getTime())) return date.toLocaleDateString(undefined, { weekday: 'long' });
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (sameDay(date.getTime(), today.getTime())) {
+    return date.toLocaleDateString(tag, { weekday: 'long' });
+  }
+  return date.toLocaleDateString(tag, { month: 'short', day: 'numeric' });
 }
 
 export function MessageList({
   messages,
   busy,
+  findQuery,
   onRegenerate,
   onRetry,
   onEdit,
 }: MessageListProps) {
+  const { locale } = useLocaleContext();
+  const needle = findQuery?.trim().toLowerCase() ?? '';
   const lastAssistantId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
       if (messages[i].role === 'assistant') return messages[i].id;
@@ -58,13 +66,14 @@ export function MessageList({
           <Fragment key={message.id}>
             {showDay ? (
               <li className="messages__day" aria-hidden="true">
-                {formatDay(message.createdAt)}
+                {formatDay(message.createdAt, locale)}
               </li>
             ) : null}
             <MessageBubble
               message={message}
               isLastAssistant={message.id === lastAssistantId}
               busy={busy}
+              dimmed={Boolean(needle) && !message.text.toLowerCase().includes(needle)}
               onRegenerate={onRegenerate}
               onRetry={onRetry}
               onEdit={onEdit}

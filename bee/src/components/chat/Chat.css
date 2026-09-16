@@ -324,3 +324,30 @@
     transform: none;
   }
 }
+
+/* --- Find dimming + long-reply clamp ------------------------------------ */
+
+.bubble--dimmed {
+  opacity: 0.35;
+}
+
+.bubble__content--clamped {
+  max-height: 320px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent);
+  mask-image: linear-gradient(180deg, #000 72%, transparent);
+}
+
+.bubble__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  border: none;
+  background: transparent;
+  color: var(--bee-link);
+  font: inherit;
+  font-size: 12px;
+  padding: 0;
+  cursor: pointer;
+}

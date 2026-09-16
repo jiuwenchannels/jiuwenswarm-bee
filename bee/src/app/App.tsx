@@ -1,15 +1,18 @@
 import { Menu, Plus, Search, Settings } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AvatarChat } from '../components/avatar/AvatarChat';
 import { BeeAvatar } from '../components/avatar/BeeAvatar';
 import { ChatInput, type ChatInputHandle } from '../components/chat/ChatInput';
+import { FindBar } from '../components/chat/FindBar';
 import { MessageList } from '../components/chat/MessageList';
 import { StarterPrompts } from '../components/chat/StarterPrompts';
 import { CommandPalette } from '../components/common/CommandPalette';
+import { useToast } from '../components/common/ToastContext';
 import { HistorySidebar } from '../components/history/HistorySidebar';
 import { SettingsPanel } from '../components/settings/SettingsPanel';
 import { useLocaleContext, useStrings } from '../i18n/LocaleContext';
+import { conversationToMarkdown, downloadMarkdown } from '../lib/export';
 import { isNativeApp } from '../platform/desktop';
 import { useAppConfig, useSettings } from '../settings/SettingsContext';
 import { useChat } from '../chat/useChat';
@@ -25,6 +28,7 @@ function ChatApp() {
   const config = useAppConfig();
   const { settings, update } = useSettings();
   const { locale, setLocale } = useLocaleContext();
+  const { notify } = useToast();
   const {
     messages,
     avatar,
@@ -44,6 +48,7 @@ function ChatApp() {
     selectConversation,
     renameConversation,
     deleteConversation,
+    undoDelete,
   } = useChat(config);
 
   const mainRef = useRef<HTMLElement | null>(null);
@@ -53,12 +58,48 @@ function ChatApp() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [findOpen, setFindOpen] = useState(false);
+  const [findQuery, setFindQuery] = useState('');
+  const [findIndex, setFindIndex] = useState(0);
   const hasError = messages.some((message) => message.error);
   const isMac =
     typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.userAgent);
 
+  const matches = useMemo(() => {
+    const needle = findQuery.trim().toLowerCase();
+    if (!needle) return [] as string[];
+    return messages.filter((message) => message.text.toLowerCase().includes(needle)).map((m) => m.id);
+  }, [messages, findQuery]);
+
+  // Reflect the drawer state on the root so the desktop layout can dock it.
+  useEffect(() => {
+    document.documentElement.dataset.history = historyOpen ? 'open' : 'closed';
+    return () => {
+      delete document.documentElement.dataset.history;
+    };
+  }, [historyOpen]);
+
+  // Keep the composer above the mobile keyboard.
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const update = () => {
+      const inset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
+      document.documentElement.style.setProperty('--kb-inset', `${inset}px`);
+    };
+    viewport.addEventListener('resize', update);
+    viewport.addEventListener('scroll', update);
+    update();
+    return () => {
+      viewport.removeEventListener('resize', update);
+      viewport.removeEventListener('scroll', update);
+      document.documentElement.style.removeProperty('--kb-inset');
+    };
+  }, []);
+
   const startNewChat = useCallback(() => {
     newChat();
+    setFindOpen(false);
     requestAnimationFrame(() => composerRef.current?.focus());
   }, [newChat]);
 
@@ -82,17 +123,81 @@ function ChatApp() {
     if (atBottomRef.current) scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  const handleSend = useCallback(
+    (text: string) => {
+      atBottomRef.current = true;
+      send(text);
+      requestAnimationFrame(() => scrollToBottom('smooth'));
+    },
+    [send, scrollToBottom],
+  );
+
   const cycleTheme = useCallback(() => {
     const next = THEME_CYCLE[(THEME_CYCLE.indexOf(settings.theme) + 1) % THEME_CYCLE.length];
     update({ theme: next });
   }, [settings.theme, update]);
 
-  // Global keyboard model: ⌘/Ctrl+K palette, `/` focuses the composer.
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteConversation(id);
+      notify(t.history.deleted, { action: { label: t.actions.undo, onClick: undoDelete } });
+    },
+    [deleteConversation, undoDelete, notify, t],
+  );
+
+  const handleExport = useCallback(() => {
+    const active = conversations.find((conversation) => conversation.id === activeId);
+    if (!active || active.messages.length === 0) return;
+    downloadMarkdown(
+      active.title,
+      conversationToMarkdown(active, { you: t.history.you, assistant: t.character }),
+    );
+    notify(t.history.exported, 'success');
+  }, [activeId, conversations, notify, t]);
+
+  const jumpToMatch = useCallback(
+    (position: number) => {
+      if (matches.length === 0) return;
+      const id = matches[((position % matches.length) + matches.length) % matches.length];
+      const el = mainRef.current?.querySelector(`[data-message-id="${id}"]`);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    },
+    [matches],
+  );
+
+  const findNext = useCallback(() => {
+    setFindIndex((current) => {
+      const next = matches.length ? (current + 1) % matches.length : 0;
+      jumpToMatch(next);
+      return next;
+    });
+  }, [matches.length, jumpToMatch]);
+
+  const findPrev = useCallback(() => {
+    setFindIndex((current) => {
+      const prev = matches.length ? (current - 1 + matches.length) % matches.length : 0;
+      jumpToMatch(prev);
+      return prev;
+    });
+  }, [matches.length, jumpToMatch]);
+
+  const closeFind = useCallback(() => {
+    setFindOpen(false);
+    setFindQuery('');
+  }, []);
+
+  // Global keyboard model: ⌘/Ctrl+K palette, ⌘/Ctrl+F find, `/` focus composer.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPaletteOpen((value) => !value);
+        return;
+      }
+      if (mod && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        setFindOpen(true);
         return;
       }
       const target = event.target as HTMLElement | null;
@@ -117,7 +222,7 @@ function ChatApp() {
             <button
               className="icon-btn"
               type="button"
-              onClick={() => setHistoryOpen(true)}
+              onClick={() => setHistoryOpen((value) => !value)}
               aria-label={t.history.title}
               data-testid="bee-history-toggle"
             >
@@ -142,7 +247,7 @@ function ChatApp() {
             </div>
           </div>
         </div>
-        <div className="app__header-center" data-testid="bee-avatar-status">
+        <div className="app__header-center" data-testid="bee-avatar-status" title={t.tagline}>
           {messages.length > 0 ? <BeeAvatar state={avatar} compact /> : null}
         </div>
         <div className="app__controls">
@@ -197,7 +302,35 @@ function ChatApp() {
         </div>
       </header>
 
+      {status === 'disconnected' ? (
+        <div className="app__banner" data-testid="bee-connection-hint">
+          <span className="app__banner-text">{t.offline(url)}</span>
+          <button className="app__banner-btn" data-testid="bee-reconnect" type="button" onClick={reconnect}>
+            {t.actions.reconnect}
+          </button>
+          <button
+            className="app__banner-btn"
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+          >
+            {t.actions.configure}
+          </button>
+        </div>
+      ) : null}
+
       <main className="app__main" ref={mainRef} onScroll={onScroll}>
+        {findOpen ? (
+          <FindBar
+            query={findQuery}
+            onQuery={setFindQuery}
+            total={matches.length}
+            index={findIndex}
+            onNext={findNext}
+            onPrev={findPrev}
+            onClose={closeFind}
+          />
+        ) : null}
+
         {messages.length === 0 ? (
           <>
             <BeeAvatar state={avatar} showLabel={false} />
@@ -209,19 +342,12 @@ function ChatApp() {
           <MessageList
             messages={messages}
             busy={busy}
+            findQuery={findQuery}
             onRegenerate={regenerate}
             onRetry={retryMessage}
             onEdit={editMessage}
           />
         )}
-        {status === 'disconnected' ? (
-          <div className="app__offline" data-testid="bee-connection-hint">
-            <p className="app__offline-text">{t.offline(url)}</p>
-            <button className="app__retry" data-testid="bee-reconnect" type="button" onClick={reconnect}>
-              {t.actions.reconnect}
-            </button>
-          </div>
-        ) : null}
         {hasError ? (
           <button className="app__retry" data-testid="bee-retry" type="button" onClick={retry}>
             {t.actions.tryAgain}
@@ -250,7 +376,7 @@ function ChatApp() {
         <ChatInput
           ref={composerRef}
           disabled={busy}
-          onSend={send}
+          onSend={handleSend}
           onStop={stop}
           draftKey={activeId}
         />
@@ -272,7 +398,7 @@ function ChatApp() {
             onSelect={selectConversation}
             onNew={startNewChat}
             onRename={renameConversation}
-            onDelete={deleteConversation}
+            onDelete={handleDelete}
             onClose={() => setHistoryOpen(false)}
           />
         </>
@@ -288,6 +414,8 @@ function ChatApp() {
         onSwitchLanguage={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
         onOpenSettings={() => setSettingsOpen(true)}
         onFocusComposer={() => composerRef.current?.focus()}
+        onExport={handleExport}
+        onFind={() => setFindOpen(true)}
       />
     </div>
   );

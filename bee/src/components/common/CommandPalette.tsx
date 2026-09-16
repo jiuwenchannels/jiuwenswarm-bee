@@ -1,7 +1,8 @@
-import { Languages, MessageSquare, Plus, Search, Settings, SunMoon } from 'lucide-react';
+import { Download, Languages, MessageSquare, Plus, Search, Settings, SunMoon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useStrings } from '../../i18n/LocaleContext';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 import './CommandPalette.css';
 
 interface Command {
@@ -19,6 +20,8 @@ export function CommandPalette({
   onSwitchLanguage,
   onOpenSettings,
   onFocusComposer,
+  onExport,
+  onFind,
 }: {
   open: boolean;
   onClose: () => void;
@@ -27,21 +30,27 @@ export function CommandPalette({
   onSwitchLanguage: () => void;
   onOpenSettings: () => void;
   onFocusComposer: () => void;
+  onExport: () => void;
+  onFind: () => void;
 }) {
   const t = useStrings();
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
 
   const commands = useMemo<Command[]>(
     () => [
       { id: 'new', label: t.command.newChat, icon: Plus, run: onNewChat },
+      { id: 'find', label: t.command.find, icon: Search, run: onFind },
+      { id: 'export', label: t.command.export, icon: Download, run: onExport },
       { id: 'theme', label: t.command.toggleTheme, icon: SunMoon, run: onToggleTheme },
       { id: 'language', label: t.command.switchLanguage, icon: Languages, run: onSwitchLanguage },
       { id: 'settings', label: t.command.openSettings, icon: Settings, run: onOpenSettings },
       { id: 'focus', label: t.command.focusComposer, icon: MessageSquare, run: onFocusComposer },
     ],
-    [t, onNewChat, onToggleTheme, onSwitchLanguage, onOpenSettings, onFocusComposer],
+    [t, onNewChat, onFind, onExport, onToggleTheme, onSwitchLanguage, onOpenSettings, onFocusComposer],
   );
 
   const filtered = useMemo(() => {
@@ -72,7 +81,7 @@ export function CommandPalette({
   return (
     <div className="palette" data-testid="bee-palette">
       <div className="palette__backdrop" onClick={onClose} />
-      <div className="palette__panel" role="dialog" aria-modal="true" aria-label={t.command.title}>
+      <div className="palette__panel" ref={panelRef} role="dialog" aria-modal="true" aria-label={t.command.title}>
         <div className="palette__search">
           <Search size={16} aria-hidden="true" />
           <input

@@ -29,6 +29,11 @@ A client-only polish pass on the web app (no gateway/backend changes).
   localized + grouped history sidebar, sidebar scrim/swipe, top toasts, ⌘K chip,
   composer hint + autofocus, reduced aria-live noise, Inter variable font, and an
   offline service worker (still no backend changes).
+- **Third pass**: find-in-conversation (⌘/Ctrl+F), export a chat as Markdown,
+  read-aloud on replies, docked history sidebar on wide screens, undo-delete toast,
+  sticky offline banner with a Gateway-settings shortcut, mobile-keyboard inset,
+  focus-trapped dialogs, lazy-loaded Markdown/highlighter chunk, high-contrast
+  tokens, and locale-aware dates.
 
 ## 0.1.0
 

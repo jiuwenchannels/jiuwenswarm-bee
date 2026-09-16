@@ -1,8 +1,9 @@
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import type { Locale } from '../../i18n';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 import { useSettings } from '../../settings/SettingsContext';
 import type { ThemePreference } from '../../theme/theme';
 
@@ -15,6 +16,8 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
   const t = useStrings();
   const { locale, setLocale } = useLocaleContext();
   const { settings, update, reset } = useSettings();
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, open);
   const [gatewayUrl, setGatewayUrl] = useState(settings.gatewayUrl);
   const [agentId, setAgentId] = useState(settings.agentId);
   const [mode, setMode] = useState(settings.mode);
@@ -52,7 +55,7 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
   return (
     <div className="modal" data-testid="bee-settings">
       <div className="modal__backdrop" onClick={onClose} />
-      <div className="modal__panel" role="dialog" aria-modal="true" aria-label={t.settings.title}>
+      <div className="modal__panel" ref={panelRef} role="dialog" aria-modal="true" aria-label={t.settings.title}>
         <header className="modal__header">
           <h2 className="modal__title">{t.settings.title}</h2>
           <button className="icon-btn" type="button" onClick={onClose} aria-label={t.settings.close}>

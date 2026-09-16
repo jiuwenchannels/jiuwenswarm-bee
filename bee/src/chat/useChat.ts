@@ -50,6 +50,7 @@ export interface UseChatResult {
   selectConversation: (id: string) => void;
   renameConversation: (id: string, title: string) => void;
   deleteConversation: (id: string) => void;
+  undoDelete: () => void;
 }
 
 interface ChatState {
@@ -91,6 +92,7 @@ export function useChat(config: AppConfig): UseChatResult {
   const busyRef = useRef(false);
   const cancelledRef = useRef(false);
   const everConnectedRef = useRef(false);
+  const deletedRef = useRef<{ conversation: Conversation; index: number } | null>(null);
 
   const active = useMemo(
     () => chat.conversations.find((c) => c.id === chat.activeId) ?? chat.conversations[0],
@@ -316,6 +318,10 @@ export function useChat(config: AppConfig): UseChatResult {
   const deleteConversation = useCallback(
     (id: string) => {
       setChat((previous) => {
+        const index = previous.conversations.findIndex((conversation) => conversation.id === id);
+        if (index >= 0) {
+          deletedRef.current = { conversation: previous.conversations[index], index };
+        }
         const remaining = previous.conversations.filter((conversation) => conversation.id !== id);
         if (remaining.length === 0) {
           const conversation = createConversation();
@@ -329,6 +335,18 @@ export function useChat(config: AppConfig): UseChatResult {
     },
     [applyAvatar],
   );
+
+  const undoDelete = useCallback(() => {
+    const deleted = deletedRef.current;
+    if (!deleted) return;
+    deletedRef.current = null;
+    setChat((previous) => {
+      if (previous.conversations.some((c) => c.id === deleted.conversation.id)) return previous;
+      const conversations = [...previous.conversations];
+      conversations.splice(Math.min(deleted.index, conversations.length), 0, deleted.conversation);
+      return { conversations, activeId: previous.activeId };
+    });
+  }, []);
 
   const reconnect = useCallback(() => {
     everConnectedRef.current = false;
@@ -360,5 +378,6 @@ export function useChat(config: AppConfig): UseChatResult {
     selectConversation,
     renameConversation,
     deleteConversation,
+    undoDelete,
   };
 }
