@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,13 +25,17 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.webkit.WebViewAssetLoader;
-import androidx.webkit.WebViewClientCompat;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A real floating bee: a transparent, draggable, interactive overlay window
@@ -47,6 +52,9 @@ public class OverlayService extends Service {
     private static final int COLLAPSED_HEIGHT_DP = 260;
     private static final int EXPANDED_WIDTH_DP = 360;
     private static final int EXPANDED_HEIGHT_DP = 560;
+
+    /** Served origin; the web build is copied to {@code assets/public/}. */
+    private static final String OVERLAY_URL = "https://localhost/public/index.html#avatar";
 
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
@@ -151,21 +159,34 @@ public class OverlayService extends Service {
         settings.setAllowFileAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // Serve the bundled web build at https://localhost/public/... (Capacitor's scheme).
-        final WebViewAssetLoader assetLoader =
-                new WebViewAssetLoader.Builder()
-                        .addPathHandler("/", new WebViewAssetLoader.AssetsPathHandler(this))
-                        .build();
+        // Serve the bundled web build ourselves. AssetsPathHandler's prefix semantics were
+        // unreliable here, so map https://localhost/public/<file> -> assets/public/<file>
+        // explicitly, with correct MIME types (ES modules need a JS mime or they won't run).
         webView.setWebViewClient(
-                new WebViewClientCompat() {
+                new WebViewClient() {
                     @Override
                     public WebResourceResponse shouldInterceptRequest(
                             WebView view, WebResourceRequest request) {
-                        return assetLoader.shouldInterceptRequest(request.getUrl());
+                        Uri uri = request.getUrl();
+                        if (uri == null || !"localhost".equals(uri.getHost())) return null;
+                        String path = uri.getPath();
+                        if (path == null || "/".equals(path)) path = "/public/index.html";
+                        String assetPath = path.startsWith("/") ? path.substring(1) : path;
+                        try {
+                            InputStream stream =
+                                    getAssets().open(assetPath, android.content.res.AssetManager.ACCESS_STREAMING);
+                            Map<String, String> headers = new HashMap<>();
+                            headers.put("Access-Control-Allow-Origin", "*");
+                            return new WebResourceResponse(
+                                    mimeFor(assetPath), null, 200, "OK", headers, stream);
+                        } catch (IOException e) {
+                            return new WebResourceResponse(
+                                    "text/plain", "utf-8", 404, "Not Found", new HashMap<>(), null);
+                        }
                     }
                 });
         webView.addJavascriptInterface(new BeeBridge(), "AndroidBee");
-        webView.loadUrl("https://localhost/public/index.html#avatar");
+        webView.loadUrl(OVERLAY_URL);
 
         root.addView(
                 webView,
@@ -216,6 +237,25 @@ public class OverlayService extends Service {
                         }
                     }
                 });
+    }
+
+    private static String mimeFor(String path) {
+        String p = path.toLowerCase();
+        if (p.endsWith(".html") || p.endsWith(".htm")) return "text/html";
+        if (p.endsWith(".js") || p.endsWith(".mjs")) return "application/javascript";
+        if (p.endsWith(".css")) return "text/css";
+        if (p.endsWith(".json") || p.endsWith(".map")) return "application/json";
+        if (p.endsWith(".svg")) return "image/svg+xml";
+        if (p.endsWith(".png")) return "image/png";
+        if (p.endsWith(".webp")) return "image/webp";
+        if (p.endsWith(".jpg") || p.endsWith(".jpeg")) return "image/jpeg";
+        if (p.endsWith(".gif")) return "image/gif";
+        if (p.endsWith(".ico")) return "image/x-icon";
+        if (p.endsWith(".woff2")) return "font/woff2";
+        if (p.endsWith(".woff")) return "font/woff";
+        if (p.endsWith(".ttf")) return "font/ttf";
+        if (p.endsWith(".wasm")) return "application/wasm";
+        return "application/octet-stream";
     }
 
     private void setExpanded(boolean expanded) {
