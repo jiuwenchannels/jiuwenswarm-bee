@@ -37,7 +37,6 @@ function ChatApp() {
     send,
     stop,
     retry,
-    regenerate,
     retryMessage,
     editMessage,
     reconnect,
@@ -343,7 +342,6 @@ function ChatApp() {
             messages={messages}
             busy={busy}
             findQuery={findQuery}
-            onRegenerate={regenerate}
             onRetry={retryMessage}
             onEdit={editMessage}
           />

@@ -43,7 +43,6 @@ export const zh: Strings = {
     copied: '已复制',
     copyText: '复制为纯文本',
     copyCode: '复制代码',
-    regenerate: '重新生成',
     edit: '编辑',
     stop: '停止',
     stopped: '已停止',

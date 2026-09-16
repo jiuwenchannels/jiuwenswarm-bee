@@ -43,7 +43,6 @@ export const en: Strings = {
     copied: 'Copied',
     copyText: 'Copy as plain text',
     copyCode: 'Copy code',
-    regenerate: 'Regenerate',
     edit: 'Edit',
     stop: 'Stop',
     stopped: 'Stopped',

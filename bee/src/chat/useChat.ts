@@ -39,7 +39,6 @@ export interface UseChatResult {
   send: (text: string) => void;
   stop: () => void;
   retry: () => void;
-  regenerate: () => void;
   retryMessage: (id: string) => void;
   editMessage: (id: string, text: string) => void;
   reconnect: () => void;
@@ -224,22 +223,6 @@ export function useChat(config: AppConfig): UseChatResult {
     updateActive(stopLastAssistant);
   }, [applyAvatar, updateActive]);
 
-  const regenerate = useCallback(() => {
-    if (busyRef.current) return;
-    const current = activeRef.current?.messages ?? [];
-    let index = -1;
-    for (let i = current.length - 1; i >= 0; i -= 1) {
-      if (current[i].role === 'user') {
-        index = i;
-        break;
-      }
-    }
-    if (index < 0) return;
-    const text = current[index].text;
-    updateActive((previous) => previous.slice(0, index + 1));
-    runChat(text, false);
-  }, [runChat, updateActive]);
-
   const retryMessage = useCallback(
     (id: string) => {
       if (busyRef.current) return;
@@ -274,8 +257,7 @@ export function useChat(config: AppConfig): UseChatResult {
     const current = activeRef.current?.messages ?? [];
     const errored = [...current].reverse().find((message) => message.role === 'assistant' && message.error);
     if (errored) retryMessage(errored.id);
-    else regenerate();
-  }, [regenerate, retryMessage]);
+  }, [retryMessage]);
 
   const newChat = useCallback(() => {
     const conversation = createConversation();
@@ -367,7 +349,6 @@ export function useChat(config: AppConfig): UseChatResult {
     send,
     stop,
     retry,
-    regenerate,
     retryMessage,
     editMessage,
     reconnect,

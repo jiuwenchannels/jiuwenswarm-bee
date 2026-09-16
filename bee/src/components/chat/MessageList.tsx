@@ -1,4 +1,4 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment } from 'react';
 
 import { type ChatMessage } from '../../chat/messages';
 import { useLocaleContext } from '../../i18n/LocaleContext';
@@ -9,7 +9,6 @@ export interface MessageListProps {
   messages: ChatMessage[];
   busy: boolean;
   findQuery?: string;
-  onRegenerate: () => void;
   onRetry: (id: string) => void;
   onEdit: (id: string, text: string) => void;
 }
@@ -38,18 +37,11 @@ export function MessageList({
   messages,
   busy,
   findQuery,
-  onRegenerate,
   onRetry,
   onEdit,
 }: MessageListProps) {
   const { locale } = useLocaleContext();
   const needle = findQuery?.trim().toLowerCase() ?? '';
-  const lastAssistantId = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i -= 1) {
-      if (messages[i].role === 'assistant') return messages[i].id;
-    }
-    return undefined;
-  }, [messages]);
 
   return (
     <ul
@@ -71,10 +63,7 @@ export function MessageList({
             ) : null}
             <MessageBubble
               message={message}
-              isLastAssistant={message.id === lastAssistantId}
-              busy={busy}
               dimmed={Boolean(needle) && !message.text.toLowerCase().includes(needle)}
-              onRegenerate={onRegenerate}
               onRetry={onRetry}
               onEdit={onEdit}
             />

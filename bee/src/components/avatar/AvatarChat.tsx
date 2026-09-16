@@ -25,7 +25,6 @@ export function AvatarChat() {
     send,
     stop,
     retry,
-    regenerate,
     retryMessage,
     editMessage,
   } = useChat(config);
@@ -190,7 +189,6 @@ export function AvatarChat() {
             <MessageList
               messages={messages}
               busy={busy}
-              onRegenerate={regenerate}
               onRetry={retryMessage}
               onEdit={editMessage}
             />

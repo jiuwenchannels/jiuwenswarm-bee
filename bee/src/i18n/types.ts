@@ -45,7 +45,6 @@ export interface Strings {
     copied: string;
     copyText: string;
     copyCode: string;
-    regenerate: string;
     edit: string;
     stop: string;
     stopped: string;

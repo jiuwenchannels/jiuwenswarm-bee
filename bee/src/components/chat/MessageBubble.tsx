@@ -5,7 +5,6 @@ import {
   Copy,
   FileText,
   Pencil,
-  RefreshCw,
   RotateCcw,
   Volume2,
   VolumeX,
@@ -27,20 +26,14 @@ const COLLAPSE_AT = 1200;
 
 export interface MessageBubbleProps {
   message: ChatMessage;
-  isLastAssistant: boolean;
-  busy: boolean;
   dimmed?: boolean;
-  onRegenerate: () => void;
   onRetry: (id: string) => void;
   onEdit: (id: string, text: string) => void;
 }
 
 export function MessageBubble({
   message,
-  isLastAssistant,
-  busy,
   dimmed = false,
-  onRegenerate,
   onRetry,
   onEdit,
 }: MessageBubbleProps) {
@@ -197,17 +190,6 @@ export function MessageBubble({
                   title={speaking ? t.actions.stopSpeaking : t.actions.speak}
                 >
                   {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
-                </button>
-              ) : null}
-              {isLastAssistant ? (
-                <button
-                  className="bubble__btn"
-                  type="button"
-                  disabled={busy}
-                  onClick={onRegenerate}
-                  title={t.actions.regenerate}
-                >
-                  <RefreshCw size={14} aria-hidden="true" />
                 </button>
               ) : null}
             </>
