@@ -3,15 +3,15 @@ node_modules/
 
 # Build output
 bee/dist/
-desktop/release/
-desktop-tauri/src-tauri/target/
-desktop-tauri/src-tauri/gen/
+desktop/electron/release/
+desktop/tauri/src-tauri/target/
+desktop/tauri/src-tauri/gen/
 .vite/
 coverage/
 
 # Tauri-generated mobile icons (desktop icons are committed)
-desktop-tauri/src-tauri/icons/android/
-desktop-tauri/src-tauri/icons/ios/
+desktop/tauri/src-tauri/icons/android/
+desktop/tauri/src-tauri/icons/ios/
 
 # Env / secrets (keep the examples)
 .env

@@ -15,8 +15,8 @@ BeeChat speaks **both** gateway protocols:
 
 | Gateway | URL | Protocol |
 |---|---|---|
-| **Product** (`jiuwenswarm-start`) | `ws://localhost:19000/ws` | `connection.ack` → `chat.send` → `chat.delta` / `chat.final` / `chat.processing_status` / `chat.error` |
-| **SDK** (`python -m openjiuwen.gateway`) | `ws://localhost:19001/v1/ws` | `connect` / `create_session` / `chat` → `ack` / `token` / `done` / `error` |
+| **Product** (`jiuwenswarm-start`) | `ws://127.0.0.1:19000/ws` | `connection.ack` → `chat.send` → `chat.delta` / `chat.final` / `chat.processing_status` / `chat.error` |
+| **SDK** (`python -m openjiuwen.gateway`) | `ws://127.0.0.1:19001/v1/ws` | `connect` / `create_session` / `chat` → `ack` / `token` / `done` / `error` |
 
 To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 
@@ -36,14 +36,14 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 
 ```bash
 # 0. Start JiuwenSwarm (must be running)
-jiuwenswarm-start            # gateway on ws://localhost:19000
+jiuwenswarm-start            # gateway on ws://127.0.0.1:19000
 
 # 1. Install deps
 cd bee
 npm install
 
 # 2. Configure env
-cp .env.example .env         # VITE_JIUWENSWARM_URL defaults to ws://localhost:19000/v1/ws
+cp .env.example .env         # optional: pin VITE_JIUWENSWARM_URL (unset = built-in target list)
 
 # 3. Run
 npm run dev                  # → http://localhost:5175
@@ -53,7 +53,7 @@ npm run dev                  # → http://localhost:5175
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `VITE_JIUWENSWARM_URL` | `ws://localhost:19000/v1/ws` | gateway endpoint |
+| `VITE_JIUWENSWARM_URL` | *unset* — tries the built-in target list | gateway endpoint |
 | `VITE_GATEWAY_TOKEN` | *(empty)* | optional token for the `connect` frame |
 | `VITE_AGENT_ID` | `researcher` | agent used by `create_session` |
 | `VITE_APP_TITLE` | `BeeChat` | brand title |
@@ -73,7 +73,7 @@ BeeChat speaks the standard JiuwenSwarm envelope protocol (`type`-discriminated 
 | server → client | `done` | `session_id` |
 | server → client | `error` | `message` |
 
-All framing lives in `bee/src/lib/gateway.ts`.
+All framing lives in `bee/src/gateway/`.
 
 ## Desktop assistant avatar (Windows)
 
@@ -86,21 +86,21 @@ Open `index.html#avatar` in the web app for the same view in the browser.
 | Shell | Folder | Runtime | Installer |
 |---|---|---|---|
 | **Electron** (ready to run) | `desktop/` | bundled Chromium + Node | ~100 MB |
-| **Tauri v2** (lightweight) | `desktop-tauri/` | OS webview (WebView2) | ~5 MB |
+| **Tauri v2** (lightweight) | `desktop/tauri/` | OS webview (WebView2) | ~5 MB |
 
 ```bash
-cd ../bee && npm install && npm run build   # build the web app (or run its dev server)
+cd bee && npm install && npm run build      # build the web app (or run its dev server)
 
-cd ../desktop && npm install && npm start          # Electron
+cd ../desktop/electron && npm install && npm start          # Electron
 # or
-cd ../desktop-tauri && npm install && npm run dev  # Tauri (needs Rust + MSVC build tools)
+cd ../desktop/tauri && npm install && npm run dev           # Tauri (needs Rust + MSVC build tools)
 ```
 
-Both give: a draggable assistant (position remembered), click-to-expand inline chat, spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`desktop/README.md`](desktop/README.md) and [`desktop-tauri/README.md`](desktop-tauri/README.md).
+Both give: a draggable assistant (position remembered), click-to-expand inline chat, spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`desktop/electron/README.md`](desktop/electron/README.md) and [`desktop/tauri/README.md`](desktop/tauri/README.md).
 
 ### The character and voice
 
-- The character is an inline **SVG** (`src/components/Avatar/AvatarCharacter.tsx`) with states `idle / thinking / answering / error` — **swap the SVG (or drop in a Lottie/Rive renderer) without touching the chat logic**.
+- The character is an inline **SVG** (`bee/src/components/avatar/AvatarCharacter.tsx`) with states `idle / thinking / answering / error` — **swap the SVG (or drop in a Lottie/Rive renderer) without touching the chat logic**.
 - Voice uses the **Web Speech API** (`speechSynthesis`, built into WebView2/Chromium) with `onboundary` driving the mouth; no API key needed.
 
 ## Development
@@ -118,16 +118,23 @@ npm run preview     # serve the production build
 
 ```
 jiuwenswarm-bee/
-  bee/            The Vite/React/TS web app (src, tests, public, configs)
+  bee/                  The Vite/React/TS web app (the single source of truth)
     src/
-      assets/     bee-static.png, bee-flying.webp
-      components/ Avatar/ and Chat/
-      lib/        gateway.ts, gatewayProduct.ts, useChat.ts, messages.ts, avatar.ts, config.ts
-      theme/      design tokens (light/dark)
-  desktop/        Electron shell: always-on-top bee avatar + chat window
-  desktop-tauri/  Tauri v2 shell: same app, lightweight native (Rust) wrapper
-  docs/           User-facing docs
-  internal/       Working/design docs (not shipped)
+      app/              Entry (main.tsx) and view roots (App.tsx)
+      components/       avatar/ and chat/ UI (styles co-located)
+      gateway/          WebSocket clients + protocol types + config
+      chat/             Conversation state (useChat, message reducers)
+      avatar/            Avatar state machine + style preference
+      platform/         Desktop-shell bridge and Web Speech TTS
+      assets/           bee-static.png, bee-flying.webp (shared with the shells)
+      theme/            design tokens (light/dark)
+  desktop/
+    electron/           Electron shell: always-on-top bee avatar + chat window
+    tauri/              Tauri v2 shell: same app, lightweight native (Rust) wrapper
+  docs/
+    en/                 User + development docs (English)
+    zh/                 User docs (Chinese)
+  internal/             Architecture, roadmap, changelog, design notes (not shipped)
 ```
 
 ## Design notes
