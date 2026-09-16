@@ -18,6 +18,7 @@ interface TauriGlobal {
 /** Native overlay bridge exposed by the Android app (`OverlayService`). */
 interface AndroidOverlayBridge {
   setExpanded?: (expanded: boolean) => void;
+  moveBy?: (dx: number, dy: number) => void;
   close?: () => void;
 }
 
@@ -44,6 +45,11 @@ export function isNativeApp(): boolean {
   return Boolean(capacitor?.isNativePlatform?.());
 }
 
+/** True when running inside the Android floating overlay (the draggable pet window). */
+export function isAndroidOverlay(): boolean {
+  return Boolean(androidOverlay());
+}
+
 export const desktop = {
   isDesktop,
 
@@ -52,6 +58,16 @@ export const desktop = {
     electron()?.setExpanded?.(expanded);
     void tauri()?.core?.invoke('set_avatar_expanded', { expanded });
     androidOverlay()?.setExpanded?.(expanded);
+  },
+
+  /** Move the floating overlay window by a delta (Android overlay only). */
+  moveBy(dx: number, dy: number): void {
+    androidOverlay()?.moveBy?.(dx, dy);
+  },
+
+  /** Close the floating overlay window (Android overlay only). */
+  closeOverlay(): void {
+    androidOverlay()?.close?.();
   },
 
   setClickThrough(enabled: boolean): void {

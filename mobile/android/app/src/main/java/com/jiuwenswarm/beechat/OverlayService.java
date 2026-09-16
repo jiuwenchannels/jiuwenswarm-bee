@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -17,7 +16,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -26,9 +24,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -40,8 +35,9 @@ import java.util.Map;
 /**
  * A real floating bee: a transparent, draggable, interactive overlay window
  * ({@code TYPE_APPLICATION_OVERLAY}) that hosts the same web avatar view as the rest of
- * BeeChat. Unlike Picture-in-Picture, the window is fully interactive — the inline chat
- * and soft keyboard work — so the bee behaves like the desktop pet.
+ * BeeChat. The window content is entirely the web view — dragging and the close button
+ * are drawn by the page and forwarded here via {@code window.AndroidBee}, so it looks
+ * like one piece rather than native chrome stacked on the UI.
  */
 public class OverlayService extends Service {
 
@@ -58,8 +54,7 @@ public class OverlayService extends Service {
 
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
-    private LinearLayout root;
-    private WebView webView;
+    private WebView root;
     private VoiceBridge voiceBridge;
 
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -124,35 +119,7 @@ public class OverlayService extends Service {
     private void createOverlay() {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-
-        // Native drag handle with a close affordance (the web grip can't drag on Android).
-        FrameLayout handle = new FrameLayout(this);
-        GradientDrawable handleBg = new GradientDrawable();
-        handleBg.setColor(0x33000000);
-        handleBg.setCornerRadii(new float[] {dp(12), dp(12), dp(12), dp(12), 0, 0, 0, 0});
-        handle.setBackground(handleBg);
-
-        TextView close = new TextView(this);
-        close.setText("\u00d7");
-        close.setTextColor(Color.WHITE);
-        close.setTextSize(16);
-        close.setPadding(dp(10), 0, dp(12), 0);
-        handle.addView(
-                close,
-                new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        Gravity.END | Gravity.CENTER_VERTICAL));
-        close.setOnClickListener(v -> stopSelf());
-
-        root.addView(
-                handle,
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, dp(28)));
-
-        webView = new WebView(this);
+        WebView webView = new WebView(this);
         webView.setBackgroundColor(Color.TRANSPARENT);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -160,9 +127,7 @@ public class OverlayService extends Service {
         settings.setAllowFileAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        // Serve the bundled web build ourselves. AssetsPathHandler's prefix semantics were
-        // unreliable here, so map https://localhost/public/<file> -> assets/public/<file>
-        // explicitly, with correct MIME types (ES modules need a JS mime or they won't run).
+        // Serve the bundled web build ourselves, with correct MIME types.
         webView.setWebViewClient(
                 new WebViewClient() {
                     @Override
@@ -175,7 +140,11 @@ public class OverlayService extends Service {
                         String assetPath = path.startsWith("/") ? path.substring(1) : path;
                         try {
                             InputStream stream =
-                                    getAssets().open(assetPath, android.content.res.AssetManager.ACCESS_STREAMING);
+                                    getAssets()
+                                            .open(
+                                                    assetPath,
+                                                    android.content.res.AssetManager
+                                                            .ACCESS_STREAMING);
                             Map<String, String> headers = new HashMap<>();
                             headers.put("Access-Control-Allow-Origin", "*");
                             return new WebResourceResponse(
@@ -186,14 +155,12 @@ public class OverlayService extends Service {
                         }
                     }
                 });
+
         webView.addJavascriptInterface(new BeeBridge(), "AndroidBee");
         voiceBridge = new VoiceBridge(getApplicationContext(), webView);
         webView.addJavascriptInterface(voiceBridge, "AndroidVoice");
         webView.loadUrl(OVERLAY_URL);
-
-        root.addView(
-                webView,
-                new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        root = webView;
 
         int overlayType =
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -206,6 +173,7 @@ public class OverlayService extends Service {
                         dp(COLLAPSED_HEIGHT_DP),
                         overlayType,
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                                 | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                         PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
@@ -213,33 +181,6 @@ public class OverlayService extends Service {
         params.y = dp(120);
 
         windowManager.addView(root, params);
-
-        handle.setOnTouchListener(
-                new View.OnTouchListener() {
-                    private int startX;
-                    private int startY;
-                    private float touchX;
-                    private float touchY;
-
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        switch (event.getActionMasked()) {
-                            case MotionEvent.ACTION_DOWN:
-                                startX = params.x;
-                                startY = params.y;
-                                touchX = event.getRawX();
-                                touchY = event.getRawY();
-                                return true;
-                            case MotionEvent.ACTION_MOVE:
-                                params.x = startX + (int) (event.getRawX() - touchX);
-                                params.y = startY + (int) (event.getRawY() - touchY);
-                                windowManager.updateViewLayout(root, params);
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                });
     }
 
     private static String mimeFor(String path) {
@@ -261,16 +202,36 @@ public class OverlayService extends Service {
         return "application/octet-stream";
     }
 
+    private void applyWindowUpdate(Runnable mutation) {
+        main.post(
+                () -> {
+                    mutation.run();
+                    if (root != null && windowManager != null) {
+                        windowManager.updateViewLayout(root, params);
+                    }
+                });
+    }
+
     private void setExpanded(boolean expanded) {
-        params.width = dp(expanded ? EXPANDED_WIDTH_DP : COLLAPSED_WIDTH_DP);
-        params.height = dp(expanded ? EXPANDED_HEIGHT_DP : COLLAPSED_HEIGHT_DP);
-        // Only while expanded must the window take focus, so the soft keyboard can appear.
-        if (expanded) {
-            params.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        } else {
-            params.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        }
-        windowManager.updateViewLayout(root, params);
+        applyWindowUpdate(
+                () -> {
+                    params.width = dp(expanded ? EXPANDED_WIDTH_DP : COLLAPSED_WIDTH_DP);
+                    params.height = dp(expanded ? EXPANDED_HEIGHT_DP : COLLAPSED_HEIGHT_DP);
+                    // Only while expanded must the window take focus, so the keyboard can appear.
+                    if (expanded) {
+                        params.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    } else {
+                        params.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    }
+                });
+    }
+
+    private void moveBy(float dx, float dy) {
+        applyWindowUpdate(
+                () -> {
+                    params.x += Math.round(dx);
+                    params.y += Math.round(dy);
+                });
     }
 
     @Override
@@ -290,7 +251,12 @@ public class OverlayService extends Service {
     private class BeeBridge {
         @JavascriptInterface
         public void setExpanded(final boolean expanded) {
-            main.post(() -> OverlayService.this.setExpanded(expanded));
+            OverlayService.this.setExpanded(expanded);
+        }
+
+        @JavascriptInterface
+        public void moveBy(final float dx, final float dy) {
+            OverlayService.this.moveBy(dx, dy);
         }
 
         @JavascriptInterface

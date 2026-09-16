@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 import { ChatInput } from '../chat/ChatInput';
 import { MessageList } from '../chat/MessageList';
@@ -7,7 +7,7 @@ import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
 import { loadAvatarStyle, saveAvatarStyle, type AvatarStyle } from '../../avatar/avatarStyle';
 import { useStrings } from '../../i18n/LocaleContext';
-import { desktop } from '../../platform/desktop';
+import { desktop, isAndroidOverlay } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
 import { useChat } from '../../chat/useChat';
 import './AvatarChat.css';
@@ -19,6 +19,7 @@ export function AvatarChat() {
   const [muted, setMuted] = useState(!isSpeechSupported());
   const [mouthOpen, setMouthOpen] = useState(0);
   const [style, setStyle] = useState<AvatarStyle>(loadAvatarStyle);
+  const overlay = isAndroidOverlay();
 
   const speakerRef = useRef<Speaker | null>(null);
   const spokenRef = useRef<Set<string>>(new Set());
@@ -26,6 +27,41 @@ export function AvatarChat() {
   const answeringRef = useRef(false);
   const boostRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const dragRef = useRef({ active: false, moved: false, x: 0, y: 0 });
+
+  // Marker so styles can adapt to the Android overlay (one connected surface).
+  useEffect(() => {
+    if (!overlay) return;
+    document.documentElement.dataset.shell = 'android';
+    return () => {
+      delete document.documentElement.dataset.shell;
+    };
+  }, [overlay]);
+
+  // Drag the overlay window by grabbing the bee or the grip (screen coords, so the
+  // moving window doesn't fight the pointer).
+  const onDragStart = useCallback((event: ReactPointerEvent<HTMLElement>) => {
+    dragRef.current = { active: true, moved: false, x: event.screenX, y: event.screenY };
+  }, []);
+
+  const onDragMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      const drag = dragRef.current;
+      if (!drag.active) return;
+      const dx = event.screenX - drag.x;
+      const dy = event.screenY - drag.y;
+      if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4) return;
+      drag.moved = true;
+      drag.x = event.screenX;
+      drag.y = event.screenY;
+      if (overlay) desktop.moveBy(dx, dy);
+    },
+    [overlay],
+  );
+
+  const onDragEnd = useCallback(() => {
+    dragRef.current.active = false;
+  }, []);
 
   const tick = useCallback(() => {
     const now = performance.now();
@@ -95,9 +131,37 @@ export function AvatarChat() {
     [send],
   );
 
+  const toggleExpanded = useCallback(() => {
+    // A drag that started on the bee shouldn't also toggle the chat.
+    if (dragRef.current.moved) {
+      dragRef.current.moved = false;
+      return;
+    }
+    setExpanded((value) => !value);
+  }, []);
+
   return (
     <div className="avatar-chat" data-expanded={expanded ? 'true' : 'false'}>
-      <div className="avatar-chat__grip" data-tauri-drag-region aria-hidden="true" />
+      <div
+        className="avatar-chat__grip"
+        data-tauri-drag-region
+        aria-hidden="true"
+        onPointerDown={onDragStart}
+        onPointerMove={onDragMove}
+        onPointerUp={onDragEnd}
+        onPointerCancel={onDragEnd}
+      />
+
+      {overlay ? (
+        <button
+          className="avatar-chat__close"
+          type="button"
+          aria-label="Close"
+          onClick={() => desktop.closeOverlay()}
+        >
+          ×
+        </button>
+      ) : null}
 
       {expanded ? (
         <div className="avatar-chat__bubbles" aria-live="polite">
@@ -109,13 +173,19 @@ export function AvatarChat() {
         </div>
       ) : null}
 
-      <div className="avatar-chat__stage">
+      <div
+        className="avatar-chat__stage"
+        onPointerDown={onDragStart}
+        onPointerMove={onDragMove}
+        onPointerUp={onDragEnd}
+        onPointerCancel={onDragEnd}
+      >
         <CompanionBees />
         <button
           className="avatar-chat__char"
           type="button"
           title={expanded ? 'Collapse' : 'Chat'}
-          onClick={() => setExpanded((value) => !value)}
+          onClick={toggleExpanded}
         >
           <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={style} />
         </button>

@@ -128,3 +128,58 @@
 .avatar-chat__retry {
   color: var(--bee-danger-text);
 }
+
+/* Close affordance, drawn by the page so the overlay has no native chrome. */
+.avatar-chat__close {
+  position: absolute;
+  top: 1px;
+  right: 6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bee-text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+/*
+ * Android overlay: draw one connected surface (bubbles + bee + composer) instead of
+ * three detached cards, and make the bee/grip a native drag target.
+ */
+[data-shell='android'] .avatar-chat__grip,
+[data-shell='android'] .avatar-chat__stage {
+  touch-action: none;
+}
+
+[data-shell='android'] .avatar-chat__bubbles {
+  margin: 0 6px;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+}
+
+[data-shell='android'] .avatar-chat__stage {
+  margin: 0 6px;
+  background: var(--bee-surface);
+  border-left: 1px solid var(--bee-border);
+  border-right: 1px solid var(--bee-border);
+}
+
+[data-shell='android'] .avatar-chat__composer {
+  margin: 0 6px;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: none;
+}
+
+/* Collapsed: a single rounded card around the bee — clearly grabbable. */
+[data-shell='android'] .avatar-chat[data-expanded='false'] .avatar-chat__stage {
+  border: 1px solid var(--bee-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
