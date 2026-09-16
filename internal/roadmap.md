@@ -17,11 +17,17 @@ items to [changelog.md](changelog.md).
 - Installer packaging (NSIS) for both shells
 - ESLint + Prettier configured and wired into CI
 - Repository organised by domain; CI for the web app and shell syntax
+- Rich Markdown + GFM rendering (tables, links) with code blocks + copy (sanitized)
+- Per-message actions: copy, edit & resend, regenerate, thumbs feedback
+- Local conversation history (searchable sidebar, rename/delete) with persisted drafts
+- Light/dark/system themes and a settings panel with a runtime gateway URL
+- Command palette, stop-generation, starter prompts, toasts
+- PWA manifest + icon
 
 ## Next
 
-- **Runtime gateway URL**: a connection field in the UI, persisted locally, so the
-  Android app (and any device) can point at the PC's LAN IP without a rebuild.
+- **Virtualized message list**: only window the DOM for very long threads.
+- **Full offline PWA**: a service worker for the app shell (needs a cache-version story so updates aren't stale).
 - **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
   [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
   `honey` cue when an answer finishes.

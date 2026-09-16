@@ -22,9 +22,12 @@ export interface Strings {
   avatarAlt: string;
   /** Accessible label for the vector bee, including its state. */
   avatarLabelFor: (state: AvatarState) => string;
+  /** Suggested first prompts on the empty screen. */
+  starters: string[];
   composer: {
     placeholder: string;
     send: string;
+    stop: string;
     ariaLabel: string;
     dictateStart: string;
     dictateStop: string;
@@ -34,6 +37,19 @@ export interface Strings {
     tryAgain: string;
     reconnect: string;
     latest: string;
+    copy: string;
+    copied: string;
+    copyCode: string;
+    regenerate: string;
+    edit: string;
+    stop: string;
+    stopped: string;
+    save: string;
+    cancel: string;
+    delete: string;
+    rename: string;
+    search: string;
+    close: string;
   };
   offline: (url: string) => string;
   voice: {
@@ -41,4 +57,40 @@ export interface Strings {
     off: string;
   };
   style: Record<AvatarStyle, string>;
+  theme: {
+    label: string;
+    light: string;
+    dark: string;
+    system: string;
+  };
+  history: {
+    title: string;
+    searchPlaceholder: string;
+    empty: string;
+    deleteConfirm: string;
+  };
+  settings: {
+    title: string;
+    theme: string;
+    language: string;
+    voice: string;
+    voiceHint: string;
+    gatewayUrl: string;
+    gatewayPlaceholder: string;
+    gatewayHint: string;
+    agentId: string;
+    mode: string;
+    reset: string;
+    close: string;
+  };
+  command: {
+    title: string;
+    placeholder: string;
+    newChat: string;
+    toggleTheme: string;
+    switchLanguage: string;
+    openSettings: string;
+    focusComposer: string;
+    noResults: string;
+  };
 }

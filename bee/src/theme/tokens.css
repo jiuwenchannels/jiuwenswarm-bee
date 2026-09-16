@@ -23,6 +23,16 @@
   --bee-scrollbar-thumb-hover: #cbb98a;
   --bee-scrollbar-track: transparent;
 
+  --bee-code-bg: #1f1e24;
+  --bee-code-bar: #26252c;
+  --bee-code-border: #33323a;
+  --bee-code-text: #eae7df;
+  --bee-code-muted: #9d99a8;
+  --bee-code-inline-bg: #f4ecd7;
+
+  --bee-shadow-soft: 0 1px 2px rgb(43 42 38 / 6%), 0 8px 24px rgb(43 42 38 / 8%);
+  --bee-shadow-float: 0 8px 40px rgb(43 42 38 / 18%);
+
   /* Avatar character */
   --avatar-skin: #f3c9a4;
   --avatar-hair: #3b2f2c;
@@ -55,4 +65,14 @@
   --bee-scrollbar-thumb: #3d3a44;
   --bee-scrollbar-thumb-hover: #4f4b57;
   --bee-scrollbar-track: transparent;
+
+  --bee-code-bg: #141317;
+  --bee-code-bar: #1c1b21;
+  --bee-code-border: #302e37;
+  --bee-code-text: #ece9e2;
+  --bee-code-muted: #9a96a5;
+  --bee-code-inline-bg: #26242c;
+
+  --bee-shadow-soft: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 35%);
+  --bee-shadow-float: 0 8px 40px rgb(0 0 0 / 55%);
 }

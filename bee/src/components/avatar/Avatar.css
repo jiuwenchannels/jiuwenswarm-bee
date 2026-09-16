@@ -32,6 +32,29 @@
   margin: 0;
 }
 
+/*
+ * Compact avatar used centered in the title row. Uses the transparent,
+ * cropped `bee-mark` cut-out, so no tile or blend mode is needed.
+ */
+.bee-avatar--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 0;
+}
+
+.bee-avatar--compact .bee-avatar__image {
+  width: 32px;
+  height: 32px;
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+.bee-avatar--compact .bee-avatar__label {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .bee-avatar--thinking .bee-avatar__image {
   animation: bee-hover 1.6s ease-in-out infinite;
 }

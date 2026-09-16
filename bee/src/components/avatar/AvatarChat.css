@@ -147,6 +147,47 @@
   -webkit-app-region: no-drag;
 }
 
+/* Collapsed status cue: a small dot on the bee, so you know its state without
+   expanding the chat. Hidden once the chat is open (the meta row takes over). */
+.avatar-chat__pulse {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--bee-surface);
+  background: var(--bee-ok);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
+}
+
+.avatar-chat__pulse[data-variant='connecting'],
+.avatar-chat__pulse[data-variant='reconnecting'] {
+  background: var(--bee-warn);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+.avatar-chat__pulse[data-variant='disconnected'],
+.avatar-chat__pulse[data-state='error'] {
+  background: var(--bee-danger-text);
+}
+
+.avatar-chat[data-expanded='true'] .avatar-chat__pulse {
+  display: none;
+}
+
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-chat__pulse {
+    animation: none !important;
+  }
+}
+
 /*
  * Android overlay: draw one connected surface (bubbles + bee + composer) instead of
  * three detached cards, and make the bee/grip a native drag target.

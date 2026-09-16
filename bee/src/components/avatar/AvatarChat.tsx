@@ -9,14 +9,29 @@ import { loadAvatarStyle, saveAvatarStyle, type AvatarStyle } from '../../avatar
 import { useStrings } from '../../i18n/LocaleContext';
 import { desktop, isAndroidOverlay } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
+import { useAppConfig, useSettings } from '../../settings/SettingsContext';
 import { useChat } from '../../chat/useChat';
 import './AvatarChat.css';
 
 export function AvatarChat() {
   const t = useStrings();
-  const { messages, avatar, status, busy, send, retry } = useChat();
+  const config = useAppConfig();
+  const { settings, update } = useSettings();
+  const {
+    messages,
+    avatar,
+    status,
+    busy,
+    send,
+    stop,
+    retry,
+    regenerate,
+    retryMessage,
+    editMessage,
+    feedback,
+  } = useChat(config);
   const [expanded, setExpanded] = useState(false);
-  const [muted, setMuted] = useState(!isSpeechSupported());
+  const [muted, setMuted] = useState(() => !isSpeechSupported() || !settings.voiceEnabled);
   const [mouthOpen, setMouthOpen] = useState(0);
   const [style, setStyle] = useState<AvatarStyle>(loadAvatarStyle);
   const overlay = isAndroidOverlay();
@@ -112,6 +127,11 @@ export function AvatarChat() {
     if (!muted) speakerRef.current?.speak(last.text);
   }, [messages, muted]);
 
+  // Keep the local mute in step with the persisted setting.
+  useEffect(() => {
+    setMuted(!isSpeechSupported() || !settings.voiceEnabled);
+  }, [settings.voiceEnabled]);
+
   // The mouth keeps moving while the reply is streaming, even if TTS is silent
   // (WebView2/Electron often have no speech voices installed).
   useEffect(() => {
@@ -141,7 +161,7 @@ export function AvatarChat() {
   }, []);
 
   return (
-    <div className="avatar-chat" data-expanded={expanded ? 'true' : 'false'}>
+    <div className="avatar-chat" data-expanded={expanded ? 'true' : 'false'} data-avatar={avatar}>
       <div
         className="avatar-chat__grip"
         data-tauri-drag-region
@@ -168,7 +188,14 @@ export function AvatarChat() {
           {messages.length === 0 ? (
             <p className="avatar-chat__hello">{t.hello}</p>
           ) : (
-            <MessageList messages={messages} />
+            <MessageList
+              messages={messages}
+              busy={busy}
+              onFeedback={feedback}
+              onRegenerate={regenerate}
+              onRetry={retryMessage}
+              onEdit={editMessage}
+            />
           )}
         </div>
       ) : null}
@@ -189,11 +216,17 @@ export function AvatarChat() {
         >
           <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={style} />
         </button>
+        <span
+          className="avatar-chat__pulse"
+          data-variant={status}
+          data-state={avatar}
+          aria-hidden="true"
+        />
       </div>
 
       {expanded ? (
         <div className="avatar-chat__composer">
-          <ChatInput disabled={busy} onSend={handleSend} />
+          <ChatInput disabled={busy} onSend={handleSend} onStop={stop} draftKey="avatar" />
           <div className="avatar-chat__meta">
             <span className="avatar-chat__status" data-variant={status}>
               <span className="avatar-chat__dot" aria-hidden="true" />
@@ -206,11 +239,10 @@ export function AvatarChat() {
                 type="button"
                 aria-pressed={muted}
                 onClick={() => {
-                  setMuted((value) => {
-                    const next = !value;
-                    if (next) speakerRef.current?.cancel();
-                    return next;
-                  });
+                  const next = !muted;
+                  if (next) speakerRef.current?.cancel();
+                  setMuted(next);
+                  update({ voiceEnabled: !next });
                 }}
               >
                 {muted ? t.voice.off : t.voice.on}

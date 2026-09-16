@@ -5,7 +5,11 @@ import {
   appendToLastAssistant,
   failLastAssistant,
   finishLastAssistant,
+  lastUserText,
+  setFeedback,
   startAssistantMessage,
+  stopLastAssistant,
+  truncateFrom,
 } from './messages';
 
 describe('message reducers', () => {
@@ -47,5 +51,41 @@ describe('message reducers', () => {
     const next = startAssistantMessage(original);
     expect(original).toHaveLength(1);
     expect(next).toHaveLength(2);
+  });
+
+  it('marks the last assistant message as stopped', () => {
+    const stopped = stopLastAssistant(startAssistantMessage([]));
+    expect(stopped.at(-1)).toMatchObject({ streaming: false, stopped: true });
+  });
+
+  it('gives messages unique ids across calls', () => {
+    const a = addUserMessage([], 'a')[0].id;
+    const b = addUserMessage([], 'b')[0].id;
+    expect(a).not.toBe(b);
+  });
+
+  it('truncates from a message id onwards', () => {
+    let messages = addUserMessage([], 'first');
+    const firstId = messages[0].id;
+    messages = startAssistantMessage(messages);
+    messages = addUserMessage(messages, 'second');
+    expect(truncateFrom(messages, firstId)).toHaveLength(0);
+    expect(truncateFrom(messages, 'missing')).toHaveLength(3);
+  });
+
+  it('toggles feedback per message', () => {
+    const messages = startAssistantMessage([]);
+    const id = messages[0].id;
+    const up = setFeedback(messages, id, 'up');
+    expect(up[0].feedback).toBe('up');
+    expect(setFeedback(up, id, 'up')[0].feedback).toBeUndefined();
+  });
+
+  it('finds the last user text', () => {
+    let messages = addUserMessage([], 'one');
+    messages = startAssistantMessage(messages);
+    messages = addUserMessage(messages, 'two');
+    expect(lastUserText(messages)).toBe('two');
+    expect(lastUserText(startAssistantMessage([]))).toBeUndefined();
   });
 });

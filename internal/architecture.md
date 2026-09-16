@@ -34,15 +34,23 @@ with inline chat (what the desktop shells open by default).
 |---|---|
 | `bee/src/app/` | Entry (`main.tsx`) and the two view roots (`App.tsx`) |
 | `bee/src/components/avatar/` | Bee avatar renderings, the avatar-view shell, voice UI |
-| `bee/src/components/chat/` | Message list, bubble, composer |
+| `bee/src/components/chat/` | Message list, bubbles (Markdown + actions), composer, starter prompts |
+| `bee/src/components/history/` | Conversation sidebar (search, rename, delete) |
+| `bee/src/components/settings/` | Settings modal (theme, voice, gateway URL, agent, mode) |
+| `bee/src/components/common/` | Toasts, command palette, language toggle, shared primitives |
 | `bee/src/gateway/protocol.ts` | Shared types: `Envelope`, `GatewayStatus`, `GatewayEvents`, `ChatGateway`, `WebSocketLike` |
 | `bee/src/gateway/gateway.ts` | SDK gateway client (`/v1/ws` envelope protocol) + reconnect |
 | `bee/src/gateway/gatewayProduct.ts` | Product gateway client (`/ws` event/req protocol) |
-| `bee/src/gateway/config.ts` | `VITE_*` config and the ordered list of gateway targets |
-| `bee/src/chat/` | `useChat` (React hook) and pure message reducers |
+| `bee/src/gateway/config.ts` | `VITE_*` defaults + `resolveConfig(settings)` |
+| `bee/src/settings/` | Persisted `UserSettings` (theme, gateway URL, agent, mode, voice) + provider |
+| `bee/src/chat/` | `useChat` (gateway + conversation orchestration), pure message/conversation reducers, local storage, drafts |
 | `bee/src/avatar/` | Pure avatar state machine + style preference |
 | `bee/src/platform/` | Desktop-shell bridge (`window.bee` / `__TAURI__`) and Web Speech TTS |
-| `bee/src/theme/tokens.css` | Light/dark design tokens (no hardcoded colours in components) |
+| `bee/src/theme/` | Theme resolution (`light`/`dark`/`system`) and `tokens.css` |
+
+Conversations, drafts, settings, avatar style and language are all stored in
+`localStorage`; nothing is sent to the gateway beyond the existing chat frames. The
+gateway layer is unchanged, so no backend work is required.
 
 Dependency direction: `components → chat/avatar/platform → gateway`. The `gateway/`
 folder is the only place that knows about WebSocket framing; the rest of the app talks

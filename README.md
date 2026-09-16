@@ -25,13 +25,16 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 ## Features
 
 - One-screen Q&A conversation with streaming tokens
+- Rich **Markdown + GFM** replies (tables, lists, links) with code blocks and a copy button, sanitized by `rehype-sanitize`
+- Per-message actions: copy, edit & resend, regenerate, and thumbs feedback
 - Reactive bee avatar: idle / thinking / answering / error
-- Light and dark themes (semantic tokens only)
-- Connection status with automatic reconnect (exponential backoff)
-- Mobile layout, keyboard-first input (Enter to send, Shift+Enter for newline)
-- Accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
+- Local **conversation history**: searchable sidebar with rename/delete, persisted across reloads, per-chat drafts
+- **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
+- Connection status with automatic reconnect (exponential backoff) and stop-generation
+- Command palette (**⌘/Ctrl + K**), keyboard-first input (Enter to send, Shift+Enter for newline, `/` to focus)
+- Mobile layout, PWA manifest, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
 - Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app
-- Zero backend: talks to the JiuwenSwarm WebSocket gateway directly
+- Zero backend: talks to the JiuwenSwarm WebSocket gateway directly (no gateway changes needed)
 
 ## Quick start
 
@@ -134,13 +137,15 @@ jiuwenswarm-bee/
   bee/                  The Vite/React/TS web app (the single source of truth)
     src/
       app/              Entry (main.tsx) and view roots (App.tsx)
-      components/       avatar/ and chat/ UI (styles co-located)
+      components/       avatar/, chat/, history/, settings/, common/ UI (styles co-located)
       gateway/          WebSocket clients + protocol types + config
-      chat/             Conversation state (useChat, message reducers)
+      chat/             Conversation state (useChat, message + conversation reducers, drafts)
       avatar/            Avatar state machine + style preference
+      settings/         Persisted user settings + provider
       platform/         Desktop-shell bridge and Web Speech TTS
+      theme/            Theme resolution + design tokens (light/dark)
       assets/           bee-static.png, bee-flying.webp (shared with the shells)
-      theme/            design tokens (light/dark)
+  public/               PWA manifest + icon
   desktop/
     electron/           Electron shell: always-on-top bee avatar + chat window
     tauri/              Tauri v2 shell: same app, lightweight native (Rust) wrapper

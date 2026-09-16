@@ -1,23 +1,77 @@
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { CircleStop, Mic, Send } from 'lucide-react';
+import {
+  type KeyboardEvent,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 
+import { loadDraft, saveDraft } from '../../chat/draftStorage';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import { Dictation, isRecognitionSupported, recognitionLang } from '../../platform/recognition';
 import './Chat.css';
 
-export function ChatInput({
-  disabled,
-  onSend,
-}: {
+const MAX_TEXTAREA_PX = 200;
+
+export interface ChatInputHandle {
+  focus: () => void;
+  /** Put text in the composer (replacing any draft) and focus it. */
+  setText: (text: string) => void;
+}
+
+interface ChatInputProps {
   disabled: boolean;
   onSend: (text: string) => void;
-}) {
+  onStop: () => void;
+  draftKey: string;
+}
+
+export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput(
+  { disabled, onSend, onStop, draftKey },
+  ref,
+) {
   const t = useStrings();
   const { locale } = useLocaleContext();
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(() => loadDraft(draftKey));
   const [listening, setListening] = useState(false);
   const [dictationSupported] = useState(isRecognitionSupported);
   const dictationRef = useRef<Dictation | null>(null);
   const baseRef = useRef('');
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => inputRef.current?.focus(),
+      setText: (text: string) => {
+        setValue(text);
+        requestAnimationFrame(() => {
+          const el = inputRef.current;
+          if (!el) return;
+          el.focus();
+          el.setSelectionRange(text.length, text.length);
+        });
+      },
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    setValue(loadDraft(draftKey));
+  }, [draftKey]);
+
+  useEffect(() => {
+    saveDraft(draftKey, value);
+  }, [draftKey, value]);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_PX)}px`;
+  }, [value]);
 
   function stopDictation() {
     dictationRef.current?.stop();
@@ -78,6 +132,7 @@ export function ChatInput({
       }}
     >
       <textarea
+        ref={inputRef}
         className="composer__input"
         data-testid="bee-input"
         rows={1}
@@ -89,7 +144,7 @@ export function ChatInput({
       />
       {dictationSupported ? (
         <button
-          className="composer__mic"
+          className="composer__icon"
           data-testid="bee-mic"
           type="button"
           data-listening={listening ? 'true' : undefined}
@@ -99,12 +154,32 @@ export function ChatInput({
           disabled={disabled}
           onClick={toggleDictation}
         >
-          🎤
+          <Mic size={18} aria-hidden="true" />
         </button>
       ) : null}
-      <button className="composer__send" data-testid="bee-send" type="submit" disabled={disabled || !value.trim()}>
-        {t.composer.send}
-      </button>
+      {disabled ? (
+        <button
+          className="composer__send composer__send--stop"
+          data-testid="bee-stop"
+          type="button"
+          onClick={onStop}
+          aria-label={t.composer.stop}
+          title={t.composer.stop}
+        >
+          <CircleStop size={18} aria-hidden="true" />
+          <span>{t.composer.stop}</span>
+        </button>
+      ) : (
+        <button
+          className="composer__send"
+          data-testid="bee-send"
+          type="submit"
+          disabled={!value.trim()}
+        >
+          <Send size={16} aria-hidden="true" />
+          <span>{t.composer.send}</span>
+        </button>
+      )}
     </form>
   );
-}
+});

@@ -3,27 +3,42 @@
  * is the "honey" in the hive vocabulary (internal/naming.md).
  */
 export type Role = 'user' | 'assistant';
+export type Feedback = 'up' | 'down';
 
 export interface ChatMessage {
   id: string;
   role: Role;
   text: string;
+  createdAt: number;
   streaming?: boolean;
   error?: boolean;
+  /** Set when the user stopped generation before the reply finished. */
+  stopped?: boolean;
+  /** Local thumbs feedback (not sent to the gateway yet). */
+  feedback?: Feedback;
 }
 
-let counter = 0;
-function nextId(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${counter}`;
+function makeId(prefix: string): string {
+  const random =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${prefix}-${random}`;
 }
 
-export function addUserMessage(messages: ChatMessage[], text: string): ChatMessage[] {
-  return [...messages, { id: nextId('user'), role: 'user', text }];
+export function makeMessageId(prefix: string): string {
+  return makeId(prefix);
 }
 
-export function startAssistantMessage(messages: ChatMessage[]): ChatMessage[] {
-  return [...messages, { id: nextId('bee'), role: 'assistant', text: '', streaming: true }];
+export function addUserMessage(messages: ChatMessage[], text: string, now = Date.now()): ChatMessage[] {
+  return [...messages, { id: makeId('user'), role: 'user', text, createdAt: now }];
+}
+
+export function startAssistantMessage(messages: ChatMessage[], now = Date.now()): ChatMessage[] {
+  return [
+    ...messages,
+    { id: makeId('bee'), role: 'assistant', text: '', streaming: true, createdAt: now },
+  ];
 }
 
 export function appendToLastAssistant(messages: ChatMessage[], token: string): ChatMessage[] {
@@ -33,10 +48,7 @@ export function appendToLastAssistant(messages: ChatMessage[], token: string): C
   return [...messages.slice(0, -1), { ...last, text: last.text + token }];
 }
 
-function patchLast(
-  messages: ChatMessage[],
-  patch: Partial<ChatMessage>,
-): ChatMessage[] {
+function patchLast(messages: ChatMessage[], patch: Partial<ChatMessage>): ChatMessage[] {
   if (messages.length === 0) return messages;
   const last = messages[messages.length - 1];
   if (last.role !== 'assistant') return messages;
@@ -47,6 +59,30 @@ export function finishLastAssistant(messages: ChatMessage[]): ChatMessage[] {
   return patchLast(messages, { streaming: false });
 }
 
+export function stopLastAssistant(messages: ChatMessage[]): ChatMessage[] {
+  return patchLast(messages, { streaming: false, stopped: true });
+}
+
 export function failLastAssistant(messages: ChatMessage[], text: string): ChatMessage[] {
   return patchLast(messages, { streaming: false, error: true, text });
+}
+
+/** Drop a message and everything after it (used to regenerate/edit in place). */
+export function truncateFrom(messages: ChatMessage[], id: string): ChatMessage[] {
+  const index = messages.findIndex((message) => message.id === id);
+  return index < 0 ? messages : messages.slice(0, index);
+}
+
+export function setFeedback(messages: ChatMessage[], id: string, feedback?: Feedback): ChatMessage[] {
+  return messages.map((message) =>
+    message.id === id ? { ...message, feedback: message.feedback === feedback ? undefined : feedback } : message,
+  );
+}
+
+/** The text of the most recent user message, for retry/regenerate. */
+export function lastUserText(messages: ChatMessage[]): string | undefined {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i].role === 'user') return messages[i].text;
+  }
+  return undefined;
 }

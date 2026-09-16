@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BeeChat">
+  <rect width="512" height="512" rx="112" fill="#f2b705" />
+  <ellipse cx="256" cy="300" rx="132" ry="104" fill="#2b2a26" />
+  <rect x="196" y="200" width="34" height="196" fill="#f2b705" />
+  <rect x="278" y="200" width="34" height="196" fill="#f2b705" />
+  <ellipse cx="180" cy="176" rx="58" ry="74" fill="#fff4cf" opacity="0.9" />
+  <ellipse cx="332" cy="176" rx="58" ry="74" fill="#fff4cf" opacity="0.9" />
+  <circle cx="256" cy="170" r="74" fill="#f2b705" stroke="#2b2a26" stroke-width="14" />
+  <circle cx="232" cy="164" r="15" fill="#2b2a26" />
+  <circle cx="280" cy="164" r="15" fill="#2b2a26" />
+  <path d="M232 200 Q256 216 280 200" stroke="#2b2a26" stroke-width="10" fill="none" stroke-linecap="round" />
+  <path d="M214 104 Q200 62 168 50" stroke="#2b2a26" stroke-width="12" fill="none" stroke-linecap="round" />
+  <path d="M298 104 Q312 62 344 50" stroke="#2b2a26" stroke-width="12" fill="none" stroke-linecap="round" />
+</svg>

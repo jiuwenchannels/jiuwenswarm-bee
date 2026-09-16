@@ -1,0 +1,96 @@
+/* eslint-disable react-refresh/only-export-components -- context module exports the provider and its hooks together */
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+
+import { type AppConfig, envSettingsDefaults, resolveConfig } from '../gateway/config';
+import { applyTheme, resolveTheme, systemPrefersDark } from '../theme/theme';
+import { type UserSettings, loadSettings, saveSettings } from './settings';
+
+export const DEFAULT_SETTINGS: UserSettings = {
+  theme: 'system',
+  voiceEnabled: true,
+  ...envSettingsDefaults(),
+};
+
+export interface SettingsContextValue {
+  settings: UserSettings;
+  config: AppConfig;
+  update: (patch: Partial<UserSettings>) => void;
+  reset: () => void;
+}
+
+const SettingsContext = createContext<SettingsContextValue>({
+  settings: DEFAULT_SETTINGS,
+  config: resolveConfig(DEFAULT_SETTINGS),
+  update: () => {},
+  reset: () => {},
+});
+
+function subscribeToSystemTheme(onChange: () => void): () => void {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return () => {};
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  media.addEventListener('change', onChange);
+  return () => media.removeEventListener('change', onChange);
+}
+
+export function SettingsProvider({ children }: { children: ReactNode }) {
+  const [settings, setSettings] = useState<UserSettings>(() => loadSettings(DEFAULT_SETTINGS));
+
+  const update = useCallback((patch: Partial<UserSettings>) => {
+    setSettings((previous) => {
+      const next = { ...previous, ...patch };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
+  const reset = useCallback(() => {
+    saveSettings(DEFAULT_SETTINGS);
+    setSettings(DEFAULT_SETTINGS);
+  }, []);
+
+  // Paint the theme before the browser relayouts, and follow the OS when on `system`.
+  useLayoutEffect(() => {
+    applyTheme(resolveTheme(settings.theme, systemPrefersDark()));
+    if (settings.theme !== 'system') return () => {};
+    return subscribeToSystemTheme(() => applyTheme(resolveTheme('system', systemPrefersDark())));
+  }, [settings.theme]);
+
+  // Config identity only changes when a *connection* setting changes, so a theme
+  // or voice change never tears down and rebuilds the gateway socket.
+  const { gatewayUrl, agentId, mode } = settings;
+  const config = useMemo(
+    () =>
+      resolveConfig({
+        theme: 'system',
+        voiceEnabled: true,
+        gatewayUrl,
+        agentId,
+        mode,
+      }),
+    [gatewayUrl, agentId, mode],
+  );
+
+  const value = useMemo<SettingsContextValue>(
+    () => ({ settings, config, update, reset }),
+    [settings, config, update, reset],
+  );
+
+  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+}
+
+export function useSettings(): SettingsContextValue {
+  return useContext(SettingsContext);
+}
+
+/** The resolved gateway/app config for the current settings. */
+export function useAppConfig(): AppConfig {
+  return useContext(SettingsContext).config;
+}

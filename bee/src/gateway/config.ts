@@ -1,3 +1,6 @@
+import type { UserSettings } from '../settings/settings';
+import { normalizeGatewayUrl } from '../settings/settings';
+
 export type GatewayProtocol = 'product' | 'sdk';
 
 export interface GatewayTarget {
@@ -32,21 +35,48 @@ const DEFAULT_TARGETS: GatewayTarget[] = [
   { url: 'ws://127.0.0.1:19000/v1/ws', protocol: 'sdk' },
 ];
 
-const explicitUrl = readEnv(env.VITE_JIUWENSWARM_URL, '');
-const explicitProtocol = env.VITE_GATEWAY_PROTOCOL;
-const inferredProtocol: GatewayProtocol =
-  explicitProtocol === 'product' || explicitProtocol === 'sdk'
-    ? explicitProtocol
-    : explicitUrl.includes('/v1/ws')
-      ? 'sdk'
-      : 'product';
+const envExplicitUrl = readEnv(env.VITE_JIUWENSWARM_URL, '');
+const envExplicitProtocol = env.VITE_GATEWAY_PROTOCOL;
 
-export const config: AppConfig = {
-  targets: explicitUrl ? [{ url: explicitUrl, protocol: inferredProtocol }] : DEFAULT_TARGETS,
-  token: typeof env.VITE_GATEWAY_TOKEN === 'string' && env.VITE_GATEWAY_TOKEN.length > 0
-    ? env.VITE_GATEWAY_TOKEN
-    : undefined,
+function inferProtocol(url: string): GatewayProtocol {
+  if (envExplicitProtocol === 'product' || envExplicitProtocol === 'sdk') {
+    return envExplicitProtocol;
+  }
+  return url.includes('/v1/ws') ? 'sdk' : 'product';
+}
+
+/** Build the connection settings a fresh install should start from. */
+export function envSettingsDefaults(): Omit<UserSettings, 'theme' | 'voiceEnabled'> {
+  return {
+    gatewayUrl: envExplicitUrl,
+    agentId: readEnv(env.VITE_AGENT_ID, 'researcher'),
+    mode: readEnv(env.VITE_AGENT_MODE, 'agent'),
+  };
+}
+
+/** Resolve the effective app config from env defaults plus the user's settings. */
+export function resolveConfig(settings: UserSettings): AppConfig {
+  const explicitUrl = normalizeGatewayUrl(settings.gatewayUrl);
+  const targets: GatewayTarget[] = explicitUrl
+    ? [{ url: explicitUrl, protocol: inferProtocol(explicitUrl) }]
+    : DEFAULT_TARGETS;
+  return {
+    targets,
+    token:
+      typeof env.VITE_GATEWAY_TOKEN === 'string' && env.VITE_GATEWAY_TOKEN.length > 0
+        ? env.VITE_GATEWAY_TOKEN
+        : undefined,
+    agentId: settings.agentId,
+    mode: settings.mode,
+    appTitle: readEnv(env.VITE_APP_TITLE, 'BeeChat'),
+  };
+}
+
+/** Env-only config (used as the baseline for `envSettingsDefaults` and tests). */
+export const config: AppConfig = resolveConfig({
+  theme: 'system',
+  gatewayUrl: envExplicitUrl,
   agentId: readEnv(env.VITE_AGENT_ID, 'researcher'),
   mode: readEnv(env.VITE_AGENT_MODE, 'agent'),
-  appTitle: readEnv(env.VITE_APP_TITLE, 'BeeChat'),
-};
+  voiceEnabled: true,
+});

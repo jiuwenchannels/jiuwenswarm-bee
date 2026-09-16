@@ -4,6 +4,26 @@ User-visible changes per release. The three version manifests (`bee/package.json
 `desktop/electron/package.json`, `desktop/tauri/src-tauri/tauri.conf.json`) are bumped
 together; see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+## Unreleased
+
+A client-only polish pass on the web app (no gateway/backend changes).
+
+- **Rich replies**: Markdown + GFM (tables, links, lists) with sanitized HTML, code
+  blocks with language labels and a copy button.
+- **Message actions**: copy, edit & resend, regenerate, and thumbs feedback; errors
+  retry in place instead of duplicating the user's turn.
+- **Conversation history**: locally persisted threads with a searchable sidebar
+  (rename, delete) and per-chat composer drafts; "New chat" now starts a fresh gateway
+  session.
+- **Themes**: light / dark / system (follows `prefers-color-scheme`), persisted.
+- **Settings panel**: runtime gateway URL, agent, mode, and voice toggle — no rebuild
+  needed to point at another gateway.
+- **Composer**: auto-growing input, stop-generation button, starter prompts.
+- **Command palette** (`⌘/Ctrl + K`) and keyboard model (`/` focuses the composer).
+- **Visual polish**: consistent Lucide icon set, toasts, day separators, hover actions,
+  refined tokens, depth, and motion (all respecting reduced motion).
+- **PWA manifest + icon**.
+
 ## 0.1.0
 
 Initial BeeChat release.
