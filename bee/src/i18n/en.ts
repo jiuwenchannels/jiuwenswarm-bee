@@ -23,6 +23,8 @@ export const en: Strings = {
     placeholder: 'Ask Buzz anything…',
     send: 'Send',
     ariaLabel: 'Message',
+    dictateStart: 'Start dictation',
+    dictateStop: 'Stop dictation',
   },
   actions: {
     newChat: 'New chat',

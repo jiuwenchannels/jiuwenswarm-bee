@@ -30,6 +30,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Connection status with automatic reconnect (exponential backoff)
 - Mobile layout, keyboard-first input (Enter to send, Shift+Enter for newline)
 - Accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
+- Spoken replies (TTS) and speech input (dictation) where the browser supports the Web Speech API
 - Zero backend: talks to the JiuwenSwarm WebSocket gateway directly
 
 ## Quick start

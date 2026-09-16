@@ -77,6 +77,37 @@
   outline-offset: 1px;
 }
 
+.composer__mic {
+  height: 44px;
+  width: 44px;
+  flex: 0 0 auto;
+  border: 1px solid var(--bee-border);
+  border-radius: 14px;
+  background: var(--bee-surface);
+  color: var(--bee-text);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.composer__mic[data-listening='true'] {
+  border-color: var(--bee-danger-text);
+  color: var(--bee-danger-text);
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+.composer__mic:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes mic-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .composer__send {
   height: 44px;
   padding: 0 18px;
@@ -96,6 +127,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .bubble__caret {
+    animation: none;
+  }
+
+  .composer__mic[data-listening='true'] {
     animation: none;
   }
 }

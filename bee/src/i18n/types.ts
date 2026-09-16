@@ -26,6 +26,8 @@ export interface Strings {
     placeholder: string;
     send: string;
     ariaLabel: string;
+    dictateStart: string;
+    dictateStop: string;
   };
   actions: {
     newChat: string;

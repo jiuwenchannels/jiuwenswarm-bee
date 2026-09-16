@@ -23,6 +23,8 @@ export const zh: Strings = {
     placeholder: '问问嗡嗡…',
     send: '发送',
     ariaLabel: '消息',
+    dictateStart: '开始语音输入',
+    dictateStop: '停止语音输入',
   },
   actions: {
     newChat: '新对话',

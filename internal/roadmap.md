@@ -10,6 +10,7 @@ items to [changelog.md](changelog.md).
 - Both gateway protocols (SDK envelope + product event/req) with failover and reconnect
 - Light/dark themes, mobile layout, accessibility basics
 - UI localization (`en` / `zh`) with a per-locale mascot name (Buzz / 嗡嗡)
+- Speech input (dictation) in the web app where the Web Speech API is available
 - Electron and Tauri desktop shells with voice + lip-sync
 - Android app (Capacitor): avatar view + interactive floating overlay (PiP fallback)
 - Installer packaging (NSIS) for both shells
