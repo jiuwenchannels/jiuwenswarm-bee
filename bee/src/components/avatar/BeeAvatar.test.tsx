@@ -9,12 +9,12 @@ import type { AvatarState } from '../../avatar/avatar';
 
 let container: HTMLDivElement | null = null;
 
-function render(state: AvatarState): HTMLDivElement {
+function render(state: AvatarState, showLabel = true): HTMLDivElement {
   container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   act(() => {
-    root.render(<BeeAvatar state={state} />);
+    root.render(<BeeAvatar state={state} showLabel={showLabel} />);
   });
   return container;
 }
@@ -33,5 +33,17 @@ describe('BeeAvatar', () => {
   it('shows a readable label for the state', () => {
     const node = render('error');
     expect(node.querySelector('[data-testid="bee-avatar-label"]')?.textContent).toContain('problem');
+  });
+
+  it('shows decorative companion bees ("one of the swarm")', () => {
+    const node = render('idle');
+    const swarm = node.querySelector('[data-testid="bee-swarm"]');
+    expect(swarm).not.toBeNull();
+    expect(swarm?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('can hide the state label (empty chat shows the greeting instead)', () => {
+    const node = render('idle', false);
+    expect(node.querySelector('[data-testid="bee-avatar-label"]')).toBeNull();
   });
 });

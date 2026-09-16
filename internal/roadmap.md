@@ -9,12 +9,16 @@ items to [changelog.md](changelog.md).
 - Reactive bee avatar (mascot + vector styles)
 - Both gateway protocols (SDK envelope + product event/req) with failover and reconnect
 - Light/dark themes, mobile layout, accessibility basics
+- UI localization (`en` / `zh`) with a per-locale mascot name (Buzz / 嗡嗡)
 - Electron and Tauri desktop shells with voice + lip-sync
 - Installer packaging (NSIS) for both shells
 - Repository organised by domain; CI for the web app and shell syntax
 
 ## Next
 
+- **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
+  [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
+  `honey` cue when an answer finishes.
 - **Avatar art**: only two bee poses ship (`bee-static`, `bee-flying`); add dedicated
   thinking / talking frames so the state machine maps to real art.
 - **Lint/format**: add ESLint + Prettier and wire them into CI.

@@ -59,6 +59,7 @@ BeeChat 会以指数退避策略自动重连。
 | `VITE_GATEWAY_TOKEN` | *（空）* |
 | `VITE_AGENT_ID` | `researcher` |
 | `VITE_APP_TITLE` | `BeeChat` |
+| `VITE_LOCALE` | *自动*（根据浏览器选择 `en`/`zh`） |
 
 ## 7. 故障排查
 

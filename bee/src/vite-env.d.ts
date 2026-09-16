@@ -7,6 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_AGENT_ID?: string;
   readonly VITE_AGENT_MODE?: string;
   readonly VITE_APP_TITLE?: string;
+  readonly VITE_LOCALE?: string;
 }
 
 interface ImportMeta {

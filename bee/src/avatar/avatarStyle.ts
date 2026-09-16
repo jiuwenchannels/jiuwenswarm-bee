@@ -18,8 +18,3 @@ export function saveAvatarStyle(style: AvatarStyle): void {
     /* ignore */
   }
 }
-
-export const AVATAR_STYLE_LABEL: Record<AvatarStyle, string> = {
-  mascot: 'Classic',
-  vector: 'Animated',
-};

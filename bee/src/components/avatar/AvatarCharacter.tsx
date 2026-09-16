@@ -2,6 +2,7 @@ import beeStatic from '../../assets/bee-static.png';
 import beeFlying from '../../assets/bee-flying.webp';
 import { type AvatarState } from '../../avatar/avatar';
 import { type AvatarStyle } from '../../avatar/avatarStyle';
+import { useStrings } from '../../i18n/LocaleContext';
 import './AvatarCharacter.css';
 
 function clamp01(value: number): number {
@@ -10,6 +11,7 @@ function clamp01(value: number): number {
 
 /** The shipped Jiuwen bee art. No mouth layer, so it "talks" with a pulse. */
 function MascotBee({ state, mouthOpen = 0 }: { state: AvatarState; mouthOpen?: number }) {
+  const t = useStrings();
   const flying = state === 'thinking' || state === 'answering';
   const talk = clamp01(mouthOpen);
 
@@ -18,7 +20,7 @@ function MascotBee({ state, mouthOpen = 0 }: { state: AvatarState; mouthOpen?: n
       <img
         className="bee-char__img"
         src={flying ? beeFlying : beeStatic}
-        alt="Jiuwen bee"
+        alt={t.avatarAlt}
         draggable={false}
         style={{
           transform: `scale(${1 + talk * 0.035}) rotate(${(talk - 0.5) * 2.5}deg)`,
@@ -30,12 +32,13 @@ function MascotBee({ state, mouthOpen = 0 }: { state: AvatarState; mouthOpen?: n
 
 /** A vector bee with a real animated mouth (true mouth movement / lip-sync). */
 function VectorBee({ state, mouthOpen = 0 }: { state: AvatarState; mouthOpen?: number }) {
+  const t = useStrings();
   const talk = clamp01(mouthOpen);
   const mouthRx = 7 + talk * 3;
   const mouthRy = 1.8 + talk * 9;
 
   return (
-    <svg className={`bee bee--${state}`} viewBox="0 0 200 200" role="img" aria-label={`Assistant bee (${state})`}>
+    <svg className={`bee bee--${state}`} viewBox="0 0 200 200" role="img" aria-label={t.avatarLabelFor(state)}>
       <defs>
         <clipPath id="bee-body-clip">
           <ellipse cx="100" cy="118" rx="52" ry="40" />

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { avatarLabel, nextAvatarState } from './avatar';
+import { nextAvatarState } from './avatar';
 
 describe('avatar state machine', () => {
   it('goes idle -> thinking on send', () => {
@@ -20,11 +20,5 @@ describe('avatar state machine', () => {
     expect(nextAvatarState('answering', 'done')).toBe('idle');
     expect(nextAvatarState('thinking', 'error')).toBe('error');
     expect(nextAvatarState('error', 'reset')).toBe('idle');
-  });
-
-  it('has a label for every state', () => {
-    for (const state of ['idle', 'thinking', 'answering', 'error'] as const) {
-      expect(avatarLabel(state).length).toBeGreaterThan(0);
-    }
   });
 });

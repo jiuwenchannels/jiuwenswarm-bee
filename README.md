@@ -1,6 +1,6 @@
 # jiuwenswarm-bee
 
-**BeeChat** — the simplest JiuwenSwarm channel: a bee-avatar chatbot that only does questions and answers.
+**BeeChat** — your bee in the JiuwenSwarm: the simplest channel, a bee-avatar chatbot that only does questions and answers.
 
 A single screen, a streaming reply, and **Buzz**, the JiuwenSwarm bee mascot, who reacts as you talk. No panels, no tool-call viewer, no settings sprawl.
 
@@ -57,6 +57,7 @@ npm run dev                  # → http://localhost:5175
 | `VITE_GATEWAY_TOKEN` | *(empty)* | optional token for the `connect` frame |
 | `VITE_AGENT_ID` | `researcher` | agent used by `create_session` |
 | `VITE_APP_TITLE` | `BeeChat` | brand title |
+| `VITE_LOCALE` | *auto* (`en`/`zh` from the browser) | UI language and mascot name; can also be switched in the GUI |
 
 ## Gateway protocol
 

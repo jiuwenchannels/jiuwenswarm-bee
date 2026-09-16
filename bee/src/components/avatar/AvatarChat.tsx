@@ -2,21 +2,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ChatInput } from '../chat/ChatInput';
 import { MessageList } from '../chat/MessageList';
+import { LanguageToggle } from '../common/LanguageToggle';
 import { AvatarCharacter } from './AvatarCharacter';
-import { AVATAR_STYLE_LABEL, loadAvatarStyle, saveAvatarStyle, type AvatarStyle } from '../../avatar/avatarStyle';
+import { CompanionBees } from './CompanionBees';
+import { loadAvatarStyle, saveAvatarStyle, type AvatarStyle } from '../../avatar/avatarStyle';
+import { useStrings } from '../../i18n/LocaleContext';
 import { desktop } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
 import { useChat } from '../../chat/useChat';
 import './AvatarChat.css';
 
-const STATUS_LABEL = {
-  disconnected: 'Offline',
-  connecting: 'Connecting…',
-  connected: 'Online',
-  reconnecting: 'Reconnecting…',
-} as const;
-
 export function AvatarChat() {
+  const t = useStrings();
   const { messages, avatar, status, busy, send, retry } = useChat();
   const [expanded, setExpanded] = useState(false);
   const [muted, setMuted] = useState(!isSpeechSupported());
@@ -105,7 +102,7 @@ export function AvatarChat() {
       {expanded ? (
         <div className="avatar-chat__bubbles" aria-live="polite">
           {messages.length === 0 ? (
-            <p className="avatar-chat__hello">Hi, I'm Buzz 🐝 — ask me anything.</p>
+            <p className="avatar-chat__hello">{t.hello}</p>
           ) : (
             <MessageList messages={messages} />
           )}
@@ -113,6 +110,7 @@ export function AvatarChat() {
       ) : null}
 
       <div className="avatar-chat__stage">
+        <CompanionBees />
         <button
           className="avatar-chat__char"
           type="button"
@@ -129,8 +127,9 @@ export function AvatarChat() {
           <div className="avatar-chat__meta">
             <span className="avatar-chat__status" data-variant={status}>
               <span className="avatar-chat__dot" aria-hidden="true" />
-              {STATUS_LABEL[status]}
+              {t.status[status]}
             </span>
+            <LanguageToggle />
             {isSpeechSupported() ? (
               <button
                 className="avatar-chat__mute"
@@ -144,7 +143,7 @@ export function AvatarChat() {
                   });
                 }}
               >
-                {muted ? '🔇 Voice off' : '🔊 Voice on'}
+                {muted ? t.voice.off : t.voice.on}
               </button>
             ) : null}
             <button
@@ -159,11 +158,11 @@ export function AvatarChat() {
                 });
               }}
             >
-              🐝 {AVATAR_STYLE_LABEL[style]}
+              🐝 {t.style[style]}
             </button>
             {messages.some((message) => message.error) ? (
               <button className="avatar-chat__retry" type="button" onClick={retry}>
-                Try again
+                {t.actions.tryAgain}
               </button>
             ) : null}
           </div>

@@ -1,8 +1,8 @@
 # BeeChat documentation
 
-**BeeChat** is the simplest JiuwenSwarm channel: a one-screen bee-avatar chatbot that
-only does questions and answers. A running JiuwenSwarm gateway does the thinking;
-BeeChat is the friendly face in front of it.
+**BeeChat** is your bee in the JiuwenSwarm — the simplest channel: a one-screen
+bee-avatar chatbot that only does questions and answers. A running JiuwenSwarm gateway
+does the thinking; BeeChat is the friendly face in front of it.
 
 ## User
 

@@ -80,6 +80,9 @@ Packaging installers: [`docs/en/development/packaging.md`](docs/en/development/p
 - Keep all gateway framing inside `bee/src/gateway/`; the rest of the app talks to
   the `ChatGateway` interface only.
 - Desktop-shell commands are camelCase IPC names prefixed with `bee:`.
+- Names and user-facing copy follow [`internal/naming.md`](internal/naming.md):
+  character **Buzz**, product **BeeChat**, and the hive vocabulary
+  (`pollen` / `waggle` / `honey`) used only where it stays clear.
 
 ## Commit and pull request guidelines
 

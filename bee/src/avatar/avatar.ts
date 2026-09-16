@@ -1,4 +1,8 @@
-/** Avatar state machine for the bee. */
+/**
+ * Avatar state machine for the bee. In the hive vocabulary (internal/naming.md),
+ * `thinking` is the bee's "waggle": dancing while it works. Labels live in
+ * `src/i18n` so the character name can localize.
+ */
 export type AvatarState = 'idle' | 'thinking' | 'answering' | 'error';
 
 export type AvatarEvent = 'send' | 'first-token' | 'done' | 'error' | 'reset';
@@ -18,15 +22,4 @@ export function nextAvatarState(state: AvatarState, event: AvatarEvent): AvatarS
     default:
       return state;
   }
-}
-
-const LABELS: Record<AvatarState, string> = {
-  idle: 'Buzz is ready',
-  thinking: 'Buzz is thinking…',
-  answering: 'Buzz is answering…',
-  error: 'Buzz hit a problem',
-};
-
-export function avatarLabel(state: AvatarState): string {
-  return LABELS[state];
 }

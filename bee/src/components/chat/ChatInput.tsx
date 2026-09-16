@@ -1,4 +1,5 @@
 import { type KeyboardEvent, useState } from 'react';
+import { useStrings } from '../../i18n/LocaleContext';
 import './Chat.css';
 
 export function ChatInput({
@@ -8,6 +9,7 @@ export function ChatInput({
   disabled: boolean;
   onSend: (text: string) => void;
 }) {
+  const t = useStrings();
   const [value, setValue] = useState('');
 
   function submit() {
@@ -37,14 +39,14 @@ export function ChatInput({
         className="composer__input"
         data-testid="bee-input"
         rows={1}
-        placeholder="Ask Buzz anything…"
+        placeholder={t.composer.placeholder}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={onKeyDown}
-        aria-label="Message"
+        aria-label={t.composer.ariaLabel}
       />
       <button className="composer__send" data-testid="bee-send" type="submit" disabled={disabled || !value.trim()}>
-        Send
+        {t.composer.send}
       </button>
     </form>
   );

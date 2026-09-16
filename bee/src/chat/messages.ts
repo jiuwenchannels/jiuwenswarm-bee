@@ -1,4 +1,7 @@
-/** Conversation model + pure reducers (unit-tested). */
+/**
+ * Conversation model + pure reducers (unit-tested). A finished assistant message
+ * is the "honey" in the hive vocabulary (internal/naming.md).
+ */
 export type Role = 'user' | 'assistant';
 
 export interface ChatMessage {

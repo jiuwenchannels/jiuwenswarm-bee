@@ -1,0 +1,80 @@
+/*
+ * Companion bees: the "in a swarm" motif. They sit behind the main avatar and
+ * drift gently. Decorative only — never interactive, never announced.
+ */
+
+.companion-bees {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.companion-bee {
+  position: absolute;
+  opacity: 0.5;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 12%));
+  animation: companion-drift 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+.companion-bee__body,
+.companion-bee__head {
+  fill: var(--bee-accent);
+}
+
+.companion-bee__stripe,
+.companion-bee__pupil {
+  fill: var(--avatar-pupil);
+}
+
+.companion-bee__wing {
+  fill: var(--bee-accent);
+  opacity: 0.4;
+}
+
+/* Depth: farther bees are smaller, fainter, and slower. */
+.companion-bee--far {
+  width: 14px;
+  height: 14px;
+  top: 6%;
+  left: 4%;
+  opacity: 0.28;
+  animation-duration: 9s;
+}
+
+.companion-bee--mid {
+  width: 18px;
+  height: 18px;
+  top: 2%;
+  right: 6%;
+  opacity: 0.42;
+  animation-duration: 7.5s;
+  animation-delay: -1.5s;
+}
+
+.companion-bee--near {
+  width: 22px;
+  height: 22px;
+  right: 0;
+  bottom: 10%;
+  opacity: 0.55;
+  animation-duration: 6.5s;
+  animation-delay: -3s;
+}
+
+@keyframes companion-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-4deg);
+  }
+  50% {
+    transform: translate(3px, -6px) rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .companion-bee {
+    animation: none;
+  }
+}

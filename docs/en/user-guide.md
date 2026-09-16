@@ -1,6 +1,6 @@
 # BeeChat — user guide
 
-BeeChat is a one-screen chatbot with a bee avatar. Type a question, press **Enter**, and watch the answer stream in while Buzz reacts.
+BeeChat is your bee in the JiuwenSwarm — a one-screen chatbot with a bee avatar. Type a question, press **Enter**, and watch the answer stream in while Buzz reacts.
 
 ## 1. Requirements
 
@@ -60,6 +60,7 @@ Set these in `bee/.env`:
 | `VITE_GATEWAY_TOKEN` | *(empty)* |
 | `VITE_AGENT_ID` | `researcher` |
 | `VITE_APP_TITLE` | `BeeChat` |
+| `VITE_LOCALE` | *auto* (`en`/`zh` from the browser) |
 
 ## 7. Troubleshooting
 

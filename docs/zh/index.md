@@ -1,6 +1,6 @@
 # BeeChat 文档
 
-**BeeChat** 是 JiuwenSwarm 最简单的通道：一个单屏、带蜜蜂头像的问答机器人。
+**BeeChat** 是你在 JiuwenSwarm 蜂群中的那只蜜蜂 —— 最简单的通道：一个单屏、带蜜蜂头像的问答机器人。
 真正的思考由运行中的 JiuwenSwarm 网关完成，BeeChat 只是它友好的门面。
 
 ## 用户文档

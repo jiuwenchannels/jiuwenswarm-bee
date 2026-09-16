@@ -4,22 +4,17 @@ import { AvatarChat } from '../components/avatar/AvatarChat';
 import { BeeAvatar } from '../components/avatar/BeeAvatar';
 import { ChatInput } from '../components/chat/ChatInput';
 import { MessageList } from '../components/chat/MessageList';
+import { LanguageToggle } from '../components/common/LanguageToggle';
 import { config } from '../gateway/config';
-import type { GatewayStatus } from '../gateway/protocol';
+import { useStrings } from '../i18n/LocaleContext';
 import { useChat } from '../chat/useChat';
 import '../styles.css';
-
-const STATUS_LABEL: Record<GatewayStatus, string> = {
-  disconnected: 'Offline',
-  connecting: 'Connecting…',
-  connected: 'Connected',
-  reconnecting: 'Reconnecting…',
-};
 
 const NEAR_BOTTOM_PX = 80;
 
 /** The default chat app. */
 function ChatApp() {
+  const t = useStrings();
   const { messages, avatar, status, busy, send, retry, reset, reconnect, url } = useChat();
   const mainRef = useRef<HTMLElement | null>(null);
   const atBottomRef = useRef(true);
@@ -50,38 +45,50 @@ function ChatApp() {
   return (
     <div className="app" data-testid="bee-app">
       <header className="app__header">
-        <h1 className="app__title" data-testid="bee-title">
-          {config.appTitle}
-        </h1>
+        <div className="app__brand">
+          <h1 className="app__title" data-testid="bee-title">
+            {config.appTitle}
+          </h1>
+          <p className="app__powered" data-testid="bee-powered">
+            {t.poweredBy} ·{' '}
+            <a
+              className="app__credit"
+              data-testid="bee-openjiuwen"
+              href="https://github.com/openjiuwen"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {t.attribution}
+            </a>
+          </p>
+        </div>
         <div className="app__status" data-testid="bee-status" data-variant={status}>
           <span className="app__status-dot" aria-hidden="true" />
-          {STATUS_LABEL[status]}
+          {t.status[status]}
         </div>
       </header>
 
       <main className="app__main" ref={mainRef} onScroll={onScroll}>
-        <BeeAvatar state={avatar} />
+        <BeeAvatar state={avatar} showLabel={messages.length > 0} />
 
         {messages.length === 0 ? (
           <p className="app__empty" data-testid="bee-empty">
-            Hi, I'm Buzz 🐝 — ask me anything.
+            {t.hello}
           </p>
         ) : (
           <MessageList messages={messages} />
         )}
         {status === 'disconnected' ? (
           <div className="app__offline" data-testid="bee-connection-hint">
-            <p className="app__offline-text">
-              Can't reach JiuwenSwarm at <code>{url}</code>.
-            </p>
+            <p className="app__offline-text">{t.offline(url)}</p>
             <button className="app__retry" data-testid="bee-reconnect" type="button" onClick={reconnect}>
-              Reconnect
+              {t.actions.reconnect}
             </button>
           </div>
         ) : null}
         {hasError ? (
           <button className="app__retry" data-testid="bee-retry" type="button" onClick={retry}>
-            Try again
+            {t.actions.tryAgain}
           </button>
         ) : null}
       </main>
@@ -93,15 +100,18 @@ function ChatApp() {
           type="button"
           onClick={() => scrollToBottom('smooth')}
         >
-          ↓ Latest
+          {t.actions.latest}
         </button>
       ) : null}
 
       <footer className="app__footer">
         <ChatInput disabled={busy} onSend={send} />
-        <button className="app__reset" data-testid="bee-reset" type="button" onClick={reset}>
-          New chat
-        </button>
+        <div className="app__footer-row">
+          <LanguageToggle />
+          <button className="app__reset" data-testid="bee-reset" type="button" onClick={reset}>
+            {t.actions.newChat}
+          </button>
+        </div>
       </footer>
     </div>
   );
@@ -115,6 +125,10 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.mode = avatarMode ? 'avatar' : 'app';
   }, [avatarMode]);
+
+  useEffect(() => {
+    document.title = config.appTitle;
+  }, []);
 
   return avatarMode ? <AvatarChat /> : <ChatApp />;
 }
