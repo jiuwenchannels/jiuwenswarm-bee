@@ -7,10 +7,18 @@ surfaces: the **website** (a full chat — streaming Markdown, searchable histor
 find-in-conversation, a command palette, and settings) and the **floating avatar**
 (a voice-only companion: hold to talk, and the bee speaks back).
 
+## Screenshots
+
+| Avatar | Website |
+|---|---|
+| <img src="docs/screenshots/avatar.jpg" alt="BeeChat avatar" width="300"> | <img src="docs/screenshots/website.jpg" alt="BeeChat website" width="300"> |
+
 > **Requires a running JiuwenSwarm gateway.** BeeChat auto-tries, in order (using `127.0.0.1`, since the gateway binds IPv4 and browsers may prefer `::1` for `localhost`):
 > 1. `ws://127.0.0.1:19000/ws` — the **product** gateway (`jiuwenswarm-start`), web/E2A protocol
 > 2. `ws://127.0.0.1:19001/v1/ws` — the **SDK** gateway (`python -m openjiuwen.gateway`), envelope protocol
 > 3. `ws://127.0.0.1:19000/v1/ws` — the SDK gateway on the documented port
+>
+> These defaults look for a gateway on this machine. If yours runs on the LAN or in the cloud, open **Settings → Gateway URL** (or set `VITE_JIUWENSWARM_URL`) and point it at `ws://<host>:19000/ws`.
 
 ## Gateways
 
