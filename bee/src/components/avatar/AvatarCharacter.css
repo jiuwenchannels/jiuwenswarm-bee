@@ -16,19 +16,37 @@
   animation-duration: 1.7s;
 }
 
+/* Life for the flat classic art: a blink squash, a thinking rock, an error shake. */
+.bee-char__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: 50% 52%;
+}
+
+.bee-char--thinking .bee-char__inner,
+.bee-char--answering .bee-char__inner {
+  animation: bee-char-rock 1.9s ease-in-out infinite;
+}
+
+.bee-char__inner[data-blink='true'] .bee-char__img {
+  animation: bee-char-blink 190ms ease-in-out;
+}
+
+.bee-char--error {
+  animation: bee-char-shake 0.45s ease-in-out infinite;
+}
+
 .bee-char__img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   user-select: none;
-  /* The mascot art is designed on a light background. */
-  mix-blend-mode: multiply;
   transition: transform 0.08s linear;
   will-change: transform;
-}
-
-[data-theme='dark'] .bee-char__img {
-  mix-blend-mode: normal;
 }
 
 .bee-char--error .bee-char__img {
@@ -42,6 +60,39 @@
   }
   50% {
     transform: translateY(-7px);
+  }
+}
+
+@keyframes bee-char-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.84);
+  }
+}
+
+@keyframes bee-char-rock {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes bee-char-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
   }
 }
 
@@ -166,6 +217,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .bee-char,
+  .bee-char__inner,
   .bee-char__img,
   .bee,
   .bee__wing,

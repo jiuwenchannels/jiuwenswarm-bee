@@ -28,7 +28,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Rich **Markdown + GFM** replies (tables, lists, links) with **syntax-highlighted** code blocks and a copy button, sanitized by `rehype-sanitize`
 - Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
-- **Character style is a setting**: **Classic** (the shipped raster mascot, default) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
+- **Character style is a setting**: **Classic** (the shipped mascot — now a transparent cut-out that bobs, blinks, pulses while speaking, and reacts) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
 - **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), plus onboarding, a live activity line, and drop-a-text-file-to-compose
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
@@ -161,7 +161,7 @@ jiuwenswarm-bee/
       platform/         Desktop-shell bridge and Web Speech TTS
       lib/              Clipboard, Markdown stripping, code highlighting
       theme/            Theme resolution + design tokens (light/dark)
-      assets/           classic bee art (bee-static.png / bee-flying.webp, lazily loaded)
+      assets/           classic bee art (transparent `*-cutout.png` used; originals kept)
   public/               PWA manifest, icon, offline service worker
   desktop/
     electron/           Electron shell: always-on-top bee avatar + chat window

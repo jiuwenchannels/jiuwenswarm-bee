@@ -54,6 +54,11 @@ A client-only polish pass on the web app (no gateway/backend changes).
   **Classic by default**, applied to both the website and the avatar view. The
   old standalone `beechat.avatarStyle` localStorage key is replaced by the
   persisted settings.
+- **Classic bee: transparent + alive.** Generated transparent cut-outs of the
+  shipped art (`bee-static-cutout.png` / `bee-flying-cutout.png`, edge flood-fill
+  + feather, common crop so the two poses stay aligned), dropping the
+  `mix-blend-mode` hack and fixing dark mode. The flat art now moves: bob, a
+  periodic blink squash, a talk pulse, a thinking rock, and an error shake.
 
 ## 0.1.0
 
