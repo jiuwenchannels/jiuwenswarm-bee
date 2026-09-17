@@ -15,7 +15,7 @@ import { withVoiceInstruction } from '../../chat/voicePrompt';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import { stripMarkdown } from '../../lib/markdown';
 import { desktop, isAndroidOverlay } from '../../platform/desktop';
-import { Speaker, isSpeechSupported } from '../../platform/speech';
+import { Speaker, isSpeechSupported, firstSentences } from '../../platform/speech';
 import { useVoiceInput } from '../../platform/useVoiceInput';
 import { useAppConfig, useSettings } from '../../settings/SettingsContext';
 import { useChat } from '../../chat/useChat';
@@ -39,6 +39,7 @@ export function AvatarChat() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const overlay = isAndroidOverlay();
   const muted = !isSpeechSupported() || !settings.voiceEnabled;
+  const concise = settings.conciseReplies;
 
   // Voice mode prepends a hidden "answer briefly" instruction; the conversation
   // still shows (and stores) only the user's own words.
@@ -139,14 +140,15 @@ export function AvatarChat() {
     };
   }, [ensureTalking]);
 
-  // Speak each finished assistant reply once (voice on/off is a Setting).
+  // Speak each finished assistant reply once (voice on/off is a Setting). In
+  // concise mode, only the first sentences are spoken so listening stays short.
   useEffect(() => {
     const last = messages[messages.length - 1];
     if (!last || last.role !== 'assistant' || last.streaming || last.error) return;
     if (spokenRef.current.has(last.id)) return;
     spokenRef.current.add(last.id);
-    if (!muted) speakerRef.current?.speak(last.text);
-  }, [messages, muted]);
+    if (!muted) speakerRef.current?.speak(concise ? firstSentences(last.text, 2) : last.text);
+  }, [messages, muted, concise]);
 
   useEffect(() => {
     answeringRef.current = avatar === 'answering';
@@ -175,7 +177,14 @@ export function AvatarChat() {
       ? t.voice.transcribing
       : busy
         ? justSent ?? ''
-        : notice ?? (!activated ? t.hello : lastReply ? stripMarkdown(lastReply) : '');
+        : notice ??
+          (!activated
+            ? t.hello
+            : lastReply
+              ? concise
+                ? firstSentences(lastReply, 2)
+                : stripMarkdown(lastReply)
+              : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
   const working = busy && !voice.listening && !voice.processing;

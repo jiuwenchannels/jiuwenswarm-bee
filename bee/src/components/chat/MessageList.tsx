@@ -10,7 +10,6 @@ export interface MessageListProps {
   busy: boolean;
   findQuery?: string;
   onRetry: (id: string) => void;
-  onEdit: (id: string, text: string) => void;
 }
 
 function sameDay(a: number, b: number): boolean {
@@ -38,7 +37,6 @@ export function MessageList({
   busy,
   findQuery,
   onRetry,
-  onEdit,
 }: MessageListProps) {
   const { locale } = useLocaleContext();
   const needle = findQuery?.trim().toLowerCase() ?? '';
@@ -65,7 +63,6 @@ export function MessageList({
               message={message}
               dimmed={Boolean(needle) && !message.text.toLowerCase().includes(needle)}
               onRetry={onRetry}
-              onEdit={onEdit}
             />
           </Fragment>
         );

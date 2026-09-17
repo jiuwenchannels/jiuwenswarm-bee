@@ -85,7 +85,6 @@ function sanitizeMessage(raw: unknown): ChatMessage | null {
     streaming: false,
     error: raw.error === true,
     stopped: raw.stopped === true,
-    edited: raw.edited === true,
   };
 }
 

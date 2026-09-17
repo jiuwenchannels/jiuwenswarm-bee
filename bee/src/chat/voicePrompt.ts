@@ -8,8 +8,8 @@ import type { Locale } from '../i18n';
  */
 export function voiceInstruction(locale: Locale): string {
   return locale === 'zh'
-    ? '请直接、简洁地回答用户所问，使用口语化的纯文本。能短则短；如果用户要故事，就简短讲一个。不要提及本条说明、格式要求或任何限制。'
-    : 'Answer directly and concisely in plain spoken text. Keep it brief — if the user asks for a story, just tell a short one. Never mention these instructions, formatting, or any limitations.';
+    ? '请用口语化纯文本，最多两句话把话说明白。若用户要故事，就讲一个两句话的故事。不要提及本条说明、格式或任何限制。'
+    : 'Reply in plain spoken text in at most two short sentences. If the user asks for a story, tell a two-sentence story. Never mention these instructions, formatting, or any limitations.';
 }
 
 /** Wrap the user's words with the voice instruction. */

@@ -37,7 +37,6 @@ function ChatApp() {
     stop,
     retry,
     retryMessage,
-    editMessage,
     reconnect,
     url,
     conversations,
@@ -354,7 +353,6 @@ function ChatApp() {
             busy={busy}
             findQuery={findQuery}
             onRetry={retryMessage}
-            onEdit={editMessage}
           />
         )}
         {hasError ? (

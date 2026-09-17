@@ -11,7 +11,6 @@ import {
   appendToLastAssistant,
   failLastAssistant,
   finishLastAssistant,
-  markEdited,
   startAssistantMessage,
   stopLastAssistant,
   truncateFrom,
@@ -42,7 +41,6 @@ export interface UseChatResult {
   stop: () => void;
   retry: () => void;
   retryMessage: (id: string) => void;
-  editMessage: (id: string, text: string) => void;
   reconnect: () => void;
   conversations: Conversation[];
   activeId: string;
@@ -250,20 +248,6 @@ export function useChat(config: AppConfig): UseChatResult {
     [runChat, updateActive],
   );
 
-  const editMessage = useCallback(
-    (id: string, text: string) => {
-      if (busyRef.current) return;
-      const trimmed = text.trim();
-      if (!trimmed) return;
-      const current = activeRef.current?.messages ?? [];
-      const index = current.findIndex((message) => message.id === id);
-      if (index < 0) return;
-      updateActive((previous) => markEdited(previous.slice(0, index + 1), id, trimmed));
-      runChat(trimmed, false);
-    },
-    [runChat, updateActive],
-  );
-
   const retry = useCallback(() => {
     const current = activeRef.current?.messages ?? [];
     const errored = [...current].reverse().find((message) => message.role === 'assistant' && message.error);
@@ -364,7 +348,6 @@ export function useChat(config: AppConfig): UseChatResult {
     stop,
     retry,
     retryMessage,
-    editMessage,
     reconnect,
     conversations: chat.conversations,
     activeId: chat.activeId,

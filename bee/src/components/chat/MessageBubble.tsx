@@ -4,7 +4,6 @@ import {
   ChevronUp,
   Copy,
   FileText,
-  Pencil,
   RotateCcw,
   Volume2,
   VolumeX,
@@ -28,22 +27,14 @@ export interface MessageBubbleProps {
   message: ChatMessage;
   dimmed?: boolean;
   onRetry: (id: string) => void;
-  onEdit: (id: string, text: string) => void;
 }
 
-export function MessageBubble({
-  message,
-  dimmed = false,
-  onRetry,
-  onEdit,
-}: MessageBubbleProps) {
+export function MessageBubble({ message, dimmed = false, onRetry }: MessageBubbleProps) {
   const t = useStrings();
   const { locale } = useLocaleContext();
   const { notify } = useToast();
   const speaking = useSpeaking();
   const [copied, setCopied] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(message.text);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -76,18 +67,6 @@ export function MessageBubble({
     }
   }
 
-  function startEdit() {
-    setDraft(message.text);
-    setEditing(true);
-  }
-
-  function saveEdit() {
-    const text = draft.trim();
-    if (!text) return;
-    setEditing(false);
-    onEdit(message.id, text);
-  }
-
   return (
     <li
       className={className}
@@ -97,41 +76,20 @@ export function MessageBubble({
       data-error={message.error ? 'true' : undefined}
       data-stopped={message.stopped ? 'true' : undefined}
     >
-      {editing ? (
-        <div className="bubble__edit">
-          <textarea
-            className="bubble__edit-input"
-            value={draft}
-            rows={Math.min(8, draft.split('\n').length)}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Escape') setEditing(false);
-              if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) saveEdit();
-            }}
-            autoFocus
-            aria-label={t.actions.edit}
-          />
-          <div className="bubble__edit-actions">
-            <button type="button" className="bubble__btn" onClick={saveEdit}>
-              {t.actions.save}
-            </button>
-            <button type="button" className="bubble__btn" onClick={() => setEditing(false)}>
-              {t.actions.cancel}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className={['bubble__content', collapsed ? 'bubble__content--clamped' : ''].filter(Boolean).join(' ')}>
-          {isUser || message.streaming ? (
-            <span className="bubble__text">{message.text}</span>
-          ) : (
-            <Suspense fallback={<span className="bubble__text">{message.text}</span>}>
-              <Markdown>{message.text}</Markdown>
-            </Suspense>
-          )}
-          {message.streaming ? <span className="bubble__caret" aria-hidden="true" /> : null}
-        </div>
-      )}
+      <div
+        className={['bubble__content', collapsed ? 'bubble__content--clamped' : '']
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {isUser || message.streaming ? (
+          <span className="bubble__text">{message.text}</span>
+        ) : (
+          <Suspense fallback={<span className="bubble__text">{message.text}</span>}>
+            <Markdown>{message.text}</Markdown>
+          </Suspense>
+        )}
+        {message.streaming ? <span className="bubble__caret" aria-hidden="true" /> : null}
+      </div>
 
       {canCollapse ? (
         <button
@@ -156,44 +114,38 @@ export function MessageBubble({
         </button>
       ) : null}
 
-      <div className="bubble__meta">
-        {message.stopped ? <span className="bubble__tag">{t.actions.stopped}</span> : null}
-        {message.edited ? <span className="bubble__tag">{t.actions.edited}</span> : null}
-        {!message.streaming ? <time className="bubble__time">{time}</time> : null}
-      </div>
-
-      {!editing && !message.streaming ? (
-        <div className="bubble__actions" data-testid="bee-message-actions">
-          <button className="bubble__btn" type="button" onClick={() => copy(message.text)} title={t.actions.copy}>
-            {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-          </button>
-          {isUser ? (
-            <button className="bubble__btn" type="button" onClick={startEdit} title={t.actions.edit}>
-              <Pencil size={14} aria-hidden="true" />
+      {!message.streaming ? (
+        <div className="bubble__foot" data-testid="bee-message-actions">
+          {message.stopped ? <span className="bubble__tag">{t.actions.stopped}</span> : null}
+          <time className="bubble__time">{time}</time>
+          <div className="bubble__actions">
+            <button className="bubble__btn" type="button" onClick={() => copy(message.text)} title={t.actions.copy}>
+              {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
             </button>
-          ) : (
-            <>
-              <button
-                className="bubble__btn"
-                type="button"
-                onClick={() => copy(stripMarkdown(message.text))}
-                title={t.actions.copyText}
-              >
-                <FileText size={14} aria-hidden="true" />
-              </button>
-              {isSpeechSupported() ? (
+            {isUser ? null : (
+              <>
                 <button
                   className="bubble__btn"
                   type="button"
-                  data-active={speaking ? 'true' : undefined}
-                  onClick={() => (speaking ? stopSpeaking() : speakText(message.text))}
-                  title={speaking ? t.actions.stopSpeaking : t.actions.speak}
+                  onClick={() => copy(stripMarkdown(message.text))}
+                  title={t.actions.copyText}
                 >
-                  {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
+                  <FileText size={14} aria-hidden="true" />
                 </button>
-              ) : null}
-            </>
-          )}
+                {isSpeechSupported() ? (
+                  <button
+                    className="bubble__btn"
+                    type="button"
+                    data-active={speaking ? 'true' : undefined}
+                    onClick={() => (speaking ? stopSpeaking() : speakText(message.text))}
+                    title={speaking ? t.actions.stopSpeaking : t.actions.speak}
+                  >
+                    {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
+                  </button>
+                ) : null}
+              </>
+            )}
+          </div>
         </div>
       ) : null}
     </li>

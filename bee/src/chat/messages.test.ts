@@ -6,7 +6,6 @@ import {
   failLastAssistant,
   finishLastAssistant,
   lastUserText,
-  markEdited,
   startAssistantMessage,
   stopLastAssistant,
   truncateFrom,
@@ -71,14 +70,6 @@ describe('message reducers', () => {
     messages = addUserMessage(messages, 'second');
     expect(truncateFrom(messages, firstId)).toHaveLength(0);
     expect(truncateFrom(messages, 'missing')).toHaveLength(3);
-  });
-
-  it('marks a message as edited and updates its text', () => {
-    const messages = addUserMessage([], 'first');
-    const id = messages[0].id;
-    const edited = markEdited(messages, id, 'second');
-    expect(edited[0]).toMatchObject({ text: 'second', edited: true });
-    expect(markEdited(messages, 'missing', 'x')).toEqual(messages);
   });
 
   it('finds the last user text', () => {

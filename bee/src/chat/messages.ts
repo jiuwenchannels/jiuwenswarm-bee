@@ -13,8 +13,6 @@ export interface ChatMessage {
   error?: boolean;
   /** Set when the user stopped generation before the reply finished. */
   stopped?: boolean;
-  /** Set when the user edited and resent this message. */
-  edited?: boolean;
 }
 
 function makeId(prefix: string): string {
@@ -70,12 +68,6 @@ export function failLastAssistant(messages: ChatMessage[], text: string): ChatMe
 export function truncateFrom(messages: ChatMessage[], id: string): ChatMessage[] {
   const index = messages.findIndex((message) => message.id === id);
   return index < 0 ? messages : messages.slice(0, index);
-}
-
-export function markEdited(messages: ChatMessage[], id: string, text: string): ChatMessage[] {
-  return messages.map((message) =>
-    message.id === id ? { ...message, text, edited: true } : message,
-  );
 }
 
 /** The text of the most recent user message, for retry/regenerate. */

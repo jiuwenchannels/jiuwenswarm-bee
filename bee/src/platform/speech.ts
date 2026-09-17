@@ -51,9 +51,22 @@ export function splitSentences(text: string): string[] {
   const clean = stripForSpeech(text);
   if (!clean) return [];
   return clean
-    .split(/(?<=[.!?])\s+/)
+    .split(/(?<=[.!?。！？…])\s*/)
     .map((part) => part.trim())
     .filter((part) => part.length > 0);
+}
+
+/** Keep only the first `max` sentences (plain text), bounded by `maxChars`. */
+export function firstSentences(text: string, max: number, maxChars = 320): string {
+  const parts = splitSentences(text);
+  if (parts.length === 0) return '';
+  const truncated = parts.length > max;
+  let out = parts.slice(0, max).join(' ');
+  if (out.length > maxChars) {
+    out = out.slice(0, maxChars).replace(/\s+\S*$/, '');
+    return `${out} …`;
+  }
+  return truncated ? `${out} …` : out;
 }
 
 export class Speaker {

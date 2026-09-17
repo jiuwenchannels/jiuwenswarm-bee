@@ -45,12 +45,9 @@ export interface Strings {
     copied: string;
     copyText: string;
     copyCode: string;
-    edit: string;
     stop: string;
     stopped: string;
-    edited: string;
     save: string;
-    cancel: string;
     delete: string;
     rename: string;
     search: string;
