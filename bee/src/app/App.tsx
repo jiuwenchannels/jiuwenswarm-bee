@@ -11,7 +11,7 @@ import { CommandPalette } from '../components/common/CommandPalette';
 import { useToast } from '../components/common/ToastContext';
 import { HistorySidebar } from '../components/history/HistorySidebar';
 import { SettingsPanel } from '../components/settings/SettingsPanel';
-import { useLocaleContext, useStrings } from '../i18n/LocaleContext';
+import { useStrings } from '../i18n/LocaleContext';
 import { conversationToMarkdown, downloadMarkdown } from '../lib/export';
 import { isNativeApp } from '../platform/desktop';
 import { useAppConfig, useSettings } from '../settings/SettingsContext';
@@ -27,7 +27,6 @@ function ChatApp() {
   const t = useStrings();
   const config = useAppConfig();
   const { settings, update } = useSettings();
-  const { locale, setLocale } = useLocaleContext();
   const { notify } = useToast();
   const {
     messages,
@@ -421,7 +420,6 @@ function ChatApp() {
         onClose={() => setPaletteOpen(false)}
         onNewChat={startNewChat}
         onToggleTheme={cycleTheme}
-        onSwitchLanguage={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
         onOpenSettings={() => setSettingsOpen(true)}
         onFocusComposer={() => composerRef.current?.focus()}
         onExport={handleExport}

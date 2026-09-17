@@ -1,4 +1,4 @@
-import { Download, Languages, MessageSquare, Plus, Search, Settings, SunMoon } from 'lucide-react';
+import { Download, MessageSquare, Plus, Search, Settings, SunMoon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useStrings } from '../../i18n/LocaleContext';
@@ -17,7 +17,6 @@ export function CommandPalette({
   onClose,
   onNewChat,
   onToggleTheme,
-  onSwitchLanguage,
   onOpenSettings,
   onFocusComposer,
   onExport,
@@ -27,7 +26,6 @@ export function CommandPalette({
   onClose: () => void;
   onNewChat: () => void;
   onToggleTheme: () => void;
-  onSwitchLanguage: () => void;
   onOpenSettings: () => void;
   onFocusComposer: () => void;
   onExport: () => void;
@@ -40,31 +38,16 @@ export function CommandPalette({
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, open);
 
-  // A stable, language-neutral label (the word "language" in both scripts), so
-  // the entry stays recognizable whichever UI language is active.
-  const languageLabel = 'Language · 语言';
-
   const commands = useMemo<Command[]>(
     () => [
       { id: 'new', label: t.command.newChat, icon: Plus, run: onNewChat },
       { id: 'find', label: t.command.find, icon: Search, run: onFind },
       { id: 'export', label: t.command.export, icon: Download, run: onExport },
       { id: 'theme', label: t.command.toggleTheme, icon: SunMoon, run: onToggleTheme },
-      { id: 'language', label: languageLabel, icon: Languages, run: onSwitchLanguage },
       { id: 'settings', label: t.command.openSettings, icon: Settings, run: onOpenSettings },
       { id: 'focus', label: t.command.focusComposer, icon: MessageSquare, run: onFocusComposer },
     ],
-    [
-      t,
-      languageLabel,
-      onNewChat,
-      onFind,
-      onExport,
-      onToggleTheme,
-      onSwitchLanguage,
-      onOpenSettings,
-      onFocusComposer,
-    ],
+    [t, onNewChat, onFind, onExport, onToggleTheme, onOpenSettings, onFocusComposer],
   );
 
   const filtered = useMemo(() => {
