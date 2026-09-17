@@ -387,9 +387,6 @@ function ChatApp() {
           onStop={stop}
           draftKey={activeId}
         />
-        <p className="app__hint" aria-hidden="true">
-          {t.composer.hint}
-        </p>
       </footer>
 
       {historyOpen ? (

@@ -97,17 +97,22 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
         submit();
       }}
     >
-      <textarea
-        ref={inputRef}
-        className="composer__input"
-        data-testid="bee-input"
-        rows={1}
-        placeholder={t.composer.placeholder}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        onKeyDown={onKeyDown}
-        aria-label={t.composer.ariaLabel}
-      />
+      <div className="composer__field">
+        <textarea
+          ref={inputRef}
+          className="composer__input"
+          data-testid="bee-input"
+          rows={1}
+          placeholder={t.composer.placeholder}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onKeyDown={onKeyDown}
+          aria-label={t.composer.ariaLabel}
+        />
+        <p className="composer__hint" aria-hidden="true">
+          {t.composer.hint}
+        </p>
+      </div>
       {voice.available ? (
         <button
           className="composer__icon"

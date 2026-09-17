@@ -151,7 +151,7 @@ html[data-mode='avatar'] body {
   }
 
   .app__cmd,
-  .app__hint {
+  .composer__hint {
     display: none;
   }
 
@@ -724,13 +724,6 @@ html[data-mode='avatar'] body {
 .app__cmd:hover kbd {
   color: var(--bee-text);
   border-color: color-mix(in srgb, var(--bee-accent) 45%, var(--bee-border));
-}
-
-.app__hint {
-  margin: 0;
-  font-size: 11px;
-  color: var(--bee-text-muted);
-  text-align: center;
 }
 
 .app__scrim {

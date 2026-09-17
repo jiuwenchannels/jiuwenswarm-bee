@@ -118,6 +118,7 @@
 
 /* One control: hold to talk. */
 .avatar-chat__talk {
+  position: relative;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -160,6 +161,25 @@
   background: var(--bee-accent);
   border-color: var(--bee-accent);
   color: var(--bee-accent-text);
+}
+
+/* Keep the icon at a fixed left slot so the label stays centered, and make the
+   level meter visible against the accent fill while listening. */
+.avatar-chat__talk > svg,
+.avatar-chat__talk > .waveform {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.avatar-chat__talk[data-listening='true'] .waveform__bar {
+  background: var(--bee-accent-text);
+}
+
+.avatar-chat__talk-label {
+  flex: 1;
+  text-align: center;
 }
 
 .avatar-chat__novoice {

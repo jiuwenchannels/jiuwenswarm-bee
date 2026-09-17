@@ -292,7 +292,7 @@ export function AvatarChat() {
           onContextMenu={(event) => event.preventDefault()}
         >
           {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
-          <span>{talkLabel}</span>
+          <span className="avatar-chat__talk-label">{talkLabel}</span>
         </button>
       ) : (
         <p className="avatar-chat__novoice">{t.voice.unavailable}</p>
