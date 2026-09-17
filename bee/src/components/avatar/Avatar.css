@@ -39,6 +39,19 @@
   height: 30px;
 }
 
+/* The classic raster art carries a lot of padding; zoom + clip it in the chip. */
+.bee-avatar--compact .bee-char {
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  animation: none;
+}
+
+.bee-avatar--compact .bee-char__img {
+  width: 56px;
+  height: 56px;
+}
+
 .bee-avatar--compact .bee-avatar__label {
   font-size: 12px;
   white-space: nowrap;

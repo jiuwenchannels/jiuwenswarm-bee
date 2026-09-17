@@ -28,7 +28,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Rich **Markdown + GFM** replies (tables, lists, links) with **syntax-highlighted** code blocks and a copy button, sanitized by `rehype-sanitize`
 - Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
-- **2026 character**: a code-authored rigged SVG bee (independent wings / antennae / eyes / mouth) that breathes, blinks, looks at your pointer, and lip-syncs; the classic raster art is a lazily-loaded option
+- **Character style is a setting**: **Classic** (the shipped raster mascot, default) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
 - **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), plus onboarding, a live activity line, and drop-a-text-file-to-compose
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side

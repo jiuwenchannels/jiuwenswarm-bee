@@ -8,6 +8,7 @@ import {
 
 const DEFAULTS: UserSettings = {
   theme: 'system',
+  avatarStyle: 'mascot',
   gatewayUrl: '',
   agentId: 'researcher',
   mode: 'agent',

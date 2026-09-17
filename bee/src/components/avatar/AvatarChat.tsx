@@ -14,7 +14,7 @@ import { LanguageToggle } from '../common/LanguageToggle';
 import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
 import { Waveform } from './Waveform';
-import { loadAvatarStyle, saveAvatarStyle, type AvatarStyle } from '../../avatar/avatarStyle';
+import { type AvatarStyle } from '../../avatar/avatarStyle';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import { desktop, isAndroidOverlay, isDesktop, shellTranscribe, shellVoiceAvailable } from '../../platform/desktop';
 import { ShellRecorder } from '../../platform/recorder';
@@ -34,7 +34,7 @@ export function AvatarChat() {
   const [expanded, setExpanded] = useState(false);
   const [muted, setMuted] = useState(() => !isSpeechSupported() || !settings.voiceEnabled);
   const [mouthOpen, setMouthOpen] = useState(0);
-  const [style, setStyle] = useState<AvatarStyle>(loadAvatarStyle);
+  const style = settings.avatarStyle;
   const [listening, setListening] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -475,11 +475,8 @@ export function AvatarChat() {
               type="button"
               title={t.actions.switchStyle}
               onClick={() => {
-                setStyle((current) => {
-                  const next: AvatarStyle = current === 'mascot' ? 'rigged' : 'mascot';
-                  saveAvatarStyle(next);
-                  return next;
-                });
+                const next: AvatarStyle = style === 'mascot' ? 'rigged' : 'mascot';
+                update({ avatarStyle: next });
               }}
             >
               🐝 {t.style[style]}

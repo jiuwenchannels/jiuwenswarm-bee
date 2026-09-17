@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import type { Locale } from '../../i18n';
+import type { AvatarStyle } from '../../avatar/avatarStyle';
 import { useFocusTrap } from '../../lib/useFocusTrap';
 import { useSettings } from '../../settings/SettingsContext';
 import type { ThemePreference } from '../../theme/theme';
@@ -11,6 +12,8 @@ const LOCALE_LABELS: Array<{ value: Locale; label: string }> = [
   { value: 'en', label: 'English' },
   { value: 'zh', label: '中文' },
 ];
+
+const AVATAR_STYLES: AvatarStyle[] = ['mascot', 'rigged'];
 
 export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useStrings();
@@ -98,6 +101,23 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
                     onClick={() => setLocale(option.value)}
                   >
                     {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="field">
+              <span className="field__label">{t.settings.avatar}</span>
+              <div className="segmented" role="group" aria-label={t.settings.avatar}>
+                {AVATAR_STYLES.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className="segmented__item"
+                    data-active={settings.avatarStyle === value ? 'true' : undefined}
+                    aria-pressed={settings.avatarStyle === value}
+                    onClick={() => update({ avatarStyle: value })}
+                  >
+                    {t.style[value]}
                   </button>
                 ))}
               </div>

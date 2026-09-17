@@ -1,9 +1,12 @@
+import { type AvatarStyle } from '../avatar/avatarStyle';
 import { normalizeTheme, type ThemePreference } from '../theme/theme';
 
 /** User-tunable, locally persisted settings (never sent to the gateway). */
 export interface UserSettings {
   /** Theme preference; `system` follows the OS. */
   theme: ThemePreference;
+  /** Assistant character rendering. */
+  avatarStyle: AvatarStyle;
   /** Explicit gateway URL; empty means "try the built-in target list". */
   gatewayUrl: string;
   /** Agent id used by the SDK gateway's `create_session`. */
@@ -25,6 +28,7 @@ export function sanitizeSettings(raw: unknown, defaults: UserSettings): UserSett
   const source = typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : {};
   return {
     theme: normalizeTheme(source.theme) ?? defaults.theme,
+    avatarStyle: source.avatarStyle === 'rigged' ? 'rigged' : defaults.avatarStyle,
     gatewayUrl: readString(source.gatewayUrl, defaults.gatewayUrl).trim(),
     agentId: readString(source.agentId, defaults.agentId).trim() || defaults.agentId,
     mode: readString(source.mode, defaults.mode).trim() || defaults.mode,

@@ -15,6 +15,7 @@ import { type UserSettings, loadSettings, saveSettings } from './settings';
 
 export const DEFAULT_SETTINGS: UserSettings = {
   theme: 'system',
+  avatarStyle: 'mascot',
   voiceEnabled: true,
   ...envSettingsDefaults(),
 };
@@ -79,6 +80,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     () =>
       resolveConfig({
         theme: 'system',
+        avatarStyle: 'mascot',
         voiceEnabled: true,
         gatewayUrl,
         agentId,

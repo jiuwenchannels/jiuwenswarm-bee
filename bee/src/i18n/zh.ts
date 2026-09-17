@@ -101,6 +101,7 @@ export const zh: Strings = {
     advanced: '高级',
     theme: '主题',
     language: '语言',
+    avatar: '形象',
     voice: '朗读回答',
     voiceHint: '设备支持时，朗读助手回答。',
     gatewayUrl: '网关地址',

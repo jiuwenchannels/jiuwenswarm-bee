@@ -100,6 +100,7 @@ export interface Strings {
     advanced: string;
     theme: string;
     language: string;
+    avatar: string;
     voice: string;
     voiceHint: string;
     gatewayUrl: string;

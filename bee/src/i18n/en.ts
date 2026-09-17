@@ -101,6 +101,7 @@ export const en: Strings = {
     advanced: 'Advanced',
     theme: 'Theme',
     language: 'Language',
+    avatar: 'Character',
     voice: 'Speak replies',
     voiceHint: 'Read assistant answers aloud when your device supports it.',
     gatewayUrl: 'Gateway URL',

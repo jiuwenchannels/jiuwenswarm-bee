@@ -1,7 +1,8 @@
 import { type AvatarState } from '../../avatar/avatar';
 import { useStrings } from '../../i18n/LocaleContext';
+import { useSettings } from '../../settings/SettingsContext';
+import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
-import { RiggedBee } from './RiggedBee';
 import './Avatar.css';
 
 export function BeeAvatar({
@@ -14,6 +15,8 @@ export function BeeAvatar({
   compact?: boolean;
 }) {
   const t = useStrings();
+  const { settings } = useSettings();
+  const style = settings.avatarStyle;
 
   if (compact) {
     return (
@@ -22,7 +25,7 @@ export function BeeAvatar({
         data-testid="bee-avatar-compact"
         data-variant={state}
       >
-        <RiggedBee state={state} />
+        <AvatarCharacter state={state} style={style} />
         {showLabel ? (
           <span className="bee-avatar__label" data-testid="bee-avatar-label">
             {t.avatar[state]}
@@ -37,7 +40,7 @@ export function BeeAvatar({
       <div className="bee-avatar__stage">
         <CompanionBees />
         <div className="bee-avatar__character">
-          <RiggedBee state={state} />
+          <AvatarCharacter state={state} style={style} />
         </div>
       </div>
       {showLabel ? (

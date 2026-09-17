@@ -49,6 +49,11 @@ A client-only polish pass on the web app (no gateway/backend changes).
   `whisper-cli` binary + `ggml-*.bin` model are installed (userData `whisper/` or
   `BEE_WHISPER_*` env). Previously push-to-talk was hidden in the shells because
   their webview has no cloud recognizer. (Tauri Rust side not compiled in CI.)
+- **Character style is now a Setting** (Settings → Appearance → Character):
+  **Classic** (the shipped raster mascot) or **Animated** (the rigged SVG bee),
+  **Classic by default**, applied to both the website and the avatar view. The
+  old standalone `beechat.avatarStyle` localStorage key is replaced by the
+  persisted settings.
 
 ## 0.1.0
 
