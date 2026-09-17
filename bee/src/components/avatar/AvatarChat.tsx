@@ -166,7 +166,7 @@ export function AvatarChat() {
     : voice.processing
       ? t.voice.transcribing
       : busy
-        ? justSent ?? activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)
+        ? justSent ?? ''
         : notice ?? (!activated ? t.hello : lastReply ? stripMarkdown(lastReply) : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
@@ -238,6 +238,17 @@ export function AvatarChat() {
       ) : (
         <p className="avatar-chat__novoice">{t.voice.unavailable}</p>
       )}
+
+      {busy && !voice.listening && !voice.processing ? (
+        <p className="avatar-chat__working" role="status">
+          <span className="avatar-chat__working-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          {activity ?? t.avatar[avatar]}
+        </p>
+      ) : null}
 
       {busy ? (
         <button className="avatar-chat__stop" type="button" onClick={stop}>
