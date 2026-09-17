@@ -227,6 +227,15 @@ export function AvatarChat() {
         <Settings size={14} aria-hidden="true" />
       </button>
 
+      {status !== 'connected' || avatar === 'error' ? (
+        <span
+          className="avatar-chat__pulse"
+          data-variant={status}
+          data-state={avatar}
+          aria-hidden="true"
+        />
+      ) : null}
+
       {caption || working ? (
         <div
           className="avatar-chat__caption"
@@ -260,7 +269,6 @@ export function AvatarChat() {
         <div className="avatar-chat__char">
           <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={settings.avatarStyle} />
         </div>
-        <span className="avatar-chat__pulse" data-variant={status} data-state={avatar} aria-hidden="true" />
       </div>
 
       {voice.available ? (
@@ -280,8 +288,13 @@ export function AvatarChat() {
           onPointerCancel={() => voice.end(false)}
           onContextMenu={(event) => event.preventDefault()}
         >
-          {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
-          <span>{talkLabel}</span>
+          <span className="avatar-chat__talk-main">
+            {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
+            <span>{talkLabel}</span>
+          </span>
+          <span className="avatar-chat__talk-brand" aria-hidden="true">
+            {t.poweredBy} · {t.attribution}
+          </span>
         </button>
       ) : (
         <p className="avatar-chat__novoice">{t.voice.unavailable}</p>
