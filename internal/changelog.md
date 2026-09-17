@@ -59,6 +59,12 @@ A client-only polish pass on the web app (no gateway/backend changes).
   + feather, common crop so the two poses stay aligned), dropping the
   `mix-blend-mode` hack and fixing dark mode. The flat art now moves: bob, a
   periodic blink squash, a talk pulse, a thinking rock, and an error shake.
+- **One obvious way (UX simplification)**: voice now lives **only in the composer
+  mic** — one hold-to-talk control that works in every view/shell (Web Speech or
+  offline whisper), with barge-in and a live waveform, replacing the avatar's
+  separate talk row. The avatar's redundant mute, language, and character toggles
+  are removed; **all preferences are in Settings** (and reachable from ⌘K). The
+  standalone language-toggle component is deleted.
 
 ## 0.1.0
 

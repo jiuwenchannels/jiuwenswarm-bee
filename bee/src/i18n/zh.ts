@@ -62,12 +62,9 @@ export const zh: Strings = {
     stopSpeaking: '停止朗读',
     collapse: '收起',
     chat: '对话',
-    switchStyle: '切换形象',
   },
   offline: (url) => `无法连接到 JiuwenSwarm（${url}）。`,
   voice: {
-    on: '🔊 语音开',
-    off: '🔇 语音关',
     pushToTalk: '按住说话',
     listening: '正在聆听…',
   },

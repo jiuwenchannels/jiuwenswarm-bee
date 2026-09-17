@@ -64,12 +64,9 @@ export interface Strings {
     stopSpeaking: string;
     collapse: string;
     chat: string;
-    switchStyle: string;
   };
   offline: (url: string) => string;
   voice: {
-    on: string;
-    off: string;
     pushToTalk: string;
     listening: string;
   };

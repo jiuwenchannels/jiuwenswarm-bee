@@ -62,12 +62,9 @@ export const en: Strings = {
     stopSpeaking: 'Stop reading',
     collapse: 'Collapse',
     chat: 'Chat',
-    switchStyle: 'Switch avatar style',
   },
   offline: (url) => `Can't reach JiuwenSwarm at ${url}.`,
   voice: {
-    on: '🔊 Voice on',
-    off: '🔇 Voice off',
     pushToTalk: 'Hold to talk',
     listening: 'Listening…',
   },

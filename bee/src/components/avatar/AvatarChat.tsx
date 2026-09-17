@@ -1,4 +1,3 @@
-import { Mic, MicOff } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -10,43 +9,35 @@ import {
 
 import { ChatInput, type ChatInputHandle } from '../chat/ChatInput';
 import { MessageList } from '../chat/MessageList';
-import { LanguageToggle } from '../common/LanguageToggle';
 import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
-import { Waveform } from './Waveform';
-import { type AvatarStyle } from '../../avatar/avatarStyle';
-import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
-import { desktop, isAndroidOverlay, isDesktop, shellTranscribe, shellVoiceAvailable } from '../../platform/desktop';
-import { ShellRecorder } from '../../platform/recorder';
-import { Dictation, isRecognitionSupported, recognitionLang } from '../../platform/recognition';
+import { useStrings } from '../../i18n/LocaleContext';
+import { desktop, isAndroidOverlay } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
 import { useAppConfig, useSettings } from '../../settings/SettingsContext';
 import { useChat } from '../../chat/useChat';
 import './AvatarChat.css';
 
+/**
+ * The floating avatar view. One obvious interaction: click the bee, then type
+ * or hold the mic (the composer owns the single mic). Preferences — voice,
+ * theme, language, character — live in Settings, not here.
+ */
 export function AvatarChat() {
   const t = useStrings();
-  const { locale } = useLocaleContext();
   const config = useAppConfig();
-  const { settings, update } = useSettings();
-  const { messages, avatar, status, busy, activity, send, stop, retry, retryMessage, editMessage } =
+  const { settings } = useSettings();
+  const { messages, avatar, status, busy, activity, send, stop, retryMessage, editMessage } =
     useChat(config);
   const [expanded, setExpanded] = useState(false);
-  const [muted, setMuted] = useState(() => !isSpeechSupported() || !settings.voiceEnabled);
   const [mouthOpen, setMouthOpen] = useState(0);
-  const style = settings.avatarStyle;
-  const [listening, setListening] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [shellVoice, setShellVoice] = useState(false);
   const overlay = isAndroidOverlay();
-  // Electron/Tauri ship no cloud recognizer, but may provide offline whisper.cpp;
-  // the real browser (and Android) use the Web Speech / native recognizer.
-  const canTalk = shellVoice || (isRecognitionSupported() && !isDesktop());
   const composerRef = useRef<ChatInputHandle>(null);
-  const recorderRef = useRef<ShellRecorder | null>(null);
+  const muted = !isSpeechSupported() || !settings.voiceEnabled;
 
   const speakerRef = useRef<Speaker | null>(null);
   const spokenRef = useRef<Set<string>>(new Set());
@@ -55,9 +46,6 @@ export function AvatarChat() {
   const boostRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const dragRef = useRef({ active: false, moved: false, x: 0, y: 0 });
-  const dictationRef = useRef<Dictation | null>(null);
-  const transcriptRef = useRef('');
-  const pttActiveRef = useRef(false);
   const prevStatusRef = useRef(status);
 
   // Marker so styles can adapt to the Android overlay (one connected surface).
@@ -68,17 +56,6 @@ export function AvatarChat() {
       delete document.documentElement.dataset.shell;
     };
   }, [overlay]);
-
-  // Ask the desktop shell once whether it has an offline STT engine.
-  useEffect(() => {
-    let alive = true;
-    void shellVoiceAvailable().then((available) => {
-      if (alive) setShellVoice(available);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
 
   // --- drag (screen coords so the moving window doesn't fight the pointer) ---
   const onDragStart = useCallback((event: ReactPointerEvent<HTMLElement>) => {
@@ -144,7 +121,7 @@ export function AvatarChat() {
     };
   }, [ensureTalking]);
 
-  // Speak each finished assistant reply once (barge-in cancels it).
+  // Speak each finished assistant reply once (voice on/off is a Setting).
   useEffect(() => {
     const last = messages[messages.length - 1];
     if (!last || last.role !== 'assistant' || last.streaming || last.error) return;
@@ -152,10 +129,6 @@ export function AvatarChat() {
     spokenRef.current.add(last.id);
     if (!muted) speakerRef.current?.speak(last.text);
   }, [messages, muted]);
-
-  useEffect(() => {
-    setMuted(!isSpeechSupported() || !settings.voiceEnabled);
-  }, [settings.voiceEnabled]);
 
   useEffect(() => {
     answeringRef.current = avatar === 'answering';
@@ -177,6 +150,18 @@ export function AvatarChat() {
     return () => clearInterval(timer);
   }, [busy]);
 
+  // Proactive: announce the return after a drop (one short line, then fade).
+  useEffect(() => {
+    const previous = prevStatusRef.current;
+    prevStatusRef.current = status;
+    if (previous === 'disconnected' && status === 'connected' && messages.length > 0) {
+      setNotice(t.proactive.reconnected);
+      const timer = setTimeout(() => setNotice(null), 4000);
+      return () => clearTimeout(timer);
+    }
+    return () => {};
+  }, [status, messages.length, t]);
+
   // Multimodal client cue: drop a text file to compose from its contents.
   const onDrop = useCallback(async (event: ReactDragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -190,117 +175,6 @@ export function AvatarChat() {
     setExpanded(true);
     requestAnimationFrame(() => composerRef.current?.setText(text));
   }, []);
-
-  // Proactive: announce the return after a drop (one short line, then fade).
-  useEffect(() => {
-    const previous = prevStatusRef.current;
-    prevStatusRef.current = status;
-    if (previous === 'disconnected' && status === 'connected' && messages.length > 0) {
-      setNotice(t.proactive.reconnected);
-      const timer = setTimeout(() => setNotice(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    return () => {};
-  }, [status, messages.length, t]);
-
-  // --- push-to-talk (P2) ---------------------------------------------------
-  const endTalk = useCallback(
-    (submit: boolean) => {
-      if (!pttActiveRef.current) return;
-      pttActiveRef.current = false;
-      setListening(false);
-
-      // Desktop shell: transcribe the recorded WAV with the local engine.
-      if (shellVoice) {
-        const recorder = recorderRef.current;
-        recorderRef.current = null;
-        if (!recorder) return;
-        void recorder.stop().then(async (wav) => {
-          if (!submit || !wav) return;
-          const text = await shellTranscribe(wav, locale === 'zh' ? 'zh' : 'en');
-          if (text) send(text);
-        });
-        return;
-      }
-
-      dictationRef.current?.stop();
-      dictationRef.current = null;
-      const text = transcriptRef.current.trim();
-      transcriptRef.current = '';
-      if (submit && text) send(text);
-    },
-    [shellVoice, locale, send],
-  );
-
-  const beginTalk = useCallback(() => {
-    if (!canTalk || listening) return;
-    // Barge-in: stop whatever the bee is currently saying.
-    speakerRef.current?.cancel();
-    transcriptRef.current = '';
-    pttActiveRef.current = true;
-
-    if (shellVoice) {
-      const recorder = new ShellRecorder();
-      recorderRef.current = recorder;
-      void recorder.start().then((ok) => {
-        if (!ok || !pttActiveRef.current) {
-          // Released while the mic was still opening — never flip to listening.
-          if (ok) void recorder.stop();
-          if (recorderRef.current === recorder) recorderRef.current = null;
-          if (!ok) pttActiveRef.current = false;
-          return;
-        }
-        setListening(true);
-      });
-      return;
-    }
-
-    const dictation = new Dictation(recognitionLang(locale), {
-      onStart: () => setListening(true),
-      onTranscript: (text) => {
-        transcriptRef.current = text;
-      },
-      onEnd: () => {
-        if (pttActiveRef.current) endTalk(true);
-      },
-      onError: () => {
-        pttActiveRef.current = false;
-        setListening(false);
-      },
-    });
-    if (!dictation.available) {
-      pttActiveRef.current = false;
-      return;
-    }
-    dictationRef.current = dictation;
-    dictation.start();
-  }, [canTalk, listening, shellVoice, endTalk, locale]);
-
-  // Safety: releasing outside the tiny avatar window (or losing focus) must still
-  // end the talk, and a stuck capture must not leave the mic on forever.
-  useEffect(() => {
-    if (!listening) return;
-    const finish = () => endTalk(true);
-    const cancel = () => endTalk(false);
-    window.addEventListener('pointerup', finish, true);
-    window.addEventListener('pointercancel', cancel, true);
-    window.addEventListener('blur', finish);
-    const maxTimer = window.setTimeout(finish, 60_000);
-    return () => {
-      window.removeEventListener('pointerup', finish, true);
-      window.removeEventListener('pointercancel', cancel, true);
-      window.removeEventListener('blur', finish);
-      window.clearTimeout(maxTimer);
-    };
-  }, [listening, endTalk]);
-
-  useEffect(
-    () => () => {
-      dictationRef.current?.stop();
-      void recorderRef.current?.stop();
-    },
-    [],
-  );
 
   const handleSend = useCallback(
     (text: string) => {
@@ -341,6 +215,7 @@ export function AvatarChat() {
           {t.onboarding.drop}
         </div>
       ) : null}
+
       <div
         className="avatar-chat__grip"
         data-tauri-drag-region
@@ -398,7 +273,7 @@ export function AvatarChat() {
           aria-label={expanded ? t.actions.collapse : t.actions.chat}
           onClick={toggleExpanded}
         >
-          <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={style} />
+          <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={settings.avatarStyle} />
         </button>
         <span
           className="avatar-chat__pulse"
@@ -424,69 +299,13 @@ export function AvatarChat() {
               {elapsed >= 2 ? <span className="avatar-chat__activity-time">{elapsed}s</span> : null}
             </div>
           ) : null}
-          <div className="avatar-chat__talk">
-            {canTalk ? (
-              <>
-                <Waveform active={listening} />
-                <button
-                  className="avatar-chat__ptt"
-                  type="button"
-                  data-listening={listening ? 'true' : undefined}
-                  aria-pressed={listening}
-                  onPointerDown={(event) => {
-                    event.currentTarget.setPointerCapture?.(event.pointerId);
-                    beginTalk();
-                  }}
-                  onPointerUp={() => endTalk(true)}
-                  onPointerCancel={() => endTalk(false)}
-                  onPointerLeave={() => endTalk(true)}
-                  title={listening ? t.voice.listening : t.voice.pushToTalk}
-                >
-                  {listening ? <MicOff size={16} aria-hidden="true" /> : <Mic size={16} aria-hidden="true" />}
-                  <span>{listening ? t.voice.listening : t.voice.pushToTalk}</span>
-                </button>
-              </>
-            ) : null}
-          </div>
-          <ChatInput ref={composerRef} disabled={busy} onSend={handleSend} onStop={stop} draftKey="avatar" />
-          <div className="avatar-chat__meta">
-            <span className="avatar-chat__status" data-variant={status}>
-              <span className="avatar-chat__dot" aria-hidden="true" />
-              {t.status[status]}
-            </span>
-            <LanguageToggle />
-            {isSpeechSupported() ? (
-              <button
-                className="avatar-chat__mute"
-                type="button"
-                aria-pressed={muted}
-                onClick={() => {
-                  const next = !muted;
-                  if (next) speakerRef.current?.cancel();
-                  setMuted(next);
-                  update({ voiceEnabled: !next });
-                }}
-              >
-                {muted ? t.voice.off : t.voice.on}
-              </button>
-            ) : null}
-            <button
-              className="avatar-chat__style"
-              type="button"
-              title={t.actions.switchStyle}
-              onClick={() => {
-                const next: AvatarStyle = style === 'mascot' ? 'rigged' : 'mascot';
-                update({ avatarStyle: next });
-              }}
-            >
-              🐝 {t.style[style]}
-            </button>
-            {messages.some((message) => message.error) ? (
-              <button className="avatar-chat__retry" type="button" onClick={retry}>
-                {t.actions.tryAgain}
-              </button>
-            ) : null}
-          </div>
+          <ChatInput
+            ref={composerRef}
+            disabled={busy}
+            onSend={handleSend}
+            onStop={stop}
+            draftKey="avatar"
+          />
         </div>
       ) : null}
     </div>

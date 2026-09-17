@@ -29,7 +29,8 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
 - **Character style is a setting**: **Classic** (the shipped mascot — now a transparent cut-out that bobs, blinks, pulses while speaking, and reacts) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
-- **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), plus onboarding, a live activity line, and drop-a-text-file-to-compose
+- **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), onboarding, a live activity line, and drop-a-text-file-to-compose
+- **One obvious way (2026 pass)**: a single composer everywhere — type, or hold its one mic (Web Speech in browser/Android, offline whisper in the desktop shells). Voice/history/find/palette all live in **⚙ Settings** or the **⌘K** palette; the duplicate inline toggles (separate talk button, mute, language, character) are gone.
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
 - Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint

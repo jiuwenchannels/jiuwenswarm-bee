@@ -1,7 +1,9 @@
 import { CircleStop, Mic, Send } from 'lucide-react';
 import {
   type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -10,8 +12,11 @@ import {
 
 import { loadDraft, saveDraft } from '../../chat/draftStorage';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
-import { isDesktop } from '../../platform/desktop';
+import { isDesktop, shellTranscribe, shellVoiceAvailable } from '../../platform/desktop';
 import { Dictation, isRecognitionSupported, recognitionLang } from '../../platform/recognition';
+import { ShellRecorder } from '../../platform/recorder';
+import { stopSpeaking } from '../../platform/speakerStore';
+import { Waveform } from '../avatar/Waveform';
 import './Chat.css';
 
 const MAX_TEXTAREA_PX = 200;
@@ -29,6 +34,11 @@ interface ChatInputProps {
   draftKey: string;
 }
 
+/**
+ * The single composer used by every view. One obvious way to talk to the bee:
+ * type, or hold the mic (Web Speech in the browser/Android, offline whisper in
+ * the desktop shells when installed). Voice preferences live in Settings.
+ */
 export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput(
   { disabled, onSend, onStop, draftKey },
   ref,
@@ -37,12 +47,13 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   const { locale } = useLocaleContext();
   const [value, setValue] = useState(() => loadDraft(draftKey));
   const [listening, setListening] = useState(false);
-  // Web Speech recognition needs Chromium's cloud speech service, which the
-  // desktop shells don't ship — offering the mic there only fails at runtime.
-  const [dictationSupported] = useState(() => isRecognitionSupported() && !isDesktop());
-  const dictationRef = useRef<Dictation | null>(null);
-  const baseRef = useRef('');
+  const [shellVoice, setShellVoice] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const dictationRef = useRef<Dictation | null>(null);
+  const recorderRef = useRef<ShellRecorder | null>(null);
+  const transcriptRef = useRef('');
+  const pttRef = useRef(false);
+  const canTalk = shellVoice || (isRecognitionSupported() && !isDesktop());
 
   useImperativeHandle(
     ref,
@@ -76,11 +87,102 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
     el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_PX)}px`;
   }, [value]);
 
-  function stopDictation() {
-    dictationRef.current?.stop();
-    dictationRef.current = null;
-    setListening(false);
-  }
+  // Ask the desktop shell once whether it has an offline STT engine.
+  useEffect(() => {
+    let alive = true;
+    void shellVoiceAvailable().then((available) => {
+      if (alive) setShellVoice(available);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const endTalk = useCallback(
+    (submit: boolean) => {
+      if (!pttRef.current) return;
+      pttRef.current = false;
+      setListening(false);
+
+      if (shellVoice) {
+        const recorder = recorderRef.current;
+        recorderRef.current = null;
+        if (!recorder) return;
+        void recorder.stop().then(async (wav) => {
+          if (!submit || !wav) return;
+          const text = await shellTranscribe(wav, locale === 'zh' ? 'zh' : 'en');
+          if (text) onSend(text);
+        });
+        return;
+      }
+
+      dictationRef.current?.stop();
+      dictationRef.current = null;
+      const text = transcriptRef.current.trim();
+      transcriptRef.current = '';
+      if (submit && text) onSend(text);
+    },
+    [shellVoice, locale, onSend],
+  );
+
+  const beginTalk = useCallback(() => {
+    if (!canTalk || listening || disabled) return;
+    stopSpeaking(); // barge-in: stop the bee mid-sentence
+    transcriptRef.current = '';
+    pttRef.current = true;
+
+    if (shellVoice) {
+      const recorder = new ShellRecorder();
+      recorderRef.current = recorder;
+      void recorder.start().then((ok) => {
+        if (!ok || !pttRef.current) {
+          if (ok) void recorder.stop();
+          if (recorderRef.current === recorder) recorderRef.current = null;
+          if (!ok) pttRef.current = false;
+          return;
+        }
+        setListening(true);
+      });
+      return;
+    }
+
+    const dictation = new Dictation(recognitionLang(locale), {
+      onStart: () => setListening(true),
+      onTranscript: (text) => {
+        transcriptRef.current = text;
+      },
+      onEnd: () => {
+        if (pttRef.current) endTalk(true);
+      },
+      onError: () => {
+        pttRef.current = false;
+        setListening(false);
+      },
+    });
+    if (!dictation.available) {
+      pttRef.current = false;
+      return;
+    }
+    dictationRef.current = dictation;
+    dictation.start();
+  }, [canTalk, listening, disabled, shellVoice, endTalk, locale]);
+
+  // Safety: end the talk on release/blur outside the window, and cap it.
+  useEffect(() => {
+    if (!listening) return;
+    const finish = () => endTalk(true);
+    const cancel = () => endTalk(false);
+    window.addEventListener('pointerup', finish, true);
+    window.addEventListener('pointercancel', cancel, true);
+    window.addEventListener('blur', finish);
+    const maxTimer = window.setTimeout(finish, 60_000);
+    return () => {
+      window.removeEventListener('pointerup', finish, true);
+      window.removeEventListener('pointercancel', cancel, true);
+      window.removeEventListener('blur', finish);
+      window.clearTimeout(maxTimer);
+    };
+  }, [listening, endTalk]);
 
   useEffect(() => () => dictationRef.current?.stop(), []);
 
@@ -88,13 +190,14 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
     if (!disabled) return;
     dictationRef.current?.stop();
     dictationRef.current = null;
+    void recorderRef.current?.stop();
+    recorderRef.current = null;
     setListening(false);
   }, [disabled]);
 
   function submit() {
     const text = value.trim();
     if (!text || disabled) return;
-    stopDictation();
     onSend(text);
     setValue('');
   }
@@ -106,24 +209,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
     }
   }
 
-  function toggleDictation() {
-    if (listening) {
-      stopDictation();
-      return;
-    }
-    baseRef.current = value.trim();
-    const dictation = new Dictation(recognitionLang(locale), {
-      onStart: () => setListening(true),
-      onTranscript: (text) => setValue([baseRef.current, text].filter(Boolean).join(' ')),
-      onEnd: () => setListening(false),
-      onError: () => setListening(false),
-    });
-    if (!dictation.available) return;
-    dictationRef.current = dictation;
-    dictation.start();
-  }
-
-  const dictateLabel = listening ? t.composer.dictateStop : t.composer.dictateStart;
+  const talkLabel = listening ? t.voice.listening : t.voice.pushToTalk;
 
   return (
     <form
@@ -145,19 +231,26 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
         onKeyDown={onKeyDown}
         aria-label={t.composer.ariaLabel}
       />
-      {dictationSupported ? (
+      {canTalk ? (
         <button
           className="composer__icon"
           data-testid="bee-mic"
           type="button"
           data-listening={listening ? 'true' : undefined}
           aria-pressed={listening}
-          title={dictateLabel}
-          aria-label={dictateLabel}
+          title={talkLabel}
+          aria-label={talkLabel}
           disabled={disabled}
-          onClick={toggleDictation}
+          onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            beginTalk();
+          }}
+          onPointerUp={() => endTalk(true)}
+          onPointerCancel={() => endTalk(false)}
+          onPointerLeave={() => endTalk(true)}
+          onContextMenu={(event) => event.preventDefault()}
         >
-          <Mic size={18} aria-hidden="true" />
+          {listening ? <Waveform active /> : <Mic size={18} aria-hidden="true" />}
         </button>
       ) : null}
       {disabled ? (

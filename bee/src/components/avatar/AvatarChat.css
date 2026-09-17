@@ -75,58 +75,9 @@
 }
 
 .avatar-chat__composer .composer__input,
+.avatar-chat__composer .composer__icon,
 .avatar-chat__composer .composer__send {
   -webkit-app-region: no-drag;
-}
-
-.avatar-chat__meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--bee-text-muted);
-}
-
-.avatar-chat__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.avatar-chat__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--bee-text-muted);
-}
-
-.avatar-chat__status[data-variant='connected'] .avatar-chat__dot {
-  background: var(--bee-ok);
-}
-
-.avatar-chat__status[data-variant='connecting'] .avatar-chat__dot,
-.avatar-chat__status[data-variant='reconnecting'] .avatar-chat__dot {
-  background: var(--bee-warn);
-}
-
-.avatar-chat__status[data-variant='disconnected'] .avatar-chat__dot {
-  background: var(--bee-danger-text);
-}
-
-.avatar-chat__mute,
-.avatar-chat__style,
-.avatar-chat__retry {
-  border: none;
-  background: transparent;
-  color: var(--bee-link);
-  font-size: 11px;
-  cursor: pointer;
-  padding: 0;
-  -webkit-app-region: no-drag;
-}
-
-.avatar-chat__retry {
-  color: var(--bee-danger-text);
 }
 
 /* Close affordance, drawn by the page so the overlay has no native chrome. */
@@ -148,7 +99,7 @@
 }
 
 /* Collapsed status cue: a small dot on the bee, so you know its state without
-   expanding the chat. Hidden once the chat is open (the meta row takes over). */
+   expanding the chat. Hidden once the chat is open (the activity line takes over). */
 .avatar-chat__pulse {
   position: absolute;
   right: 16px;
@@ -176,93 +127,6 @@
   display: none;
 }
 
-@keyframes pulse-dot {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .avatar-chat__pulse {
-    animation: none !important;
-  }
-}
-
-/*
- * Android overlay: draw one connected surface (bubbles + bee + composer) instead of
- * three detached cards, and make the bee/grip a native drag target.
- */
-[data-shell='android'] .avatar-chat__grip,
-[data-shell='android'] .avatar-chat__stage {
-  touch-action: none;
-}
-
-[data-shell='android'] .avatar-chat__bubbles {
-  margin: 0 6px;
-  border-bottom: none;
-  border-radius: 16px 16px 0 0;
-  box-shadow: none;
-}
-
-[data-shell='android'] .avatar-chat__stage {
-  margin: 0 6px;
-  background: var(--bee-surface);
-  border-left: 1px solid var(--bee-border);
-  border-right: 1px solid var(--bee-border);
-}
-
-[data-shell='android'] .avatar-chat__composer {
-  margin: 0 6px;
-  border-top: none;
-  border-radius: 0 0 16px 16px;
-  box-shadow: none;
-}
-
-/* Collapsed: a single rounded card around the bee — clearly grabbable. */
-[data-shell='android'] .avatar-chat[data-expanded='false'] .avatar-chat__stage {
-  border: 1px solid var(--bee-border);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
-}
-
-/* --- 2026 voice-first controls ------------------------------------------ */
-
-.avatar-chat__talk {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 0;
-}
-
-.avatar-chat__ptt {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 36px;
-  padding: 0 16px;
-  border: 1px solid var(--bee-border);
-  border-radius: 999px;
-  background: var(--bee-surface);
-  color: var(--bee-text);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-app-region: no-drag;
-  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
-}
-
-.avatar-chat__ptt:hover {
-  border-color: var(--bee-accent);
-}
-
-.avatar-chat__ptt[data-listening='true'] {
-  background: var(--bee-accent);
-  border-color: var(--bee-accent);
-  color: var(--bee-accent-text);
-}
-
 .avatar-chat__hint {
   position: absolute;
   bottom: -2px;
@@ -288,19 +152,6 @@
   color: var(--bee-text-muted);
   font-size: 11px;
   animation: notice-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes notice-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .avatar-chat__notice {
-    animation: none;
-  }
 }
 
 /* --- agency surface: what the bee is doing right now -------------------- */
@@ -347,18 +198,6 @@
   opacity: 0.8;
 }
 
-@keyframes activity-dot {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-}
-
 /* --- multimodal: drop a text file to compose ---------------------------- */
 
 .avatar-chat__drop {
@@ -378,8 +217,72 @@
   pointer-events: none;
 }
 
+@keyframes pulse-dot {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes activity-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+/*
+ * Android overlay: draw one connected surface (bubbles + bee + composer) instead of
+ * three detached cards, and make the bee/grip a native drag target.
+ */
+[data-shell='android'] .avatar-chat__grip,
+[data-shell='android'] .avatar-chat__stage {
+  touch-action: none;
+}
+
+[data-shell='android'] .avatar-chat__bubbles {
+  margin: 0 6px;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+}
+
+[data-shell='android'] .avatar-chat__stage {
+  margin: 0 6px;
+  background: var(--bee-surface);
+  border-left: 1px solid var(--bee-border);
+  border-right: 1px solid var(--bee-border);
+}
+
+[data-shell='android'] .avatar-chat__composer {
+  margin: 0 6px;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: none;
+}
+
+/* Collapsed: a single rounded card around the bee — clearly grabbable. */
+[data-shell='android'] .avatar-chat[data-expanded='false'] .avatar-chat__stage {
+  border: 1px solid var(--bee-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .avatar-chat__pulse,
+  .avatar-chat__notice,
   .avatar-chat__activity-dots i {
-    animation: none;
+    animation: none !important;
   }
 }
