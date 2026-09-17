@@ -1,8 +1,11 @@
 # jiuwenswarm-bee
 
-**BeeChat** — your bee in the JiuwenSwarm: the simplest channel, a bee-avatar chatbot that only does questions and answers.
+**BeeChat** — your bee in the JiuwenSwarm: a bee-avatar chatbot for question-and-answer conversations.
 
-A single screen, a streaming reply, and **Buzz**, the JiuwenSwarm bee mascot, who reacts as you talk. No panels, no tool-call viewer, no settings sprawl.
+**Buzz**, the JiuwenSwarm bee mascot, reacts as you talk. One web build powers two
+surfaces: the **website** (a full chat — streaming Markdown, searchable history,
+find-in-conversation, a command palette, and settings) and the **floating avatar**
+(a voice-only companion: hold to talk, and the bee speaks back).
 
 > **Requires a running JiuwenSwarm gateway.** BeeChat auto-tries, in order (using `127.0.0.1`, since the gateway binds IPv4 and browsers may prefer `::1` for `localhost`):
 > 1. `ws://127.0.0.1:19000/ws` — the **product** gateway (`jiuwenswarm-start`), web/E2A protocol
@@ -20,13 +23,11 @@ BeeChat speaks **both** gateway protocols:
 
 To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 
-
-
 ## Features
 
 - One-screen Q&A conversation with streaming tokens
 - Rich **Markdown + GFM** replies (tables, lists, links) with **syntax-highlighted** code blocks and a copy button, sanitized by `rehype-sanitize`
-- Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
+- Per-message actions (on hover): copy, copy as plain text, read aloud, and error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
 - **Character style is a setting**: **Classic** (the shipped mascot — now a transparent cut-out that bobs, blinks, pulses while speaking, and reacts) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
 - **Voice-first avatar view**: the floating avatar is a **voice companion** — one "Hold to talk" control, a live waveform, barge-in (talking cancels the bee mid-sentence), and a subtitle. No text box, no message list; the website is where you type.
@@ -35,7 +36,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
 - Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint
 - Find in conversation (**⌘/Ctrl + F**), export a chat as Markdown, read replies aloud
-- Docked history sidebar on wide screens; undo-delete; focus-trapped dialogs
+- History sidebar as a slide-in drawer with undo-delete; focus-trapped dialogs
 - Command palette (**⌘/Ctrl + K**), keyboard-first input (Enter to send, Shift+Enter for newline, `/` to focus)
 - Mobile layout, **installable PWA with an offline app shell**, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
 - Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app, and **offline whisper.cpp** in the desktop shells (when installed — see below)
@@ -98,7 +99,7 @@ Open `index.html#avatar` in the web app for the same view in the browser.
 
 | Shell | Folder | Runtime | Installer |
 |---|---|---|---|
-| **Electron** (ready to run) | `apps/desktop/` | bundled Chromium + Node | ~100 MB |
+| **Electron** (ready to run) | `apps/desktop/electron/` | bundled Chromium + Node | ~100 MB |
 | **Tauri v2** (lightweight) | `apps/desktop/tauri/` | OS webview (WebView2) | ~5 MB |
 
 ```bash
@@ -109,7 +110,7 @@ cd ../desktop/electron && npm install && npm start          # Electron
 cd ../desktop/tauri && npm install && npm run dev           # Tauri (needs Rust + MSVC build tools)
 ```
 
-Both give: a draggable assistant (position remembered), click-to-expand inline chat, spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`apps/desktop/electron/README.md`](apps/desktop/electron/README.md) and [`apps/desktop/tauri/README.md`](apps/desktop/tauri/README.md).
+Both give: a draggable assistant (position remembered), spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`apps/desktop/electron/README.md`](apps/desktop/electron/README.md) and [`apps/desktop/tauri/README.md`](apps/desktop/tauri/README.md).
 
 ### The character and voice
 
@@ -182,5 +183,5 @@ jiuwenswarm-bee/
 ## Design notes
 
 - The mascot assets are the same ones used by the main JiuwenSwarm web UI.
-- Products colors are never hardcoded in components; everything goes through `src/theme/tokens.css`.
+- Product colors are never hardcoded in components; everything goes through `apps/web/src/theme/tokens.css`.
 - The avatar is decorative to screen readers; application state is exposed through status and message text.
