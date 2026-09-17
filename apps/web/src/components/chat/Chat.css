@@ -83,11 +83,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 5px;
-  border: 1px solid var(--bee-border);
-  border-radius: 999px;
-  background: var(--bee-surface);
-  box-shadow: var(--bee-shadow-soft);
   font-size: 10px;
   color: var(--bee-text-muted);
   opacity: 0;
