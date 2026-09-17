@@ -5,6 +5,7 @@ export const en: Strings = {
   poweredBy: 'JiuwenSwarm',
   attribution: 'OpenJiuwen',
   hello: "I'm Buzz — your bee in the swarm. Ask me anything.",
+  helloAvatar: "I'm Buzz — your bee in the swarm.\nAsk me anything.",
   tagline: 'Your bee in the swarm',
   status: {
     disconnected: 'Offline',

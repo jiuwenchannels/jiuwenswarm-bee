@@ -5,6 +5,7 @@ export const zh: Strings = {
   poweredBy: 'JiuwenSwarm',
   attribution: 'OpenJiuwen',
   hello: '我是嗡嗡 —— 你在蜂群中的那只蜜蜂。有什么想问的，尽管说。',
+  helloAvatar: '我是嗡嗡 —— 你在蜂群中的那只蜜蜂。\n有什么想问的，尽管说。',
   tagline: '蜂群中的那只蜜蜂',
   status: {
     disconnected: '离线',

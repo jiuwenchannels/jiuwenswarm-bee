@@ -48,6 +48,7 @@
 .avatar-chat__caption-text {
   max-width: 100%;
   overflow: hidden;
+  white-space: pre-line;
 }
 
 .avatar-chat__caption[data-state='listening'] {
