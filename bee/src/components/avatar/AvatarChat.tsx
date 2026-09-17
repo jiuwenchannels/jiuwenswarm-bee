@@ -1,4 +1,4 @@
-import { Mic } from 'lucide-react';
+import { Mic, Settings } from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -10,6 +10,7 @@ import {
 import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
 import { Waveform } from './Waveform';
+import { SettingsPanel } from '../settings/SettingsPanel';
 import { withVoiceInstruction } from '../../chat/voicePrompt';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import { stripMarkdown } from '../../lib/markdown';
@@ -35,6 +36,7 @@ export function AvatarChat() {
   const [notice, setNotice] = useState<string | null>(null);
   const [justSent, setJustSent] = useState<string | null>(null);
   const [activated, setActivated] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const overlay = isAndroidOverlay();
   const muted = !isSpeechSupported() || !settings.voiceEnabled;
 
@@ -201,6 +203,17 @@ export function AvatarChat() {
         </button>
       ) : null}
 
+      <button
+        className="avatar-chat__settings"
+        type="button"
+        aria-label={t.settings.title}
+        title={t.settings.title}
+        data-testid="bee-avatar-settings"
+        onClick={() => setSettingsOpen(true)}
+      >
+        <Settings size={14} aria-hidden="true" />
+      </button>
+
       {caption || working ? (
         <div
           className="avatar-chat__caption"
@@ -265,6 +278,8 @@ export function AvatarChat() {
           {t.composer.stop}
         </button>
       ) : null}
+
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

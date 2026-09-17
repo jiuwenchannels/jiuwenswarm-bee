@@ -190,9 +190,31 @@
   -webkit-app-region: no-drag;
 }
 
-/* Close affordance, drawn by the page so the overlay has no native chrome. */
-.avatar-chat__close {
+/* Settings access, so language/voice/character can be changed from the avatar. */
+.avatar-chat__settings {
   position: absolute;
+  top: 1px;
+  left: 6px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bee-text-muted);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.avatar-chat__settings:hover {
+  color: var(--bee-text);
+}
+
+/* Close affordance, drawn by the page so the overlay has no native chrome. */
+.avatar-chat__close {  position: absolute;
   top: 1px;
   right: 6px;
   z-index: 2;
