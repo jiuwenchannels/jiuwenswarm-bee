@@ -48,7 +48,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 jiuwenswarm-start            # gateway on ws://127.0.0.1:19000
 
 # 1. Install deps
-cd bee
+cd apps/web
 npm install
 
 # 2. Configure env
@@ -83,7 +83,7 @@ BeeChat speaks the standard JiuwenSwarm envelope protocol (`type`-discriminated 
 | server → client | `done` | `session_id` |
 | server → client | `error` | `message` |
 
-All framing lives in `bee/src/gateway/`.
+All framing lives in `apps/web/src/gateway/`.
 
 ## Desktop assistant avatar (Windows)
 
@@ -98,22 +98,22 @@ Open `index.html#avatar` in the web app for the same view in the browser.
 
 | Shell | Folder | Runtime | Installer |
 |---|---|---|---|
-| **Electron** (ready to run) | `desktop/` | bundled Chromium + Node | ~100 MB |
-| **Tauri v2** (lightweight) | `desktop/tauri/` | OS webview (WebView2) | ~5 MB |
+| **Electron** (ready to run) | `apps/desktop/` | bundled Chromium + Node | ~100 MB |
+| **Tauri v2** (lightweight) | `apps/desktop/tauri/` | OS webview (WebView2) | ~5 MB |
 
 ```bash
-cd bee && npm install && npm run build      # build the web app (or run its dev server)
+cd apps/web && npm install && npm run build      # build the web app (or run its dev server)
 
 cd ../desktop/electron && npm install && npm start          # Electron
 # or
 cd ../desktop/tauri && npm install && npm run dev           # Tauri (needs Rust + MSVC build tools)
 ```
 
-Both give: a draggable assistant (position remembered), click-to-expand inline chat, spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`desktop/electron/README.md`](desktop/electron/README.md) and [`desktop/tauri/README.md`](desktop/tauri/README.md).
+Both give: a draggable assistant (position remembered), click-to-expand inline chat, spoken replies, a tray menu (show/hide, open full chat, click-through, quit), and hotkeys (`Ctrl+Shift+H` show/hide the assistant, `Ctrl+Shift+B` full chat window). See [`apps/desktop/electron/README.md`](apps/desktop/electron/README.md) and [`apps/desktop/tauri/README.md`](apps/desktop/tauri/README.md).
 
 ### The character and voice
 
-- The character is now a **code-authored rigged SVG bee** (`bee/src/components/avatar/RiggedBee.tsx`): independent parts, blink, pointer gaze, and lip-sync. The classic raster art is a lazily-loaded style option.
+- The character is now a **code-authored rigged SVG bee** (`apps/web/src/components/avatar/RiggedBee.tsx`): independent parts, blink, pointer gaze, and lip-sync. The classic raster art is a lazily-loaded style option.
 - Voice uses the **Web Speech API** (`speechSynthesis`, built into WebView2/Chromium) with `onboundary` driving the mouth; no API key needed.
 
 ### Voice input in the desktop shells (offline whisper.cpp)
@@ -130,19 +130,19 @@ When the binary + model are present the talk button appears; otherwise it stays 
 
 ## Android app
 
-`mobile/` wraps the same web build in a Capacitor app that opens straight into the **avatar view** and shrinks into **Picture-in-Picture** when you leave it — the bee floats over other apps on the phone. It talks to the gateway over the LAN (`ws://<pc-ip>:19000/ws`).
+`apps/mobile/` wraps the same web build in a Capacitor app that opens straight into the **avatar view** and shrinks into **Picture-in-Picture** when you leave it — the bee floats over other apps on the phone. It talks to the gateway over the LAN (`ws://<pc-ip>:19000/ws`).
 
 ```bash
-cd bee && npm install && npm run build   # build the web app
+cd apps/web && npm install && npm run build   # build the web app
 cd ../mobile && npm install && npm run sync && npm run open   # build/run in Android Studio
 ```
 
-Requires JDK 21 + Android SDK (see [`mobile/README.md`](mobile/README.md)).
+Requires JDK 21 + Android SDK (see [`apps/mobile/README.md`](apps/mobile/README.md)).
 
 ## Development
 
 ```bash
-cd bee
+cd apps/web
 npm run dev         # Vite dev server on :5175
 npm test            # Vitest unit tests
 npm run typecheck   # TypeScript check
@@ -154,27 +154,29 @@ npm run preview     # serve the production build
 
 ```
 jiuwenswarm-bee/
-  bee/                  The Vite/React/TS web app (the single source of truth)
-    src/
-      app/              Entry (main.tsx) and view roots (App.tsx)
-      components/       avatar/, chat/, history/, settings/, common/ UI (styles co-located)
-      gateway/          WebSocket clients + protocol types + config
-      chat/             Conversation state (useChat, message + conversation reducers, drafts)
-      avatar/            Avatar state machine + style preference
-      settings/         Persisted user settings + provider
-      platform/         Desktop-shell bridge and Web Speech TTS
-      lib/              Clipboard, Markdown stripping, code highlighting
-      theme/            Theme resolution + design tokens (light/dark)
-      assets/           classic bee art (transparent `*-cutout.png` used; originals kept)
-  public/               PWA manifest, icon, offline service worker
-  desktop/
-    electron/           Electron shell: always-on-top bee avatar + chat window
-    tauri/              Tauri v2 shell: same app, lightweight native (Rust) wrapper
-  mobile/               Android app (Capacitor): avatar view + Picture-in-Picture
+  apps/
+    web/                The Vite/React/TS web app (the single source of truth)
+      src/
+        app/            Entry (main.tsx) and view roots (App.tsx)
+        components/     avatar/, chat/, history/, settings/, common/ UI (styles co-located)
+        gateway/        WebSocket clients + protocol types + config
+        chat/           Conversation state (useChat, message + conversation reducers, drafts)
+        avatar/         Avatar state machine + style preference
+        settings/       Persisted user settings + provider
+        platform/       Desktop-shell bridge and Web Speech TTS
+        lib/            Clipboard, Markdown stripping, code highlighting
+        theme/          Theme resolution + design tokens (light/dark)
+        assets/         classic bee art (transparent `*-cutout.png` used; originals kept)
+      public/           PWA manifest, icon, offline service worker
+    desktop/
+      electron/         Electron shell: always-on-top bee avatar + chat window
+      tauri/            Tauri v2 shell: same app, lightweight native (Rust) wrapper
+    mobile/             Android app (Capacitor): avatar view + Picture-in-Picture
   docs/
-    en/                 User + development docs (English)
-    zh/                 User docs (Chinese)
-  internal/             Architecture, roadmap, changelog, design notes (not shipped)
+    user/en/            End-user docs (English)
+    user/zh/            End-user docs (Chinese)
+    dev/                Maintainer docs: architecture, naming, run modes, roadmap
+  CHANGELOG.md          User-visible changes per release
 ```
 
 ## Design notes

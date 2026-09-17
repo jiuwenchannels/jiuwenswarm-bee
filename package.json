@@ -1,0 +1,19 @@
+{
+  "name": "jiuwenswarm-bee",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BeeChat — a bee-avatar chatbot channel for JiuwenSwarm (monorepo)",
+  "workspaces": [
+    "apps/web",
+    "apps/mobile",
+    "apps/desktop/electron",
+    "apps/desktop/tauri"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/web run dev",
+    "build": "npm --workspace apps/web run build",
+    "typecheck": "npm --workspace apps/web run typecheck",
+    "test": "npm --workspace apps/web test",
+    "lint": "npm --workspace apps/web run lint"
+  }
+}
