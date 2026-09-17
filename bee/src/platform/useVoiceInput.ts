@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useLocaleContext } from '../i18n/LocaleContext';
 import { isDesktop, shellTranscribe, shellVoiceAvailable } from './desktop';
+import { hasNativeVoice, voiceLog } from './nativeVoice';
 import { Dictation, isRecognitionSupported, recognitionLang } from './recognition';
 import { ShellRecorder } from './recorder';
 import { stopSpeaking } from './speakerStore';
@@ -34,9 +35,10 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
   const recorderRef = useRef<ShellRecorder | null>(null);
   const transcriptRef = useRef('');
   const pttRef = useRef(false);
-  // Android delivers the final result only *after* stop() — so when there is no
-  // transcript yet at release, wait for it (or a short timeout) before sending.
+  // Android delivers partials while you hold, then the final result only *after*
+  // stop() — so hold the last partial and prefer the final when it lands.
   const awaitingFinalRef = useRef(false);
+  const pendingTextRef = useRef('');
   const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const available = shellVoice || (isRecognitionSupported() && !isDesktop());
 
@@ -61,8 +63,11 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     if (!awaitingFinalRef.current) return;
     awaitingFinalRef.current = false;
     clearFlush();
-    const text = transcriptRef.current.trim();
+    // Prefer the final transcript; fall back to the last partial if none came.
+    const text = (transcriptRef.current || pendingTextRef.current).trim();
     transcriptRef.current = '';
+    pendingTextRef.current = '';
+    voiceLog(`flush text="${text}"`);
     if (text) onResult(text);
   }, [clearFlush, onResult]);
 
@@ -72,6 +77,7 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
       pttRef.current = false;
       setListening(false);
       setTranscript('');
+      voiceLog(`end submit=${submit} shell=${shellVoice}`);
 
       if (shellVoice) {
         const recorder = recorderRef.current;
@@ -96,31 +102,38 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
 
       if (!submit) {
         awaitingFinalRef.current = false;
+        pendingTextRef.current = '';
         clearFlush();
         transcriptRef.current = '';
         return;
       }
 
       const text = transcriptRef.current.trim();
-      if (text) {
+      if (text && !hasNativeVoice()) {
         transcriptRef.current = '';
+        voiceLog(`send text="${text}"`);
         onResult(text);
         return;
       }
-      // Nothing captured yet: wait for the platform's final result.
+      // Native (or nothing captured yet): give the platform a moment to deliver
+      // its final transcript, then fall back to the last partial.
+      pendingTextRef.current = text;
       awaitingFinalRef.current = true;
-      flushTimerRef.current = setTimeout(flush, 1500);
+      voiceLog(`end: awaiting final (partial="${text}")`);
+      flushTimerRef.current = setTimeout(flush, text ? 700 : 1500);
     },
     [shellVoice, locale, onResult, clearFlush, flush],
   );
 
   const begin = useCallback(() => {
     if (!available || !enabled || listening) return;
+    voiceLog(`begin available=${available} shell=${shellVoice} enabled=${enabled}`);
     stopSpeaking(); // barge-in
     transcriptRef.current = '';
     setTranscript('');
     setProcessing(false);
     awaitingFinalRef.current = false;
+    pendingTextRef.current = '';
     pttRef.current = true;
 
     if (shellVoice) {
@@ -140,9 +153,11 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
 
     const dictation = new Dictation(recognitionLang(locale), {
       onStart: () => {
+        voiceLog('onStart');
         if (pttRef.current) setListening(true);
       },
       onTranscript: (text, isFinal) => {
+        voiceLog(`onTranscript final=${isFinal} text="${text}"`);
         // Ignore late events from a previous session; only the active press
         // (or one waiting on its final result) may write the transcript.
         if (!pttRef.current && !awaitingFinalRef.current) return;
@@ -154,9 +169,11 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
         if (pttRef.current) end(true);
       },
       onError: () => {
+        voiceLog('onError');
         if (!pttRef.current && !awaitingFinalRef.current) return;
         pttRef.current = false;
         awaitingFinalRef.current = false;
+        pendingTextRef.current = '';
         clearFlush();
         setListening(false);
       },
