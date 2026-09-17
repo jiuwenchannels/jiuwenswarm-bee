@@ -269,6 +269,9 @@ export function AvatarChat() {
         <div className="avatar-chat__char">
           <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={settings.avatarStyle} />
         </div>
+        <span className="avatar-chat__brand" aria-hidden="true">
+          {t.poweredBy} · {t.attribution}
+        </span>
       </div>
 
       {voice.available ? (
@@ -288,13 +291,8 @@ export function AvatarChat() {
           onPointerCancel={() => voice.end(false)}
           onContextMenu={(event) => event.preventDefault()}
         >
-          <span className="avatar-chat__talk-main">
-            {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
-            <span>{talkLabel}</span>
-          </span>
-          <span className="avatar-chat__talk-brand" aria-hidden="true">
-            {t.poweredBy} · {t.attribution}
-          </span>
+          {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
+          <span>{talkLabel}</span>
         </button>
       ) : (
         <p className="avatar-chat__novoice">{t.voice.unavailable}</p>

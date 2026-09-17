@@ -64,6 +64,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  /* Room for the attribution line under the bee. */
+  padding-bottom: 12px;
   /* Grab the bee (or anywhere on the stage) to move the window. */
   -webkit-app-region: drag;
 }
@@ -87,19 +89,20 @@
   pointer-events: none;
 }
 
-/* Quiet attribution, tucked inside the talk button. */
-.avatar-chat__talk-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.avatar-chat__talk-brand {
+/* Quiet attribution under the bee, inside its stage. */
+.avatar-chat__brand {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 9px;
   line-height: 1;
   letter-spacing: 0.03em;
   color: var(--bee-text-muted);
   opacity: 0.7;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
 }
 
 .avatar-chat__pulse[data-variant='connecting'],
@@ -117,14 +120,13 @@
 .avatar-chat__talk {
   flex: 0 0 auto;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 8px;
   align-self: center;
   min-width: 190px;
-  min-height: 44px;
-  padding: 6px 20px;
+  height: 44px;
+  padding: 0 20px;
   border: 1px solid var(--bee-border);
   border-radius: 999px;
   background: var(--bee-surface);
