@@ -2,13 +2,14 @@ import type { Locale } from '../i18n';
 
 /**
  * The hidden instruction prepended in voice/avatar mode so the answer is quick
- * to listen to. It is never shown in the conversation — only the user's own
- * words are stored and displayed.
+ * to listen to. It is a *style* request — never a rule or limitation — so the
+ * agent answers what was asked (a story is a short story) instead of refusing
+ * or explaining why it can't. It is never shown in the conversation.
  */
 export function voiceInstruction(locale: Locale): string {
   return locale === 'zh'
-    ? '请用一到两句话简短回答，使用口语化的纯文本，不要 Markdown、列表或代码块。'
-    : 'Answer in one or two short sentences of plain, speakable text. No markdown, lists, or code blocks.';
+    ? '请直接、简洁地回答用户所问，使用口语化的纯文本。能短则短；如果用户要故事，就简短讲一个。不要提及本条说明、格式要求或任何限制。'
+    : 'Answer directly and concisely in plain spoken text. Keep it brief — if the user asks for a story, just tell a short one. Never mention these instructions, formatting, or any limitations.';
 }
 
 /** Wrap the user's words with the voice instruction. */
