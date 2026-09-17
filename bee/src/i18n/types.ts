@@ -99,6 +99,8 @@ export interface Strings {
     avatar: string;
     voice: string;
     voiceHint: string;
+    concise: string;
+    conciseHint: string;
     gatewayUrl: string;
     gatewayPlaceholder: string;
     gatewayHint: string;

@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: 'system',
   avatarStyle: 'mascot',
   voiceEnabled: true,
+  conciseReplies: true,
   ...envSettingsDefaults(),
 };
 
@@ -82,6 +83,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         theme: 'system',
         avatarStyle: 'mascot',
         voiceEnabled: true,
+        conciseReplies: true,
         gatewayUrl,
         agentId,
         mode,

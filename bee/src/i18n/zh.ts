@@ -100,6 +100,8 @@ export const zh: Strings = {
     avatar: '形象',
     voice: '朗读回答',
     voiceHint: '设备支持时，朗读助手回答。',
+    concise: '语音简短回答',
+    conciseHint: '在形象模式下，自动要求用一两句话的纯文本回答。',
     gatewayUrl: '网关地址',
     gatewayPlaceholder: 'ws://127.0.0.1:19000/ws',
     gatewayHint: '留空则自动检测本地 JiuwenSwarm 网关。',

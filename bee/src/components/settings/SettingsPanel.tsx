@@ -138,6 +138,18 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
               </label>
               <p className="field__hint">{t.settings.voiceHint}</p>
             </div>
+            <div className="field">
+              <label className="field__row">
+                <span className="field__label">{t.settings.concise}</span>
+                <input
+                  type="checkbox"
+                  className="switch"
+                  checked={settings.conciseReplies}
+                  onChange={(event) => update({ conciseReplies: event.target.checked })}
+                />
+              </label>
+              <p className="field__hint">{t.settings.conciseHint}</p>
+            </div>
           </section>
 
           <section className="field-group">

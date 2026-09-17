@@ -10,7 +10,9 @@ import {
 import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
 import { Waveform } from './Waveform';
-import { useStrings } from '../../i18n/LocaleContext';
+import { withVoiceInstruction } from '../../chat/voicePrompt';
+import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
+import { stripMarkdown } from '../../lib/markdown';
 import { desktop, isAndroidOverlay } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
 import { useVoiceInput } from '../../platform/useVoiceInput';
@@ -25,6 +27,7 @@ import './AvatarChat.css';
  */
 export function AvatarChat() {
   const t = useStrings();
+  const { locale } = useLocaleContext();
   const config = useAppConfig();
   const { settings } = useSettings();
   const { messages, avatar, status, busy, activity, send, stop } = useChat(config);
@@ -32,7 +35,16 @@ export function AvatarChat() {
   const [notice, setNotice] = useState<string | null>(null);
   const overlay = isAndroidOverlay();
   const muted = !isSpeechSupported() || !settings.voiceEnabled;
-  const voice = useVoiceInput(send);
+
+  // Voice mode prepends a hidden "answer briefly" instruction; the conversation
+  // still shows (and stores) only the user's own words.
+  const handleVoice = useCallback(
+    (text: string) => {
+      send(text, settings.conciseReplies ? withVoiceInstruction(text, locale) : undefined);
+    },
+    [send, settings.conciseReplies, locale],
+  );
+  const voice = useVoiceInput(handleVoice);
 
   const speakerRef = useRef<Speaker | null>(null);
   const spokenRef = useRef<Set<string>>(new Set());
@@ -143,12 +155,14 @@ export function AvatarChat() {
 
   const lastReply = [...messages]
     .reverse()
-    .find((message) => message.role === 'assistant' && !message.streaming && !message.error)?.text;
+    .find((message) => message.role === 'assistant' && !message.streaming && !message.error)
+    ?.text;
   const caption = voice.listening
     ? voice.transcript || t.voice.listening
     : busy
       ? activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)
-      : notice ?? lastReply ?? (messages.length === 0 ? t.hello : '');
+      : notice ??
+        (lastReply ? stripMarkdown(lastReply) : messages.length === 0 ? t.hello : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
 

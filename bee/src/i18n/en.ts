@@ -100,6 +100,8 @@ export const en: Strings = {
     avatar: 'Character',
     voice: 'Speak replies',
     voiceHint: 'Read assistant answers aloud when your device supports it.',
+    concise: 'Short voice answers',
+    conciseHint: 'In the avatar, silently ask for one–two sentence, plain-text replies.',
     gatewayUrl: 'Gateway URL',
     gatewayPlaceholder: 'ws://127.0.0.1:19000/ws',
     gatewayHint: 'Leave empty to auto-detect the local JiuwenSwarm gateway.',

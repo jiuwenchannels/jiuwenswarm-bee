@@ -13,6 +13,7 @@ const DEFAULTS: UserSettings = {
   agentId: 'researcher',
   mode: 'agent',
   voiceEnabled: true,
+  conciseReplies: true,
 };
 
 describe('settings', () => {

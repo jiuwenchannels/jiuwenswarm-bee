@@ -38,7 +38,7 @@ export interface UseChatResult {
   /** Live "what the agent is doing" line, when the gateway emits one. */
   activity: string | null;
   url: string;
-  send: (text: string) => void;
+  send: (text: string, wire?: string) => void;
   stop: () => void;
   retry: () => void;
   retryMessage: (id: string) => void;
@@ -197,7 +197,7 @@ export function useChat(config: AppConfig): UseChatResult {
   }, [chat]);
 
   const runChat = useCallback(
-    (text: string, appendUser: boolean) => {
+    (text: string, appendUser: boolean, wire?: string) => {
       if (busyRef.current) return;
       const trimmed = text.trim();
       if (!trimmed) return;
@@ -210,14 +210,16 @@ export function useChat(config: AppConfig): UseChatResult {
         return startAssistantMessage(base);
       });
       applyAvatar('send');
-      clientRef.current?.chat(trimmed).catch((error) => handleError(errorMessage(error)));
+      // `wire` lets a caller send a richer prompt (e.g. a hidden voice
+      // instruction) while the conversation stores/displays only the user's words.
+      clientRef.current?.chat((wire ?? trimmed).trim()).catch((error) => handleError(errorMessage(error)));
     },
     [applyAvatar, handleError, updateActive],
   );
 
   const send = useCallback(
-    (text: string) => {
-      runChat(text, true);
+    (text: string, wire?: string) => {
+      runChat(text, true, wire);
     },
     [runChat],
   );

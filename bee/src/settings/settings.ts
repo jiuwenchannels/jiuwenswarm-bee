@@ -15,6 +15,8 @@ export interface UserSettings {
   mode: string;
   /** Speak assistant replies when the platform supports it. */
   voiceEnabled: boolean;
+  /** In voice/avatar mode, ask the agent for short, plain-text answers. */
+  conciseReplies: boolean;
 }
 
 const STORAGE_KEY = 'beechat.settings.v1';
@@ -34,6 +36,10 @@ export function sanitizeSettings(raw: unknown, defaults: UserSettings): UserSett
     mode: readString(source.mode, defaults.mode).trim() || defaults.mode,
     voiceEnabled:
       typeof source.voiceEnabled === 'boolean' ? source.voiceEnabled : defaults.voiceEnabled,
+    conciseReplies:
+      typeof source.conciseReplies === 'boolean'
+        ? source.conciseReplies
+        : defaults.conciseReplies,
   };
 }
 
