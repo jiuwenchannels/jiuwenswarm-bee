@@ -65,6 +65,7 @@ export const en: Strings = {
   voice: {
     pushToTalk: 'Hold to talk',
     listening: 'Listening…',
+    transcribing: 'Transcribing…',
     unavailable: 'Voice isn’t available here — open Settings.',
   },
   style: {

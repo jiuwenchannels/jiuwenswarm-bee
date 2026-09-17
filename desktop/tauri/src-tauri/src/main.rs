@@ -172,6 +172,11 @@ fn transcribe(app: AppHandle, bytes: Vec<u8>, lang: Option<String>) -> Transcrib
     let wav_path = wav.to_string_lossy().to_string();
     let txt_path = format!("{wav_path}.txt");
 
+    let threads = std::thread::available_parallelism()
+        .map(|n| (n.get() / 2).max(1))
+        .unwrap_or(2);
+    let threads = threads.to_string();
+
     let mut command = std::process::Command::new(&bin);
     command.args([
         "-m",
@@ -180,6 +185,10 @@ fn transcribe(app: AppHandle, bytes: Vec<u8>, lang: Option<String>) -> Transcrib
         &wav_path,
         "-l",
         lang.as_deref().unwrap_or("auto"),
+        "-t",
+        threads.as_str(),
+        "-bs",
+        "1",
         "-nt",
         "-otxt",
     ]);

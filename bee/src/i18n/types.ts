@@ -67,6 +67,7 @@ export interface Strings {
   voice: {
     pushToTalk: string;
     listening: string;
+    transcribing: string;
     unavailable: string;
   };
   style: Record<AvatarStyle, string>;

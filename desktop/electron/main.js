@@ -11,6 +11,7 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, nativeImage, screen, protocol, net } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
+const os = require('node:os');
 const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
@@ -262,10 +263,15 @@ function transcribeWav(bytes, lang) {
   }
   return new Promise((resolve) => {
     let child;
+    const threads = Math.max(1, Math.floor(os.cpus().length / 2));
     try {
-      child = spawn(bin, ['-m', model, '-f', wav, '-l', lang || 'auto', '-nt', '-otxt'], {
-        windowsHide: true,
-      });
+      // `-t` uses multiple cores and `-bs 1` is greedy (no beam search): both cut
+      // the wait between releasing the mic and seeing the transcript.
+      child = spawn(
+        bin,
+        ['-m', model, '-f', wav, '-l', lang || 'auto', '-t', String(threads), '-bs', '1', '-nt', '-otxt'],
+        { windowsHide: true },
+      );
     } catch (error) {
       cleanup();
       resolve({ ok: false, error: `spawn-failed: ${error.message}` });

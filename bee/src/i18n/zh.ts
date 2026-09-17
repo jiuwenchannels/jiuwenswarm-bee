@@ -65,6 +65,7 @@ export const zh: Strings = {
   voice: {
     pushToTalk: '按住说话',
     listening: '正在聆听…',
+    transcribing: '识别中…',
     unavailable: '此处不支持语音，请打开设置。',
   },
   style: {

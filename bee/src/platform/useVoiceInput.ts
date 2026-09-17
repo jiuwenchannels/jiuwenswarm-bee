@@ -16,6 +16,8 @@ export interface VoiceInput {
   /** True when a recognizer exists here (web/mic or an installed shell engine). */
   available: boolean;
   listening: boolean;
+  /** True while a shell recording is being transcribed (no live transcript there). */
+  processing: boolean;
   /** Live transcript while listening (web path). */
   transcript: string;
   begin: () => void;
@@ -26,6 +28,7 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
   const { locale } = useLocaleContext();
   const [shellVoice, setShellVoice] = useState(false);
   const [listening, setListening] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [transcript, setTranscript] = useState('');
   const dictationRef = useRef<Dictation | null>(null);
   const recorderRef = useRef<ShellRecorder | null>(null);
@@ -54,9 +57,14 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
         const recorder = recorderRef.current;
         recorderRef.current = null;
         if (!recorder) return;
+        setProcessing(true);
         void recorder.stop().then(async (wav) => {
-          if (!submit || !wav) return;
+          if (!submit || !wav) {
+            setProcessing(false);
+            return;
+          }
           const text = await shellTranscribe(wav, locale === 'zh' ? 'zh' : 'en');
+          setProcessing(false);
           if (text) onResult(text);
         });
         return;
@@ -76,6 +84,7 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     stopSpeaking(); // barge-in
     transcriptRef.current = '';
     setTranscript('');
+    setProcessing(false);
     pttRef.current = true;
 
     if (shellVoice) {
@@ -140,5 +149,5 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     [],
   );
 
-  return { available, listening, transcript, begin, end };
+  return { available, listening, processing, transcript, begin, end };
 }

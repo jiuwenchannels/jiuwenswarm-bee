@@ -34,6 +34,7 @@ export function AvatarChat() {
   const [mouthOpen, setMouthOpen] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [justSent, setJustSent] = useState<string | null>(null);
+  const [activated, setActivated] = useState(false);
   const overlay = isAndroidOverlay();
   const muted = !isSpeechSupported() || !settings.voiceEnabled;
 
@@ -41,6 +42,7 @@ export function AvatarChat() {
   // still shows (and stores) only the user's own words.
   const handleVoice = useCallback(
     (text: string) => {
+      setActivated(true);
       setJustSent(text);
       send(text, settings.conciseReplies ? withVoiceInstruction(text, locale) : undefined);
     },
@@ -161,10 +163,11 @@ export function AvatarChat() {
     ?.text;
   const caption = voice.listening
     ? voice.transcript || t.voice.listening
-    : busy
-      ? justSent ?? activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)
-      : notice ??
-        (lastReply ? stripMarkdown(lastReply) : messages.length === 0 ? t.hello : '');
+    : voice.processing
+      ? t.voice.transcribing
+      : busy
+        ? justSent ?? activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)
+        : notice ?? (!activated ? t.hello : lastReply ? stripMarkdown(lastReply) : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
 
