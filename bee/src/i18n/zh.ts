@@ -50,6 +50,7 @@ export const zh: Strings = {
     rename: '重命名',
     search: '搜索',
     close: '关闭',
+    quit: '退出 BeeChat',
     more: '更多',
     undo: '撤销',
     showMore: '显示更多',

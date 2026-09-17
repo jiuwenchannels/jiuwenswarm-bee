@@ -85,6 +85,7 @@ function createAvatarWindow() {
     fullscreenable: false,
     skipTaskbar: true,
     alwaysOnTop: true,
+    icon: path.join(BEE_ASSETS_DIR, 'bee.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -143,6 +144,7 @@ function createChatWindow() {
     minHeight: 520,
     title: 'BeeChat',
     backgroundColor: '#fdf8ea',
+    icon: path.join(BEE_ASSETS_DIR, 'bee.ico'),
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
   const devUrl = process.env.BEECHAT_URL || (process.argv.includes('--dev') ? 'http://localhost:5175' : null);
@@ -187,9 +189,22 @@ function rebuildTray() {
   tray.setContextMenu(menu);
 }
 
+function trayImage() {
+  // Prefer a Windows .ico (crisp multi-size), then small transparent PNGs. The
+  // full mascot is a 960px white square that looks blank in the notification area.
+  for (const name of ['tray.ico', 'tray-32.png', 'bee.ico', 'bee-static.png']) {
+    const candidate = path.join(BEE_ASSETS_DIR, name);
+    if (!fs.existsSync(candidate)) continue;
+    const image = nativeImage.createFromPath(candidate);
+    log(`[bee] tray icon candidate ${name} empty=${image.isEmpty()}`);
+    if (!image.isEmpty()) return image;
+  }
+  log('[bee] tray icon: no usable image found');
+  return nativeImage.createEmpty();
+}
+
 function createTray() {
-  const iconPath = path.join(BEE_ASSETS_DIR, 'bee-static.png');
-  tray = new Tray(nativeImage.createFromPath(iconPath));
+  tray = new Tray(trayImage());
   tray.setToolTip('BeeChat');
   tray.on('click', toggleAvatar);
   rebuildTray();

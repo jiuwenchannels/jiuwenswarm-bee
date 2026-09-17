@@ -50,6 +50,7 @@ export const en: Strings = {
     rename: 'Rename',
     search: 'Search',
     close: 'Close',
+    quit: 'Quit BeeChat',
     more: 'More',
     undo: 'Undo',
     showMore: 'Show more',

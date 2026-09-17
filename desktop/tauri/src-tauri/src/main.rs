@@ -97,6 +97,11 @@ fn set_click_through(app: AppHandle, enabled: bool) {
     apply_click_through(&app, enabled);
 }
 
+#[tauri::command]
+fn quit(app: AppHandle) {
+    app.exit(0);
+}
+
 // --- Offline speech-to-text (whisper.cpp) --------------------------------
 //
 // Mirrors the Electron shell: the webview records a 16 kHz WAV, this command
@@ -236,6 +241,7 @@ fn main() {
             open_chat_command,
             set_avatar_expanded,
             set_click_through,
+            quit,
             voice_available,
             transcribe
         ])

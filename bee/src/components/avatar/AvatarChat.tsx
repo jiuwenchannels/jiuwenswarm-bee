@@ -14,7 +14,7 @@ import { SettingsPanel } from '../settings/SettingsPanel';
 import { withVoiceInstruction } from '../../chat/voicePrompt';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
 import { stripMarkdown } from '../../lib/markdown';
-import { desktop, isAndroidOverlay } from '../../platform/desktop';
+import { desktop, isAndroidOverlay, isDesktop } from '../../platform/desktop';
 import { Speaker, isSpeechSupported, firstSentences } from '../../platform/speech';
 import { useVoiceInput } from '../../platform/useVoiceInput';
 import { useAppConfig, useSettings } from '../../settings/SettingsContext';
@@ -201,12 +201,13 @@ export function AvatarChat() {
         onPointerCancel={onDragEnd}
       />
 
-      {overlay ? (
+      {overlay || isDesktop() ? (
         <button
           className="avatar-chat__close"
           type="button"
-          aria-label={t.actions.close}
-          onClick={() => desktop.closeOverlay()}
+          aria-label={overlay ? t.actions.close : t.actions.quit}
+          title={overlay ? t.actions.close : t.actions.quit}
+          onClick={() => (overlay ? desktop.closeOverlay() : desktop.quit())}
         >
           ×
         </button>
@@ -226,6 +227,7 @@ export function AvatarChat() {
       {caption || working ? (
         <div
           className="avatar-chat__caption"
+          data-tauri-drag-region
           aria-live="polite"
           data-state={voice.listening ? 'listening' : busy ? 'busy' : 'idle'}
         >
@@ -245,6 +247,7 @@ export function AvatarChat() {
 
       <div
         className="avatar-chat__stage"
+        data-tauri-drag-region
         onPointerDown={onDragStart}
         onPointerMove={onDragMove}
         onPointerUp={onDragEnd}

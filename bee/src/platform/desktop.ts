@@ -9,6 +9,7 @@ interface ElectronBridge {
   setExpanded?: (expanded: boolean) => void;
   setClickThrough?: (enabled: boolean) => void;
   openChat?: () => void;
+  quit?: () => void;
   voiceAvailable?: () => Promise<boolean>;
   transcribe?: (
     bytes: ArrayBuffer,
@@ -78,6 +79,12 @@ export const desktop = {
   setClickThrough(enabled: boolean): void {
     electron()?.setClickThrough?.(enabled);
     void tauri()?.core?.invoke('set_click_through', { enabled });
+  },
+
+  /** Quit the desktop app (Electron/Tauri). No-op in the browser. */
+  quit(): void {
+    electron()?.quit?.();
+    void tauri()?.core?.invoke('quit');
   },
 };
 

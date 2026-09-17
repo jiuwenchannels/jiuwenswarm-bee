@@ -52,6 +52,7 @@ export interface Strings {
     rename: string;
     search: string;
     close: string;
+    quit: string;
     more: string;
     undo: string;
     showMore: string;
