@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   voiceEnabled: true,
   speechRate: 1,
   conciseReplies: true,
+  alwaysShowStarters: false,
   ...envSettingsDefaults(),
 };
 
@@ -92,6 +93,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         voiceEnabled: true,
         speechRate: 1,
         conciseReplies: true,
+        alwaysShowStarters: false,
         gatewayUrl,
         agentId,
         mode,

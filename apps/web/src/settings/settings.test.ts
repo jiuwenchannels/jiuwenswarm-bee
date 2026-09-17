@@ -15,6 +15,7 @@ const DEFAULTS: UserSettings = {
   voiceEnabled: true,
   speechRate: 1,
   conciseReplies: true,
+  alwaysShowStarters: false,
 };
 
 describe('settings', () => {

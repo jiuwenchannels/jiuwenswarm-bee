@@ -374,7 +374,7 @@ function ChatApp() {
       ) : null}
 
       <footer className="app__footer">
-        {messages.length === 0 && conversations.length === 1 ? (
+        {messages.length === 0 && (settings.alwaysShowStarters || conversations.length === 1) ? (
           <StarterPrompts
             prompts={t.starters}
             onPick={(text) => composerRef.current?.setText(text)}

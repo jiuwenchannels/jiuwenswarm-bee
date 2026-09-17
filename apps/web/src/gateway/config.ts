@@ -48,7 +48,7 @@ function inferProtocol(url: string): GatewayProtocol {
 /** Build the connection settings a fresh install should start from. */
 export function envSettingsDefaults(): Omit<
   UserSettings,
-  'theme' | 'avatarStyle' | 'voiceEnabled' | 'speechRate' | 'conciseReplies'
+  'theme' | 'avatarStyle' | 'voiceEnabled' | 'speechRate' | 'conciseReplies' | 'alwaysShowStarters'
 > {
   return {
     gatewayUrl: envExplicitUrl,
@@ -85,4 +85,5 @@ export const config: AppConfig = resolveConfig({
   voiceEnabled: true,
   speechRate: 1,
   conciseReplies: true,
+  alwaysShowStarters: false,
 });

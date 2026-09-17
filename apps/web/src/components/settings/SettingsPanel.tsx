@@ -122,6 +122,18 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
                 ))}
               </div>
             </div>
+            <div className="field">
+              <label className="field__row">
+                <span className="field__label">{t.settings.alwaysShowStarters}</span>
+                <input
+                  type="checkbox"
+                  className="switch"
+                  checked={settings.alwaysShowStarters}
+                  onChange={(event) => update({ alwaysShowStarters: event.target.checked })}
+                />
+              </label>
+              <p className="field__hint">{t.settings.alwaysShowStartersHint}</p>
+            </div>
           </section>
 
           <section className="field-group">

@@ -102,6 +102,8 @@ export interface Strings {
     speechRateHint: string;
     concise: string;
     conciseHint: string;
+    alwaysShowStarters: string;
+    alwaysShowStartersHint: string;
     gatewayUrl: string;
     gatewayPlaceholder: string;
     gatewayHint: string;

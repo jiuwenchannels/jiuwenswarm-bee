@@ -103,6 +103,8 @@ export const zh: Strings = {
     speechRateHint: '朗读回答的速度。',
     concise: '语音简短回答',
     conciseHint: '在形象模式下，自动要求用一两句话的纯文本回答。',
+    alwaysShowStarters: '始终显示建议',
+    alwaysShowStartersHint: '每当对话为空时显示推荐问题，而不仅是首次启动。',
     gatewayUrl: '网关地址',
     gatewayPlaceholder: 'ws://127.0.0.1:19000/ws',
     gatewayHint: '留空则自动检测本地 JiuwenSwarm 网关。',

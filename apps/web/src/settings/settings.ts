@@ -19,6 +19,8 @@ export interface UserSettings {
   speechRate: number;
   /** In voice/avatar mode, ask the agent for short, plain-text answers. */
   conciseReplies: boolean;
+  /** Show the starter suggestions whenever a chat is empty, not just on first launch. */
+  alwaysShowStarters: boolean;
 }
 
 const STORAGE_KEY = 'beechat.settings.v1';
@@ -48,6 +50,10 @@ export function sanitizeSettings(raw: unknown, defaults: UserSettings): UserSett
       typeof source.conciseReplies === 'boolean'
         ? source.conciseReplies
         : defaults.conciseReplies,
+    alwaysShowStarters:
+      typeof source.alwaysShowStarters === 'boolean'
+        ? source.alwaysShowStarters
+        : defaults.alwaysShowStarters,
   };
 }
 

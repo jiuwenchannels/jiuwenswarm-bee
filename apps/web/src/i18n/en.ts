@@ -103,6 +103,8 @@ export const en: Strings = {
     speechRateHint: 'How fast replies are read aloud.',
     concise: 'Short voice answers',
     conciseHint: 'In the avatar, silently ask for one–two sentence, plain-text replies.',
+    alwaysShowStarters: 'Always show suggestions',
+    alwaysShowStartersHint: 'Show the starter prompts whenever a chat is empty, not just on first launch.',
     gatewayUrl: 'Gateway URL',
     gatewayPlaceholder: 'ws://127.0.0.1:19000/ws',
     gatewayHint: 'Leave empty to auto-detect the local JiuwenSwarm gateway.',
