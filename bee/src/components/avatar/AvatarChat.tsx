@@ -51,7 +51,13 @@ export function AvatarChat() {
   const voice = useVoiceInput(handleVoice);
 
   const speakerRef = useRef<Speaker | null>(null);
-  const spokenRef = useRef<Set<string>>(new Set());
+  // Seed with replies already in history so opening the avatar never re-speaks
+  // the previous answer; only replies that arrive this session are spoken.
+  const spokenRef = useRef<Set<string>>(
+    new Set(
+      messages.filter((message) => message.role === 'assistant').map((message) => message.id),
+    ),
+  );
   const speakingRef = useRef(false);
   const answeringRef = useRef(false);
   const boostRef = useRef(0);
