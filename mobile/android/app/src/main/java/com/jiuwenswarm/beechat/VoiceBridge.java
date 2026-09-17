@@ -10,6 +10,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
@@ -24,6 +25,8 @@ import java.util.ArrayList;
  * (see {@code bee/src/platform/nativeVoice.ts}).
  */
 public class VoiceBridge {
+
+    private static final String TAG = "BeeChat";
 
     private final Context context;
     private final WebView webView;
@@ -115,19 +118,34 @@ public class VoiceBridge {
     }
 
     @JavascriptInterface
-    public void speak(String text) {
-        if (!ttsReady || tts == null || text == null || text.isEmpty()) return;
+    public void speak(String text, double rate) {
+        if (!ttsReady || tts == null || text == null || text.isEmpty()) {
+            Log.d(TAG, "speak ignored (ready=" + ttsReady + ")");
+            return;
+        }
+        float speed = (float) (rate > 0 ? Math.min(2.0, Math.max(0.5, rate)) : 1.0);
+        tts.setSpeechRate(speed);
+        Log.d(TAG, "speak len=" + text.length() + " rate=" + speed);
         tts.speak(text, TextToSpeech.QUEUE_ADD, null, "bee-" + System.currentTimeMillis());
     }
 
     @JavascriptInterface
     public void stopSpeaking() {
+        Log.d(TAG, "stopSpeaking");
         if (tts != null) tts.stop();
+    }
+
+    /** Log lines from the web layer, so JS and native share one logcat stream. */
+    @JavascriptInterface
+    public void log(String message) {
+        Log.d(TAG, "web: " + message);
     }
 
     @JavascriptInterface
     public void startListening(String lang) {
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+        boolean available = SpeechRecognizer.isRecognitionAvailable(context);
+        Log.d(TAG, "startListening lang=" + lang + " recognitionAvailable=" + available);
+        if (!available) {
             listeningEvent("error");
             return;
         }
@@ -153,6 +171,7 @@ public class VoiceBridge {
                         recognizer = SpeechRecognizer.createSpeechRecognizer(context);
                         recognizer.setRecognitionListener(new Listener());
                     } catch (Exception e) {
+                        Log.w(TAG, "createSpeechRecognizer failed", e);
                         listeningEvent("error");
                         return;
                     }
@@ -167,8 +186,10 @@ public class VoiceBridge {
                     }
                     try {
                         recognizer.startListening(intent);
+                        Log.d(TAG, "recognizer.startListening ok");
                         listeningEvent("start");
                     } catch (Exception e) {
+                        Log.w(TAG, "recognizer.startListening failed", e);
                         listeningEvent("error");
                     }
                 });
@@ -176,6 +197,7 @@ public class VoiceBridge {
 
     @JavascriptInterface
     public void stopListening() {
+        Log.d(TAG, "stopListening recognizer=" + (recognizer != null));
         main.post(
                 () -> {
                     if (recognizer != null) {
@@ -204,10 +226,14 @@ public class VoiceBridge {
 
     private class Listener implements RecognitionListener {
         @Override
-        public void onReadyForSpeech(Bundle params) {}
+        public void onReadyForSpeech(Bundle params) {
+            Log.d(TAG, "onReadyForSpeech");
+        }
 
         @Override
-        public void onBeginningOfSpeech() {}
+        public void onBeginningOfSpeech() {
+            Log.d(TAG, "onBeginningOfSpeech");
+        }
 
         @Override
         public void onRmsChanged(float rmsdB) {}
@@ -216,10 +242,13 @@ public class VoiceBridge {
         public void onBufferReceived(byte[] buffer) {}
 
         @Override
-        public void onEndOfSpeech() {}
+        public void onEndOfSpeech() {
+            Log.d(TAG, "onEndOfSpeech");
+        }
 
         @Override
         public void onError(int error) {
+            Log.w(TAG, "onError code=" + error + " (" + errorName(error) + ")");
             listeningEvent("error");
         }
 
@@ -227,6 +256,7 @@ public class VoiceBridge {
         public void onResults(Bundle results) {
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             String text = (matches != null && !matches.isEmpty()) ? matches.get(0) : "";
+            Log.d(TAG, "onResults len=" + text.length() + " text=" + text);
             transcriptEvent(text, true);
             listeningEvent("end");
         }
@@ -235,10 +265,38 @@ public class VoiceBridge {
         public void onPartialResults(Bundle partialResults) {
             ArrayList<String> matches =
                     partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            if (matches != null && !matches.isEmpty()) transcriptEvent(matches.get(0), false);
+            if (matches != null && !matches.isEmpty()) {
+                Log.d(TAG, "onPartialResults text=" + matches.get(0));
+                transcriptEvent(matches.get(0), false);
+            }
         }
 
         @Override
         public void onEvent(int eventType, Bundle params) {}
+    }
+
+    private static String errorName(int error) {
+        switch (error) {
+            case SpeechRecognizer.ERROR_AUDIO:
+                return "ERROR_AUDIO";
+            case SpeechRecognizer.ERROR_CLIENT:
+                return "ERROR_CLIENT";
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                return "ERROR_INSUFFICIENT_PERMISSIONS";
+            case SpeechRecognizer.ERROR_NETWORK:
+                return "ERROR_NETWORK";
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                return "ERROR_NETWORK_TIMEOUT";
+            case SpeechRecognizer.ERROR_NO_MATCH:
+                return "ERROR_NO_MATCH";
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                return "ERROR_RECOGNIZER_BUSY";
+            case SpeechRecognizer.ERROR_SERVER:
+                return "ERROR_SERVER";
+            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                return "ERROR_SPEECH_TIMEOUT";
+            default:
+                return "UNKNOWN";
+        }
     }
 }

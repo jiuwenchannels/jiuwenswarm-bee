@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Rational;
 import android.webkit.WebView;
 
@@ -25,24 +26,45 @@ import com.getcapacitor.BridgeActivity;
  */
 public class MainActivity extends BridgeActivity {
 
+    private static final String TAG = "BeeChat";
+
     private static boolean overlayPermissionRequested = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (tryLaunchOverlay()) return;
+
+        // Missing the overlay or mic permission: keep the activity on screen so
+        // the system dialogs can actually be answered, then close once granted.
+        requestOverlayPermissionOnce();
         requestNotificationPermissionOnce();
         requestAudioPermissionOnce();
-
-        // Avatar-only launch: with the overlay permission granted, start the
-        // floating bee and close this activity so the full screen never shows.
-        if (Settings.canDrawOverlays(this) && startOverlayService()) {
-            finishAndRemoveTask();
-            return;
-        }
-
-        // No overlay permission yet: keep the activity so the user can grant it.
-        requestOverlayPermissionOnce();
         installVoiceBridge();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Catches the grant coming back from a dialog or the overlay-settings screen.
+        tryLaunchOverlay();
+    }
+
+    /** Start the floating bee and close the activity, once we are allowed to. */
+    private boolean tryLaunchOverlay() {
+        boolean overlay = Settings.canDrawOverlays(this);
+        boolean audio = hasAudioPermission();
+        Log.d(TAG, "tryLaunchOverlay overlayPermission=" + overlay + " recordAudio=" + audio);
+        if (!overlay || !audio) return false;
+        if (!startOverlayService()) return false;
+        Log.d(TAG, "launching avatar-only, finishing activity");
+        finishAndRemoveTask();
+        return true;
+    }
+
+    private boolean hasAudioPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /** Expose native TTS + speech recognition to the web app as `window.AndroidVoice`. */

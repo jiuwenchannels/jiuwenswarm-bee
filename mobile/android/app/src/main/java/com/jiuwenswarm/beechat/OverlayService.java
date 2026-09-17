@@ -14,11 +14,14 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -41,6 +44,8 @@ import java.util.Map;
  */
 public class OverlayService extends Service {
 
+    private static final String TAG = "BeeChat";
+
     private static final String CHANNEL_ID = "bee_overlay";
     private static final int NOTIFICATION_ID = 42;
 
@@ -54,6 +59,7 @@ public class OverlayService extends Service {
     private WindowManager.LayoutParams params;
     private WebView root;
     private VoiceBridge voiceBridge;
+    private boolean swCleanupDone = false;
 
     private final Handler main = new Handler(Looper.getMainLooper());
 
@@ -66,6 +72,7 @@ public class OverlayService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG, "overlay service onCreate");
         startForegroundNotification();
         createOverlay();
     }
@@ -98,11 +105,17 @@ public class OverlayService extends Service {
                         .setOngoing(true)
                         .build();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                     NOTIFICATION_ID,
                     notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+                            | ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Microphone type is what lets the floating bee keep recording once
+            // the activity is gone (Android 14+ blocks background mic otherwise).
+            startForeground(
+                    NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
@@ -124,6 +137,26 @@ public class OverlayService extends Service {
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        // Always take the freshly bundled assets, never a cached shell.
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        // Forward the page's console.log to logcat under one tag.
+        webView.setWebChromeClient(
+                new WebChromeClient() {
+                    @Override
+                    public boolean onConsoleMessage(ConsoleMessage message) {
+                        Log.d(
+                                TAG,
+                                "web: "
+                                        + message.message()
+                                        + " ("
+                                        + message.sourceId()
+                                        + ":"
+                                        + message.lineNumber()
+                                        + ")");
+                        return true;
+                    }
+                });
 
         // Serve the bundled web build ourselves, with correct MIME types.
         webView.setWebViewClient(
@@ -151,6 +184,24 @@ public class OverlayService extends Service {
                             return new WebResourceResponse(
                                     "text/plain", "utf-8", 404, "Not Found", new HashMap<>(), null);
                         }
+                    }
+
+                    @Override
+                    public void onPageFinished(WebView view, String url) {
+                        // An older build registered a service worker that served a
+                        // stale app shell, hiding every update. Drop it once, then
+                        // reload clean (keeps localStorage settings).
+                        if (swCleanupDone) return;
+                        swCleanupDone = true;
+                        view.evaluateJavascript(
+                                "(function(){try{if(!navigator.serviceWorker||!navigator.serviceWorker.getRegistrations)return false;"
+                                        + "if(!navigator.serviceWorker.controller)return false;"
+                                        + "navigator.serviceWorker.getRegistrations().then(function(rs){for(var i=0;i<rs.length;i++){rs[i].unregister();}});"
+                                        + "return true;}catch(e){return false;}})()",
+                                value -> {
+                                    Log.d(TAG, "page finished, sw controlled=" + value);
+                                    if ("true".equals(value)) view.reload();
+                                });
                     }
                 });
 
