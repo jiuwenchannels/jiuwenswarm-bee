@@ -30,6 +30,12 @@ export interface GatewayEvents {
   onToken?: (text: string) => void;
   onDone?: (sessionId?: string) => void;
   onError?: (message: string) => void;
+  /**
+   * Live mid-run activity from the agent (e.g. "Searching the web", a tool
+   * name). Optional: gateways that never emit it simply leave the UI on its
+   * state-derived fallback.
+   */
+  onActivity?: (activity: string) => void;
 }
 
 /** Common surface implemented by both gateway clients (SDK and product). */

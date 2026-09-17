@@ -60,15 +60,20 @@ export const en: Strings = {
     configure: 'Gateway settings',
     speak: 'Read aloud',
     stopSpeaking: 'Stop reading',
+    collapse: 'Collapse',
+    chat: 'Chat',
+    switchStyle: 'Switch avatar style',
   },
   offline: (url) => `Can't reach JiuwenSwarm at ${url}.`,
   voice: {
     on: '🔊 Voice on',
     off: '🔇 Voice off',
+    pushToTalk: 'Hold to talk',
+    listening: 'Listening…',
   },
   style: {
+    rigged: 'Animated',
     mascot: 'Classic',
-    vector: 'Animated',
   },
   theme: {
     label: 'Theme',
@@ -125,5 +130,12 @@ export const en: Strings = {
     none: 'No matches',
     next: 'Next match',
     previous: 'Previous match',
+  },
+  onboarding: {
+    hint: 'Click the bee to chat',
+    drop: 'Drop a text file to add it',
+  },
+  proactive: {
+    reconnected: "I'm back.",
   },
 };

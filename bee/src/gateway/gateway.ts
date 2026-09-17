@@ -256,6 +256,17 @@ export class GatewayClient {
         resolve?.();
         break;
       }
+      case 'activity':
+      case 'tool': {
+        const text =
+          typeof envelope.text === 'string'
+            ? envelope.text
+            : typeof envelope.message === 'string'
+              ? envelope.message
+              : '';
+        if (text) this.events.onActivity?.(text);
+        break;
+      }
       case 'error': {
         const message = typeof envelope.message === 'string' ? envelope.message : 'Unknown gateway error';
         this.failChat(new Error(message));

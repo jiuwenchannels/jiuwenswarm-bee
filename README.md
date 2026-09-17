@@ -28,6 +28,8 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Rich **Markdown + GFM** replies (tables, lists, links) with **syntax-highlighted** code blocks and a copy button, sanitized by `rehype-sanitize`
 - Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
+- **2026 character**: a code-authored rigged SVG bee (independent wings / antennae / eyes / mouth) that breathes, blinks, looks at your pointer, and lip-syncs; the classic raster art is a lazily-loaded option
+- **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), plus onboarding, a live activity line, and drop-a-text-file-to-compose
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
 - Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint
@@ -35,7 +37,7 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Docked history sidebar on wide screens; undo-delete; focus-trapped dialogs
 - Command palette (**⌘/Ctrl + K**), keyboard-first input (Enter to send, Shift+Enter for newline, `/` to focus)
 - Mobile layout, **installable PWA with an offline app shell**, accessibility: `aria-live` answers, reduced-motion support, `data-testid` coverage
-- Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app
+- Spoken replies (TTS) and speech input (dictation): Web Speech in the browser, native TTS + speech recognition in the Android app, and **offline whisper.cpp** in the desktop shells (when installed — see below)
 - Zero backend: talks to the JiuwenSwarm WebSocket gateway directly (no gateway changes needed)
 
 ## Quick start
@@ -107,8 +109,20 @@ Both give: a draggable assistant (position remembered), click-to-expand inline c
 
 ### The character and voice
 
-- The character is an inline **SVG** (`bee/src/components/avatar/AvatarCharacter.tsx`) with states `idle / thinking / answering / error` — **swap the SVG (or drop in a Lottie/Rive renderer) without touching the chat logic**.
+- The character is now a **code-authored rigged SVG bee** (`bee/src/components/avatar/RiggedBee.tsx`): independent parts, blink, pointer gaze, and lip-sync. The classic raster art is a lazily-loaded style option.
 - Voice uses the **Web Speech API** (`speechSynthesis`, built into WebView2/Chromium) with `onboundary` driving the mouth; no API key needed.
+
+### Voice input in the desktop shells (offline whisper.cpp)
+
+Electron/Tauri webviews ship no cloud recognizer, so push-to-talk there runs **locally**: the renderer records a 16 kHz WAV and the shell transcribes it with a **whisper.cpp** CLI. Nothing is bundled — install it once:
+
+1. Get a `whisper-cli` binary (build [whisper.cpp](https://github.com/ggml-org/whisper.cpp), or use a release) and a model, e.g. `ggml-base.bin` (from `models/download-ggml-model.sh base`).
+2. Put both in the shell's userData `whisper/` folder:
+   - Electron: `%APPDATA%\jiuwenswarm-bee\whisper\` (or wherever `app.getPath('userData')` points)
+   - Tauri: the app-config dir `…/whisper/`
+3. Or point at them explicitly with `BEE_WHISPER_DIR` / `BEE_WHISPER_BIN` / `BEE_WHISPER_MODEL`.
+
+When the binary + model are present the talk button appears; otherwise it stays hidden. The browser (`#avatar` in Chrome/Edge) and Android keep their built-in recognizers — none of this applies there.
 
 ## Android app
 
@@ -147,7 +161,7 @@ jiuwenswarm-bee/
       platform/         Desktop-shell bridge and Web Speech TTS
       lib/              Clipboard, Markdown stripping, code highlighting
       theme/            Theme resolution + design tokens (light/dark)
-      assets/           bee-static.png, bee-flying.webp, bee-mark.png (cut-out)
+      assets/           classic bee art (bee-static.png / bee-flying.webp, lazily loaded)
   public/               PWA manifest, icon, offline service worker
   desktop/
     electron/           Electron shell: always-on-top bee avatar + chat window

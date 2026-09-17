@@ -9,4 +9,7 @@ contextBridge.exposeInMainWorld('bee', {
   hidePet: () => ipcRenderer.send('bee:hide-pet'),
   quit: () => ipcRenderer.send('bee:quit'),
   log: (message) => ipcRenderer.send('bee:log', message),
+  // Offline speech-to-text via whisper.cpp (see main.js).
+  voiceAvailable: () => ipcRenderer.invoke('bee:voice-available'),
+  transcribe: (bytes, lang) => ipcRenderer.invoke('bee:transcribe', bytes, lang),
 });

@@ -1,13 +1,13 @@
-/** The assistant avatar can be rendered two ways; the choice is remembered. */
-export type AvatarStyle = 'mascot' | 'vector';
+/** The assistant character can be rendered two ways; the choice is remembered. */
+export type AvatarStyle = 'rigged' | 'mascot';
 
 const STORAGE_KEY = 'beechat.avatarStyle';
 
 export function loadAvatarStyle(): AvatarStyle {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'vector' ? 'vector' : 'mascot';
+    return localStorage.getItem(STORAGE_KEY) === 'mascot' ? 'mascot' : 'rigged';
   } catch {
-    return 'mascot';
+    return 'rigged';
   }
 }
 

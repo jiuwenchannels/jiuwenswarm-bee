@@ -28,9 +28,11 @@ items to [changelog.md](changelog.md).
 - Grouped/localized history sidebar, sidebar scrim + swipe, top toasts
 - Offline app shell (service worker) and long-thread rendering via `content-visibility`
 - Inter variable font, ⌘K affordance, composer hint
+- 2026 avatar pass: rigged SVG bee (blink/gaze/lip-sync), lazily-loaded classic art, voice-first push-to-talk + waveform + barge-in, live activity line, onboarding, proactive reconnect cue, drop-to-compose
 
 ## Next
 
+- **Realtime voice & true proactivity (backend)**: natural turn-taking / speech-to-speech and agent-initiated messages need gateway support (audio stream, pushed events). The client seams are in place (`GatewayEvents.onActivity`; the avatar activity line renders when frames arrive).
 - **Hive vocabulary**: apply the `pollen` / `waggle` / `honey` lexicon (see
   [naming.md](naming.md)) to feature labels where it adds meaning, starting with a
   `honey` cue when an answer finishes.

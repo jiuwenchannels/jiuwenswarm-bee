@@ -34,6 +34,21 @@ A client-only polish pass on the web app (no gateway/backend changes).
   sticky offline banner with a Gateway-settings shortcut, mobile-keyboard inset,
   focus-trapped dialogs, lazy-loaded Markdown/highlighter chunk, high-contrast
   tokens, and locale-aware dates.
+- **2026 avatar pass**: the assistant is now a code-authored **rigged SVG bee**
+  (independent wings / antennae / eyes / mouth) that breathes, blinks, follows the
+  pointer, and lip-syncs; the classic raster art is a lazily-loaded option (the
+  1.84 MB WebP no longer loads by default). The avatar view is **voice-first**:
+  push-to-talk with a live mic-level waveform and **barge-in** (speaking cancels
+  the bee mid-sentence), plus a live **activity line**, an onboarding hint, a
+  proactive "I'm back" on reconnect, drop-a-text-file-to-compose, and fully
+  localized chrome. Engine now recognizes `chat.activity` / `chat.tool` frames —
+  rendered when a gateway emits them (backend-blocked, seam in place).
+- **Desktop voice input (offline)**: the Electron and Tauri shells can now do
+  push-to-talk with a local **whisper.cpp** CLI — the renderer records a 16 kHz
+  WAV and the shell transcribes it; the talk button appears only when a
+  `whisper-cli` binary + `ggml-*.bin` model are installed (userData `whisper/` or
+  `BEE_WHISPER_*` env). Previously push-to-talk was hidden in the shells because
+  their webview has no cloud recognizer. (Tauri Rust side not compiled in CI.)
 
 ## 0.1.0
 

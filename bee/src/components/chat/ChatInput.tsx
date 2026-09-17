@@ -10,6 +10,7 @@ import {
 
 import { loadDraft, saveDraft } from '../../chat/draftStorage';
 import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
+import { isDesktop } from '../../platform/desktop';
 import { Dictation, isRecognitionSupported, recognitionLang } from '../../platform/recognition';
 import './Chat.css';
 
@@ -36,7 +37,9 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   const { locale } = useLocaleContext();
   const [value, setValue] = useState(() => loadDraft(draftKey));
   const [listening, setListening] = useState(false);
-  const [dictationSupported] = useState(isRecognitionSupported);
+  // Web Speech recognition needs Chromium's cloud speech service, which the
+  // desktop shells don't ship — offering the mic there only fails at runtime.
+  const [dictationSupported] = useState(() => isRecognitionSupported() && !isDesktop());
   const dictationRef = useRef<Dictation | null>(null);
   const baseRef = useRef('');
   const inputRef = useRef<HTMLTextAreaElement>(null);

@@ -9,6 +9,11 @@ interface ElectronBridge {
   setExpanded?: (expanded: boolean) => void;
   setClickThrough?: (enabled: boolean) => void;
   openChat?: () => void;
+  voiceAvailable?: () => Promise<boolean>;
+  transcribe?: (
+    bytes: ArrayBuffer,
+    lang?: string,
+  ) => Promise<{ ok: boolean; text?: string; error?: string }>;
 }
 
 interface TauriGlobal {
@@ -75,3 +80,53 @@ export const desktop = {
     void tauri()?.core?.invoke('set_click_through', { enabled });
   },
 };
+
+/**
+ * True when the desktop shell has an offline speech-to-text engine wired
+ * (whisper.cpp binary + model present). The UI shows push-to-talk only then.
+ */
+export async function shellVoiceAvailable(): Promise<boolean> {
+  const electronBridge = electron();
+  if (electronBridge?.voiceAvailable) {
+    try {
+      return Boolean(await electronBridge.voiceAvailable());
+    } catch {
+      return false;
+    }
+  }
+  const tauriGlobal = tauri();
+  if (tauriGlobal?.core) {
+    try {
+      return Boolean(await tauriGlobal.core.invoke('voice_available'));
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/** Transcribe 16 kHz mono WAV bytes via the shell's whisper.cpp; null on failure. */
+export async function shellTranscribe(bytes: ArrayBuffer, lang?: string): Promise<string | null> {
+  const electronBridge = electron();
+  if (electronBridge?.transcribe) {
+    try {
+      const result = await electronBridge.transcribe(bytes, lang);
+      return result?.ok ? (result.text ?? null) : null;
+    } catch {
+      return null;
+    }
+  }
+  const tauriGlobal = tauri();
+  if (tauriGlobal?.core) {
+    try {
+      const result = (await tauriGlobal.core.invoke('transcribe', {
+        bytes: Array.from(new Uint8Array(bytes)),
+        lang,
+      })) as { ok?: boolean; text?: string } | null;
+      return result?.ok ? (result.text ?? null) : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}

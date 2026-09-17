@@ -1,9 +1,7 @@
-import beeFlying from '../../assets/bee-flying.webp';
-import beeMark from '../../assets/bee-mark.png';
 import { type AvatarState } from '../../avatar/avatar';
 import { useStrings } from '../../i18n/LocaleContext';
-import { useResolvedTheme } from '../../settings/SettingsContext';
 import { CompanionBees } from './CompanionBees';
+import { RiggedBee } from './RiggedBee';
 import './Avatar.css';
 
 export function BeeAvatar({
@@ -16,11 +14,6 @@ export function BeeAvatar({
   compact?: boolean;
 }) {
   const t = useStrings();
-  const resolvedTheme = useResolvedTheme();
-  const active = state === 'thinking' || state === 'answering';
-  // The flying art has an opaque light background; on dark it would show a box,
-  // so dark falls back to the transparent cut-out (animated by CSS).
-  const heroImage = active && resolvedTheme === 'light' ? beeFlying : beeMark;
 
   if (compact) {
     return (
@@ -29,7 +22,7 @@ export function BeeAvatar({
         data-testid="bee-avatar-compact"
         data-variant={state}
       >
-        <img className="bee-avatar__image" src={beeMark} alt="" aria-hidden="true" draggable={false} />
+        <RiggedBee state={state} />
         {showLabel ? (
           <span className="bee-avatar__label" data-testid="bee-avatar-label">
             {t.avatar[state]}
@@ -43,14 +36,9 @@ export function BeeAvatar({
     <div className={`bee-avatar bee-avatar--${state}`} data-testid="bee-avatar" data-variant={state}>
       <div className="bee-avatar__stage">
         <CompanionBees />
-        <img
-          className="bee-avatar__image"
-          src={heroImage}
-          data-image={heroImage === beeFlying ? 'flying' : 'mark'}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-        />
+        <div className="bee-avatar__character">
+          <RiggedBee state={state} />
+        </div>
       </div>
       {showLabel ? (
         <span className="bee-avatar__label" data-testid="bee-avatar-label">

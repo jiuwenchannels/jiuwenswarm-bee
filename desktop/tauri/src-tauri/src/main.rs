@@ -97,13 +97,138 @@ fn set_click_through(app: AppHandle, enabled: bool) {
     apply_click_through(&app, enabled);
 }
 
+// --- Offline speech-to-text (whisper.cpp) --------------------------------
+//
+// Mirrors the Electron shell: the webview records a 16 kHz WAV, this command
+// transcribes it with a local whisper.cpp CLI. Drop `whisper-cli[.exe]` + a
+// `ggml-*.bin` model into the app-config `whisper/` folder (or set
+// BEE_WHISPER_BIN / BEE_WHISPER_MODEL). Absent → the UI hides push-to-talk.
+//
+// NOTE: not compiled/verified here (no Rust toolchain); run `cargo build`.
+
+#[derive(serde::Serialize)]
+struct TranscribeResult {
+    ok: bool,
+    text: Option<String>,
+    error: Option<String>,
+}
+
+fn whisper_paths(app: &AppHandle) -> (PathBuf, PathBuf) {
+    let bin_name = if cfg!(windows) { "whisper-cli.exe" } else { "whisper-cli" };
+    let bin_override = std::env::var("BEE_WHISPER_BIN").map(PathBuf::from).ok();
+    let model_override = std::env::var("BEE_WHISPER_MODEL").map(PathBuf::from).ok();
+
+    let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Ok(dir) = std::env::var("BEE_WHISPER_DIR") {
+        candidates.push(PathBuf::from(dir));
+    }
+    // repo-local `whisper/` (dev), then the app-config folder.
+    if let Ok(cwd) = std::env::current_dir() {
+        candidates.push(cwd.join("..").join("..").join("whisper"));
+    }
+    if let Ok(dir) = app.path().app_config_dir() {
+        candidates.push(dir.join("whisper"));
+    }
+
+    for dir in &candidates {
+        let bin = bin_override.clone().unwrap_or_else(|| dir.join(bin_name));
+        let model = model_override.clone().unwrap_or_else(|| dir.join("ggml-base.bin"));
+        if bin.exists() && model.exists() {
+            return (bin, model);
+        }
+    }
+    let fallback = candidates.into_iter().next().unwrap_or_else(|| PathBuf::from("whisper"));
+    (
+        bin_override.unwrap_or_else(|| fallback.join(bin_name)),
+        model_override.unwrap_or_else(|| fallback.join("ggml-base.bin")),
+    )
+}
+
+#[tauri::command]
+fn voice_available(app: AppHandle) -> bool {
+    let (bin, model) = whisper_paths(&app);
+    bin.exists() && model.exists()
+}
+
+#[tauri::command]
+fn transcribe(app: AppHandle, bytes: Vec<u8>, lang: Option<String>) -> TranscribeResult {
+    let (bin, model) = whisper_paths(&app);
+    if !bin.exists() || !model.exists() {
+        return TranscribeResult {
+            ok: false,
+            text: None,
+            error: Some("voice-unavailable".into()),
+        };
+    }
+    let mut wav = std::env::temp_dir();
+    wav.push(format!("bee-voice-{}.wav", std::process::id()));
+    if std::fs::write(&wav, &bytes).is_err() {
+        return TranscribeResult {
+            ok: false,
+            text: None,
+            error: Some("write-failed".into()),
+        };
+    }
+    let wav_path = wav.to_string_lossy().to_string();
+    let txt_path = format!("{wav_path}.txt");
+
+    let mut command = std::process::Command::new(&bin);
+    command.args([
+        "-m",
+        model.to_string_lossy().as_ref(),
+        "-f",
+        &wav_path,
+        "-l",
+        lang.as_deref().unwrap_or("auto"),
+        "-nt",
+        "-otxt",
+    ]);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    }
+    let output = command.output();
+
+    let text = std::fs::read_to_string(&txt_path).ok();
+    let _ = std::fs::remove_file(&wav);
+    let _ = std::fs::remove_file(&txt_path);
+
+    match output {
+        Ok(result) if result.status.success() => match text {
+            Some(value) if !value.trim().is_empty() => TranscribeResult {
+                ok: true,
+                text: Some(value.trim().to_string()),
+                error: None,
+            },
+            _ => TranscribeResult {
+                ok: false,
+                text: None,
+                error: Some("empty".into()),
+            },
+        },
+        Ok(result) => TranscribeResult {
+            ok: false,
+            text: None,
+            error: Some(String::from_utf8_lossy(&result.stderr).to_string()),
+        },
+        Err(error) => TranscribeResult {
+            ok: false,
+            text: None,
+            error: Some(error.to_string()),
+        },
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             open_chat_command,
             set_avatar_expanded,
-            set_click_through
+            set_click_through,
+            voice_available,
+            transcribe
         ])
         .setup(|app| {
             if let Some((x, y)) = load_position(app.handle()) {

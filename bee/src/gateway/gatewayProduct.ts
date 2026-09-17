@@ -72,6 +72,12 @@ export function productErrorMessage(payload: Record<string, unknown> | undefined
   return typeof message === 'string' && message.length > 0 ? message : 'Agent error';
 }
 
+/** A short "what the agent is doing" line from an activity/tool frame. */
+export function productActivityText(payload: Record<string, unknown> | undefined): string | null {
+  const value = payload?.message ?? payload?.content ?? payload?.label ?? payload?.name ?? payload?.tool;
+  return typeof value === 'string' && value.length > 0 ? value : null;
+}
+
 // ---------------------------------------------------------------------------
 // Client
 // ---------------------------------------------------------------------------
@@ -240,6 +246,14 @@ export class ProductGatewayClient {
         const message = productErrorMessage(payload);
         this.failChat(new Error(message));
         this.events.onError?.(message);
+        break;
+      }
+      case 'chat.activity':
+      case 'chat.tool':
+      case 'chat.tool_call':
+      case 'chat.step': {
+        const text = productActivityText(payload);
+        if (text) this.events.onActivity?.(text);
         break;
       }
       default:

@@ -35,6 +35,8 @@ export interface UseChatResult {
   avatar: AvatarState;
   status: GatewayStatus;
   busy: boolean;
+  /** Live "what the agent is doing" line, when the gateway emits one. */
+  activity: string | null;
   url: string;
   send: (text: string) => void;
   stop: () => void;
@@ -85,6 +87,7 @@ export function useChat(config: AppConfig): UseChatResult {
   const [avatar, setAvatar] = useState<AvatarState>('idle');
   const [status, setStatus] = useState<GatewayStatus>('disconnected');
   const [busy, setBusy] = useState(false);
+  const [activity, setActivity] = useState<string | null>(null);
   const [targetIndex, setTargetIndex] = useState(0);
 
   const clientRef = useRef<ChatGateway | null>(null);
@@ -126,6 +129,7 @@ export function useChat(config: AppConfig): UseChatResult {
       busyRef.current = false;
       cancelledRef.current = false;
       setBusy(false);
+      setActivity(null);
       if (!hadInflightChat) return;
       applyAvatar('error');
       updateActive((previous) => {
@@ -150,6 +154,7 @@ export function useChat(config: AppConfig): UseChatResult {
       onToken: (text) => {
         if (cancelledRef.current) return;
         applyAvatar('first-token');
+        setActivity(null);
         updateActive((previous) => appendToLastAssistant(previous, text));
       },
       onDone: () => {
@@ -159,10 +164,12 @@ export function useChat(config: AppConfig): UseChatResult {
         }
         busyRef.current = false;
         setBusy(false);
+        setActivity(null);
         applyAvatar('done');
         updateActive(finishLastAssistant);
       },
       onError: handleError,
+      onActivity: (text) => setActivity(text),
     });
     clientRef.current = client;
 
@@ -197,6 +204,7 @@ export function useChat(config: AppConfig): UseChatResult {
       busyRef.current = true;
       cancelledRef.current = false;
       setBusy(true);
+      setActivity(null);
       updateActive((previous) => {
         const base = appendUser ? addUserMessage(previous, trimmed) : previous;
         return startAssistantMessage(base);
@@ -219,6 +227,7 @@ export function useChat(config: AppConfig): UseChatResult {
     if (!busyRef.current) return;
     busyRef.current = false;
     setBusy(false);
+    setActivity(null);
     applyAvatar('done');
     updateActive(stopLastAssistant);
   }, [applyAvatar, updateActive]);
@@ -268,6 +277,7 @@ export function useChat(config: AppConfig): UseChatResult {
     busyRef.current = false;
     cancelledRef.current = false;
     setBusy(false);
+    setActivity(null);
     applyAvatar('reset');
     // Start a fresh gateway session so the new thread has no shared context.
     clientRef.current?.createSession().catch(() => {});
@@ -283,6 +293,7 @@ export function useChat(config: AppConfig): UseChatResult {
       busyRef.current = false;
       cancelledRef.current = false;
       setBusy(false);
+      setActivity(null);
       applyAvatar('reset');
     },
     [applyAvatar],
@@ -345,6 +356,7 @@ export function useChat(config: AppConfig): UseChatResult {
     avatar,
     status,
     busy,
+    activity,
     url: target.url,
     send,
     stop,

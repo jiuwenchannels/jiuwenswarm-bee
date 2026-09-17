@@ -9,6 +9,9 @@ desktop/tauri/src-tauri/gen/
 .vite/
 coverage/
 
+# Local whisper.cpp speech-to-text (binary + model, installed per machine)
+whisper/
+
 # Tauri-generated mobile icons (desktop icons are committed)
 desktop/tauri/src-tauri/icons/android/
 desktop/tauri/src-tauri/icons/ios/

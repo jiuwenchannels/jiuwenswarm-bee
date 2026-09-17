@@ -1,0 +1,27 @@
+.waveform {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  width: 34px;
+  flex: 0 0 auto;
+}
+
+.waveform__bar {
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--bee-text-muted);
+  transform-origin: center;
+  transition: transform 80ms linear;
+}
+
+.waveform--active .waveform__bar {
+  background: var(--bee-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveform__bar {
+    transition: none;
+  }
+}

@@ -5,6 +5,7 @@ import {
   ProductGatewayClient,
   isTerminalEvent,
   parseProductFrame,
+  productActivityText,
   productDeltaText,
   productErrorMessage,
 } from './gatewayProduct';
@@ -52,6 +53,13 @@ describe('product protocol helpers', () => {
     expect(productErrorMessage(undefined)).toBe('Agent error');
   });
 
+  it('extracts a live activity line', () => {
+    expect(productActivityText({ message: 'Searching the web' })).toBe('Searching the web');
+    expect(productActivityText({ tool: 'write_file' })).toBe('write_file');
+    expect(productActivityText({ content: '' })).toBeNull();
+    expect(productActivityText(undefined)).toBeNull();
+  });
+
   it('decides terminal events', () => {
     expect(isTerminalEvent('chat.final', {})).toBe(true);
     expect(isTerminalEvent('chat.final', { event_type: 'team.runtime_ready' })).toBe(false);
@@ -67,11 +75,12 @@ describe('ProductGatewayClient', () => {
     const onToken = vi.fn();
     const onDone = vi.fn();
     const onError = vi.fn();
+    const onActivity = vi.fn();
     const client = new ProductGatewayClient(
       { url: 'ws://test/ws', reconnect: false, socketFactory: () => socket },
-      { onToken, onDone, onError },
+      { onToken, onDone, onError, onActivity },
     );
-    return { socket, client, onToken, onDone, onError };
+    return { socket, client, onToken, onDone, onError, onActivity };
   }
 
   it('resolves open after the connection.ack handshake', async () => {
@@ -113,5 +122,20 @@ describe('ProductGatewayClient', () => {
     socket.message({ type: 'event', event: 'chat.error', payload: { message: 'boom' } });
     await expect(chat).rejects.toThrow('boom');
     expect(onError).toHaveBeenCalledWith('boom');
+  });
+
+  it('surfaces live activity frames, and ignores empty ones', async () => {
+    const { socket, client, onActivity } = setup();
+    const opened = client.open();
+    socket.message({ type: 'event', event: 'connection.ack', payload: { session_id: 's1' } });
+    await opened;
+
+    socket.message({ type: 'event', event: 'chat.activity', payload: { message: 'Searching the web' } });
+    socket.message({ type: 'event', event: 'chat.tool', payload: { name: 'write_file' } });
+    socket.message({ type: 'event', event: 'chat.activity', payload: { message: '' } });
+
+    expect(onActivity).toHaveBeenNthCalledWith(1, 'Searching the web');
+    expect(onActivity).toHaveBeenNthCalledWith(2, 'write_file');
+    expect(onActivity).toHaveBeenCalledTimes(2);
   });
 });

@@ -15,17 +15,9 @@
   justify-content: center;
 }
 
-.bee-avatar__image {
+.bee-avatar__character {
   width: 128px;
-  height: auto;
-  mix-blend-mode: normal;
-  transform-origin: 50% 60%;
-}
-
-/* The flying art is opaque with a light background: `multiply` hides it on the
-   light page. The neutral (mark) cut-out needs no blending. */
-.bee-avatar__image[data-image='flying'] {
-  mix-blend-mode: multiply;
+  height: 128px;
 }
 
 .bee-avatar__label {
@@ -34,10 +26,7 @@
   margin: 0;
 }
 
-/*
- * Compact avatar used centered in the title row. Uses the transparent,
- * cropped `bee-mark` cut-out, so no tile or blend mode is needed.
- */
+/* Compact avatar used centered in the title row. */
 .bee-avatar--compact {
   display: inline-flex;
   align-items: center;
@@ -45,53 +34,12 @@
   min-height: 0;
 }
 
-.bee-avatar--compact .bee-avatar__image {
-  width: 32px;
-  height: 32px;
-  mix-blend-mode: normal;
-  animation: none;
+.bee-avatar--compact .rbe {
+  width: 30px;
+  height: 30px;
 }
 
 .bee-avatar--compact .bee-avatar__label {
   font-size: 12px;
   white-space: nowrap;
-}
-
-.bee-avatar--thinking .bee-avatar__image {
-  animation: bee-hover 1.6s ease-in-out infinite;
-}
-
-.bee-avatar--answering .bee-avatar__image {
-  animation: bee-bob 2.4s ease-in-out infinite;
-}
-
-.bee-avatar--error .bee-avatar__image {
-  filter: grayscale(0.35) saturate(0.6);
-}
-
-@keyframes bee-hover {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-2deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(2deg);
-  }
-}
-
-@keyframes bee-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bee-avatar--thinking .bee-avatar__image,
-  .bee-avatar--answering .bee-avatar__image {
-    animation: none;
-  }
 }

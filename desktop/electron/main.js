@@ -11,6 +11,7 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, nativeImage, screen, protocol, net } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
+const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
 const AVATAR_COLLAPSED = { width: 220, height: 280 };
@@ -192,6 +193,109 @@ function createTray() {
   tray.on('click', toggleAvatar);
   rebuildTray();
 }
+
+// --- Offline speech-to-text (whisper.cpp) --------------------------------
+//
+// The webview has no cloud recognizer, so the renderer records a 16 kHz WAV and
+// this process transcribes it with a local whisper.cpp CLI. Nothing is bundled:
+// drop `whisper-cli[.exe]` + a `ggml-*.bin` model into the userData `whisper/`
+// folder (or point BEE_WHISPER_BIN / BEE_WHISPER_MODEL at them). When absent,
+// the UI simply hides push-to-talk.
+
+function whisperPaths() {
+  const binName = process.platform === 'win32' ? 'whisper-cli.exe' : 'whisper-cli';
+  const modelName = 'ggml-base.bin';
+  const binOverride = process.env.BEE_WHISPER_BIN;
+  const modelOverride = process.env.BEE_WHISPER_MODEL;
+  const candidates = [];
+  if (process.env.BEE_WHISPER_DIR) candidates.push(process.env.BEE_WHISPER_DIR);
+  // repo-local `whisper/` (dev), then userData and the known packaged names.
+  candidates.push(path.join(__dirname, '..', '..', 'whisper'));
+  candidates.push(path.join(app.getPath('userData'), 'whisper'));
+  const appData = app.getPath('appData');
+  for (const name of [
+    'BeeChat',
+    'jiuwenswarm-bee-desktop-electron',
+    'jiuwenswarm-bee-desktop',
+    'com.jiuwenswarm.beechat',
+  ]) {
+    candidates.push(path.join(appData, name, 'whisper'));
+  }
+  for (const dir of candidates) {
+    const bin = binOverride || path.join(dir, binName);
+    const model = modelOverride || path.join(dir, modelName);
+    if (fs.existsSync(bin) && fs.existsSync(model)) return { bin, model };
+  }
+  const fallback = process.env.BEE_WHISPER_DIR || candidates[0];
+  return {
+    bin: binOverride || path.join(fallback, binName),
+    model: modelOverride || path.join(fallback, modelName),
+  };
+}
+
+function voiceAvailable() {
+  const { bin, model } = whisperPaths();
+  return fs.existsSync(bin) && fs.existsSync(model);
+}
+
+function transcribeWav(bytes, lang) {
+  const { bin, model } = whisperPaths();
+  if (!voiceAvailable()) return { ok: false, error: 'voice-unavailable' };
+  const wav = path.join(app.getPath('temp'), `bee-voice-${Date.now()}.wav`);
+  const txt = `${wav}.txt`;
+  const cleanup = () => {
+    try {
+      fs.unlinkSync(wav);
+    } catch {
+      /* best effort */
+    }
+    try {
+      fs.unlinkSync(txt);
+    } catch {
+      /* best effort */
+    }
+  };
+  try {
+    fs.writeFileSync(wav, Buffer.from(new Uint8Array(bytes)));
+  } catch (error) {
+    return { ok: false, error: `write-failed: ${error.message}` };
+  }
+  return new Promise((resolve) => {
+    let child;
+    try {
+      child = spawn(bin, ['-m', model, '-f', wav, '-l', lang || 'auto', '-nt', '-otxt'], {
+        windowsHide: true,
+      });
+    } catch (error) {
+      cleanup();
+      resolve({ ok: false, error: `spawn-failed: ${error.message}` });
+      return;
+    }
+    let stderr = '';
+    child.stdout.on('data', () => {});
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk;
+    });
+    child.on('error', (error) => {
+      cleanup();
+      resolve({ ok: false, error: error.message });
+    });
+    child.on('close', (code) => {
+      let text = '';
+      try {
+        text = fs.readFileSync(txt, 'utf8').trim();
+      } catch {
+        /* -otxt produced nothing */
+      }
+      cleanup();
+      if (code === 0 && text) resolve({ ok: true, text });
+      else resolve({ ok: false, error: stderr || `exit ${code}` });
+    });
+  });
+}
+
+ipcMain.handle('bee:voice-available', () => voiceAvailable());
+ipcMain.handle('bee:transcribe', (_event, bytes, lang) => transcribeWav(bytes, lang));
 
 // --- IPC -----------------------------------------------------------------
 

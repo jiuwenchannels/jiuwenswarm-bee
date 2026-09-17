@@ -60,15 +60,20 @@ export const zh: Strings = {
     configure: '网关设置',
     speak: '朗读',
     stopSpeaking: '停止朗读',
+    collapse: '收起',
+    chat: '对话',
+    switchStyle: '切换形象',
   },
   offline: (url) => `无法连接到 JiuwenSwarm（${url}）。`,
   voice: {
     on: '🔊 语音开',
     off: '🔇 语音关',
+    pushToTalk: '按住说话',
+    listening: '正在聆听…',
   },
   style: {
+    rigged: '动效',
     mascot: '经典',
-    vector: '动效',
   },
   theme: {
     label: '主题',
@@ -125,5 +130,12 @@ export const zh: Strings = {
     none: '没有匹配',
     next: '下一个',
     previous: '上一个',
+  },
+  onboarding: {
+    hint: '点击蜜蜂开始对话',
+    drop: '拖入文本文件以添加',
+  },
+  proactive: {
+    reconnected: '我回来了。',
   },
 };
