@@ -70,6 +70,18 @@ function ChatApp() {
     return messages.filter((message) => message.text.toLowerCase().includes(needle)).map((m) => m.id);
   }, [messages, findQuery]);
 
+  // Keep the cursor valid: reset on a new query, and clamp when the match set
+  // shrinks (streaming/message edits) so the counter never shows e.g. 4/2.
+  useEffect(() => {
+    setFindIndex(0);
+  }, [findQuery]);
+
+  useEffect(() => {
+    setFindIndex((current) =>
+      matches.length === 0 ? 0 : Math.min(current, matches.length - 1),
+    );
+  }, [matches.length]);
+
   // Reflect the drawer state on the root so the desktop layout can dock it.
   useEffect(() => {
     document.documentElement.dataset.history = historyOpen ? 'open' : 'closed';

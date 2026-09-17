@@ -122,5 +122,7 @@ export interface Strings {
   find: {
     placeholder: string;
     none: string;
+    next: string;
+    previous: string;
   };
 }

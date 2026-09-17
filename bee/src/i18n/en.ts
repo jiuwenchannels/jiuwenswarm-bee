@@ -123,5 +123,7 @@ export const en: Strings = {
   find: {
     placeholder: 'Find in conversation…',
     none: 'No matches',
+    next: 'Next match',
+    previous: 'Previous match',
   },
 };

@@ -123,5 +123,7 @@ export const zh: Strings = {
   find: {
     placeholder: '在对话中查找…',
     none: '没有匹配',
+    next: '下一个',
+    previous: '上一个',
   },
 };

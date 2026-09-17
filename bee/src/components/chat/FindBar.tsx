@@ -52,10 +52,10 @@ export function FindBar({
       <span className="find__count" aria-live="polite">
         {query.trim() ? (total === 0 ? t.find.none : `${index + 1}/${total}`) : ''}
       </span>
-      <button className="icon-btn icon-btn--sm" type="button" onClick={onPrev} aria-label={t.actions.search}>
+      <button className="icon-btn icon-btn--sm" type="button" onClick={onPrev} aria-label={t.find.previous}>
         <ChevronUp size={15} aria-hidden="true" />
       </button>
-      <button className="icon-btn icon-btn--sm" type="button" onClick={onNext} aria-label={t.actions.search}>
+      <button className="icon-btn icon-btn--sm" type="button" onClick={onNext} aria-label={t.find.next}>
         <ChevronDown size={15} aria-hidden="true" />
       </button>
       <button className="icon-btn icon-btn--sm" type="button" onClick={onClose} aria-label={t.actions.close}>
