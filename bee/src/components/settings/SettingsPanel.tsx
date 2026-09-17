@@ -229,8 +229,13 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
           <button className="btn btn--ghost" type="button" onClick={reset}>
             {t.settings.reset}
           </button>
-          <span className="modal__build" title={t.settings.build}>
-            {__BUILD_ID__}
+          <span className="modal__meta">
+            <span className="modal__brand">
+              {t.poweredBy} · {t.attribution}
+            </span>
+            <span className="modal__build" title={t.settings.build}>
+              {__BUILD_ID__}
+            </span>
           </span>
           <button className="btn btn--primary" type="button" onClick={applyConnection}>
             {t.actions.save}

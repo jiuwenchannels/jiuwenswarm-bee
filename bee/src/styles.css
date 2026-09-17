@@ -441,12 +441,27 @@ html[data-mode='avatar'] body {
   border-radius: 0 0 20px 20px;
 }
 
-.modal__build {
+.modal__meta {
   flex: 1 1 auto;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modal__brand {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--bee-text-muted);
+  white-space: nowrap;
+}
+
+.modal__build {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  color: var(--bee-text-muted);
   user-select: text;
 }
 
