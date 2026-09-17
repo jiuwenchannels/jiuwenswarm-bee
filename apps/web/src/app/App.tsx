@@ -387,6 +387,17 @@ function ChatApp() {
           onStop={stop}
           draftKey={activeId}
         />
+        <p className="app__footer-credit">
+          {t.poweredBy} ·{' '}
+          <a
+            className="app__credit"
+            href="https://github.com/openjiuwen"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {t.attribution}
+          </a>
+        </p>
       </footer>
 
       {historyOpen ? (

@@ -198,11 +198,12 @@
 }
 
 .composer__input {
+  display: block;
   width: 100%;
   resize: none;
   min-height: 46px;
   max-height: 200px;
-  padding: 13px 15px;
+  padding: 11px 15px;
   border-radius: 15px;
   border: 1px solid var(--bee-border);
   background: var(--bee-surface);

@@ -133,6 +133,15 @@ html[data-mode='avatar'] body {
   grid-column: 3;
 }
 
+.app__footer-credit {
+  display: none;
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.01em;
+  color: var(--bee-text-muted);
+  opacity: 0.85;
+}
+
 @media (max-width: 520px) {
   .app__header {
     gap: 8px;
@@ -153,6 +162,14 @@ html[data-mode='avatar'] body {
   .app__cmd,
   .composer__hint {
     display: none;
+  }
+
+  .app__footer-credit {
+    display: block;
+  }
+
+  .composer {
+    padding-bottom: 0;
   }
 
   .bubble {
