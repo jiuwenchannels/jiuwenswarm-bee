@@ -80,7 +80,7 @@ export function readTranscript(results: RecognitionResultList): { final: string;
 
 export interface DictationCallbacks {
   /** Latest transcript of the current dictation (partial results replace earlier ones). */
-  onTranscript?: (text: string) => void;
+  onTranscript?: (text: string, isFinal: boolean) => void;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: string) => void;
@@ -106,7 +106,7 @@ export class Dictation {
     if (this.native) {
       installNativeVoice();
       this.recognition = null;
-      setTranscriptHandler((text) => this.callbacks.onTranscript?.(text));
+      setTranscriptHandler((text, isFinal) => this.callbacks.onTranscript?.(text, isFinal));
       setListeningHandler((state) => {
         if (state === 'start') this.callbacks.onStart?.();
         else if (state === 'error') this.callbacks.onError?.('native');
@@ -128,7 +128,9 @@ export class Dictation {
     recognition.onstart = () => this.callbacks.onStart?.();
     recognition.onresult = (event) => {
       const { final, interim } = readTranscript(event.results);
-      this.callbacks.onTranscript?.(interim ? `${final} ${interim}`.trim() : final);
+      const lastIndex = event.results.length - 1;
+      const isFinal = lastIndex >= 0 ? event.results[lastIndex].isFinal : false;
+      this.callbacks.onTranscript?.(interim ? `${final} ${interim}`.trim() : final, isFinal);
     };
     recognition.onerror = (event) => this.callbacks.onError?.(event.error);
     recognition.onend = () => this.callbacks.onEnd?.();

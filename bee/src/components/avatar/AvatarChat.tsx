@@ -275,7 +275,6 @@ export function AvatarChat() {
           }}
           onPointerUp={() => voice.end(true)}
           onPointerCancel={() => voice.end(false)}
-          onPointerLeave={() => voice.end(true)}
           onContextMenu={(event) => event.preventDefault()}
         >
           {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}

@@ -34,6 +34,10 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
   const recorderRef = useRef<ShellRecorder | null>(null);
   const transcriptRef = useRef('');
   const pttRef = useRef(false);
+  // Android delivers the final result only *after* stop() — so when there is no
+  // transcript yet at release, wait for it (or a short timeout) before sending.
+  const awaitingFinalRef = useRef(false);
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const available = shellVoice || (isRecognitionSupported() && !isDesktop());
 
   useEffect(() => {
@@ -45,6 +49,22 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
       alive = false;
     };
   }, []);
+
+  const clearFlush = useCallback(() => {
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+  }, []);
+
+  const flush = useCallback(() => {
+    if (!awaitingFinalRef.current) return;
+    awaitingFinalRef.current = false;
+    clearFlush();
+    const text = transcriptRef.current.trim();
+    transcriptRef.current = '';
+    if (text) onResult(text);
+  }, [clearFlush, onResult]);
 
   const end = useCallback(
     (submit: boolean) => {
@@ -70,13 +90,28 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
         return;
       }
 
-      dictationRef.current?.stop();
+      const dictation = dictationRef.current;
       dictationRef.current = null;
+      dictation?.stop();
+
+      if (!submit) {
+        awaitingFinalRef.current = false;
+        clearFlush();
+        transcriptRef.current = '';
+        return;
+      }
+
       const text = transcriptRef.current.trim();
-      transcriptRef.current = '';
-      if (submit && text) onResult(text);
+      if (text) {
+        transcriptRef.current = '';
+        onResult(text);
+        return;
+      }
+      // Nothing captured yet: wait for the platform's final result.
+      awaitingFinalRef.current = true;
+      flushTimerRef.current = setTimeout(flush, 1500);
     },
-    [shellVoice, locale, onResult],
+    [shellVoice, locale, onResult, clearFlush, flush],
   );
 
   const begin = useCallback(() => {
@@ -85,6 +120,7 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     transcriptRef.current = '';
     setTranscript('');
     setProcessing(false);
+    awaitingFinalRef.current = false;
     pttRef.current = true;
 
     if (shellVoice) {
@@ -103,16 +139,25 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     }
 
     const dictation = new Dictation(recognitionLang(locale), {
-      onStart: () => setListening(true),
-      onTranscript: (text) => {
+      onStart: () => {
+        if (pttRef.current) setListening(true);
+      },
+      onTranscript: (text, isFinal) => {
+        // Ignore late events from a previous session; only the active press
+        // (or one waiting on its final result) may write the transcript.
+        if (!pttRef.current && !awaitingFinalRef.current) return;
         transcriptRef.current = text;
         setTranscript(text);
+        if (isFinal) flush();
       },
       onEnd: () => {
         if (pttRef.current) end(true);
       },
       onError: () => {
+        if (!pttRef.current && !awaitingFinalRef.current) return;
         pttRef.current = false;
+        awaitingFinalRef.current = false;
+        clearFlush();
         setListening(false);
       },
     });
@@ -122,7 +167,7 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     }
     dictationRef.current = dictation;
     dictation.start();
-  }, [available, enabled, listening, shellVoice, end, locale]);
+  }, [available, enabled, listening, shellVoice, end, locale, flush, clearFlush]);
 
   // Release/blur outside the (tiny) window must end the talk; cap the length.
   useEffect(() => {
@@ -145,8 +190,9 @@ export function useVoiceInput(onResult: (text: string) => void, enabled = true):
     () => () => {
       dictationRef.current?.stop();
       void recorderRef.current?.stop();
+      clearFlush();
     },
-    [],
+    [clearFlush],
   );
 
   return { available, listening, processing, transcript, begin, end };

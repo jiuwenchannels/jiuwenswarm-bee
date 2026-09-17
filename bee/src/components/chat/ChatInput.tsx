@@ -124,7 +124,6 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
           }}
           onPointerUp={() => voice.end(true)}
           onPointerCancel={() => voice.end(false)}
-          onPointerLeave={() => voice.end(true)}
           onContextMenu={(event) => event.preventDefault()}
         >
           {voice.listening ? <Waveform active /> : <Mic size={18} aria-hidden="true" />}
