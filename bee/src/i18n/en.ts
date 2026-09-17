@@ -60,13 +60,12 @@ export const en: Strings = {
     configure: 'Gateway settings',
     speak: 'Read aloud',
     stopSpeaking: 'Stop reading',
-    collapse: 'Collapse',
-    chat: 'Chat',
   },
   offline: (url) => `Can't reach JiuwenSwarm at ${url}.`,
   voice: {
     pushToTalk: 'Hold to talk',
     listening: 'Listening…',
+    unavailable: 'Voice isn’t available here — open Settings.',
   },
   style: {
     rigged: 'Animated',
@@ -128,10 +127,6 @@ export const en: Strings = {
     none: 'No matches',
     next: 'Next match',
     previous: 'Previous match',
-  },
-  onboarding: {
-    hint: 'Click the bee to chat',
-    drop: 'Drop a text file to add it',
   },
   proactive: {
     reconnected: "I'm back.",

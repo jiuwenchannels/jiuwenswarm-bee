@@ -86,7 +86,7 @@ fn set_avatar_expanded(app: AppHandle, expanded: bool) {
         let size = if expanded {
             LogicalSize::new(380.0, 620.0)
         } else {
-            LogicalSize::new(220.0, 280.0)
+            LogicalSize::new(300.0, 420.0)
         };
         let _ = window.set_size(Size::Logical(size));
     }

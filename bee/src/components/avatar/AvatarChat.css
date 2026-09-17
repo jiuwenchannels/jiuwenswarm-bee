@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  gap: 6px;
+  padding: 0 8px calc(10px + env(safe-area-inset-bottom));
   background: transparent;
   overflow: hidden;
 }
@@ -21,26 +23,29 @@
   cursor: grabbing;
 }
 
-.avatar-chat__bubbles {
+/* The bee's "subtitle": what it is saying, or you are, or that it's working. */
+.avatar-chat__caption {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 10px 12px 4px;
+  margin: 0;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  background: var(--bee-surface);
+  align-items: flex-end;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bee-surface) 88%, transparent);
   border: 1px solid var(--bee-border);
-  border-radius: 16px 16px 4px 16px;
-  margin: 0 4px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  color: var(--bee-text);
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
 }
 
-.avatar-chat__hello {
-  margin: 0;
+.avatar-chat__caption[data-state='listening'] {
   color: var(--bee-text-muted);
-  font-size: 13px;
+  font-style: italic;
 }
 
 .avatar-chat__stage {
@@ -49,34 +54,87 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 4px 0 2px;
 }
 
 .avatar-chat__char {
   width: 168px;
   height: 210px;
-  padding: 0;
+}
+
+.avatar-chat__pulse {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--bee-surface);
+  background: var(--bee-ok);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
+}
+
+.avatar-chat__pulse[data-variant='connecting'],
+.avatar-chat__pulse[data-variant='reconnecting'] {
+  background: var(--bee-warn);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+.avatar-chat__pulse[data-variant='disconnected'],
+.avatar-chat__pulse[data-state='error'] {
+  background: var(--bee-danger-text);
+}
+
+/* One control: hold to talk. */
+.avatar-chat__talk {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  min-width: 190px;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--bee-border);
+  border-radius: 999px;
+  background: var(--bee-surface);
+  color: var(--bee-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+}
+
+.avatar-chat__talk:hover {
+  border-color: var(--bee-accent);
+}
+
+.avatar-chat__talk[data-listening='true'] {
+  background: var(--bee-accent);
+  border-color: var(--bee-accent);
+  color: var(--bee-accent-text);
+}
+
+.avatar-chat__novoice {
+  margin: 0;
+  align-self: center;
+  padding: 0 12px;
+  text-align: center;
+  color: var(--bee-text-muted);
+  font-size: 12px;
+}
+
+.avatar-chat__stop {
+  align-self: center;
   border: none;
   background: transparent;
+  color: var(--bee-danger-text);
+  font: inherit;
+  font-size: 12px;
   cursor: pointer;
-}
-
-.avatar-chat__composer {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 6px 10px calc(10px + env(safe-area-inset-bottom));
-  background: var(--bee-surface);
-  border: 1px solid var(--bee-border);
-  border-radius: 14px;
-  margin: 0 4px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
-}
-
-.avatar-chat__composer .composer__input,
-.avatar-chat__composer .composer__icon,
-.avatar-chat__composer .composer__send {
   -webkit-app-region: no-drag;
 }
 
@@ -98,191 +156,47 @@
   -webkit-app-region: no-drag;
 }
 
-/* Collapsed status cue: a small dot on the bee, so you know its state without
-   expanding the chat. Hidden once the chat is open (the activity line takes over). */
-.avatar-chat__pulse {
-  position: absolute;
-  right: 16px;
-  bottom: 18px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid var(--bee-surface);
-  background: var(--bee-ok);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
-}
-
-.avatar-chat__pulse[data-variant='connecting'],
-.avatar-chat__pulse[data-variant='reconnecting'] {
-  background: var(--bee-warn);
-  animation: pulse-dot 1.2s ease-in-out infinite;
-}
-
-.avatar-chat__pulse[data-variant='disconnected'],
-.avatar-chat__pulse[data-state='error'] {
-  background: var(--bee-danger-text);
-}
-
-.avatar-chat[data-expanded='true'] .avatar-chat__pulse {
-  display: none;
-}
-
-.avatar-chat__hint {
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--bee-surface);
-  border: 1px solid var(--bee-border);
-  color: var(--bee-text-muted);
-  font-size: 11px;
-  white-space: nowrap;
-  box-shadow: var(--bee-shadow-soft);
-  pointer-events: none;
-}
-
-.avatar-chat__notice {
-  align-self: center;
-  margin: 0 8px 2px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--bee-bg-accent);
-  color: var(--bee-text-muted);
-  font-size: 11px;
-  animation: notice-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* --- agency surface: what the bee is doing right now -------------------- */
-
-.avatar-chat__activity {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 2px 4px;
-  color: var(--bee-text-muted);
-  font-size: 12px;
-}
-
-.avatar-chat__activity-dots {
-  display: inline-flex;
-  gap: 3px;
-}
-
-.avatar-chat__activity-dots i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--bee-accent);
-  animation: activity-dot 1.2s ease-in-out infinite;
-}
-
-.avatar-chat__activity-dots i:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.avatar-chat__activity-dots i:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.avatar-chat__activity-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.avatar-chat__activity-time {
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.8;
-}
-
-/* --- multimodal: drop a text file to compose ---------------------------- */
-
-.avatar-chat__drop {
-  position: absolute;
-  inset: 6px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed var(--bee-accent);
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--bee-surface) 82%, transparent);
-  color: var(--bee-text);
-  font-size: 12px;
-  text-align: center;
-  padding: 12px;
-  pointer-events: none;
-}
-
 @keyframes pulse-dot {
   50% {
     opacity: 0.35;
   }
 }
 
-@keyframes notice-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@keyframes activity-dot {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-}
-
 /*
- * Android overlay: draw one connected surface (bubbles + bee + composer) instead of
- * three detached cards, and make the bee/grip a native drag target.
+ * Android overlay: one connected surface (caption + bee + talk) and a native
+ * drag target for the bee.
  */
 [data-shell='android'] .avatar-chat__grip,
 [data-shell='android'] .avatar-chat__stage {
   touch-action: none;
 }
 
-[data-shell='android'] .avatar-chat__bubbles {
-  margin: 0 6px;
-  border-bottom: none;
+[data-shell='android'] .avatar-chat {
+  padding: 0 6px calc(8px + env(safe-area-inset-bottom));
+}
+
+[data-shell='android'] .avatar-chat__caption {
   border-radius: 16px 16px 0 0;
+  border-bottom: none;
   box-shadow: none;
 }
 
 [data-shell='android'] .avatar-chat__stage {
-  margin: 0 6px;
   background: var(--bee-surface);
   border-left: 1px solid var(--bee-border);
   border-right: 1px solid var(--bee-border);
 }
 
-[data-shell='android'] .avatar-chat__composer {
-  margin: 0 6px;
-  border-top: none;
+[data-shell='android'] .avatar-chat__talk {
   border-radius: 0 0 16px 16px;
+  border-top: none;
   box-shadow: none;
-}
-
-/* Collapsed: a single rounded card around the bee — clearly grabbable. */
-[data-shell='android'] .avatar-chat[data-expanded='false'] .avatar-chat__stage {
-  border: 1px solid var(--bee-border);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  align-self: stretch;
+  min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .avatar-chat__pulse,
-  .avatar-chat__notice,
-  .avatar-chat__activity-dots i {
+  .avatar-chat__pulse {
     animation: none !important;
   }
 }

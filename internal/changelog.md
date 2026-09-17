@@ -65,6 +65,13 @@ A client-only polish pass on the web app (no gateway/backend changes).
   separate talk row. The avatar's redundant mute, language, and character toggles
   are removed; **all preferences are in Settings** (and reachable from ⌘K). The
   standalone language-toggle component is deleted.
+- **The floating avatar is now voice-only.** It is a voice companion, not a chat
+  window: one "Hold to talk" button, live waveform, barge-in, and a subtitle of
+  what it is saying (or what you are saying). The composer, message list, expand
+  toggle, and drop-to-compose are removed from the avatar; the **website** stays
+  the place to type. Window sizes for Electron/Tauri/Android updated to fit.
+  Voice input is now one shared engine (`useVoiceInput`) used by both the
+  website composer mic and the avatar talk button.
 
 ## 0.1.0
 

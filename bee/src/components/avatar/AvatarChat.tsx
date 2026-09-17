@@ -1,43 +1,38 @@
+import { Mic } from 'lucide-react';
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
-  type DragEvent as ReactDragEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 
-import { ChatInput, type ChatInputHandle } from '../chat/ChatInput';
-import { MessageList } from '../chat/MessageList';
 import { AvatarCharacter } from './AvatarCharacter';
 import { CompanionBees } from './CompanionBees';
+import { Waveform } from './Waveform';
 import { useStrings } from '../../i18n/LocaleContext';
 import { desktop, isAndroidOverlay } from '../../platform/desktop';
 import { Speaker, isSpeechSupported } from '../../platform/speech';
+import { useVoiceInput } from '../../platform/useVoiceInput';
 import { useAppConfig, useSettings } from '../../settings/SettingsContext';
 import { useChat } from '../../chat/useChat';
 import './AvatarChat.css';
 
 /**
- * The floating avatar view. One obvious interaction: click the bee, then type
- * or hold the mic (the composer owns the single mic). Preferences — voice,
- * theme, language, character — live in Settings, not here.
+ * The floating avatar: a voice companion, not a chat window. Hold the button to
+ * talk; the bee listens and speaks its reply. The website remains the place to
+ * type. Preferences (voice, character, language) live in Settings.
  */
 export function AvatarChat() {
   const t = useStrings();
   const config = useAppConfig();
   const { settings } = useSettings();
-  const { messages, avatar, status, busy, activity, send, stop, retryMessage, editMessage } =
-    useChat(config);
-  const [expanded, setExpanded] = useState(false);
+  const { messages, avatar, status, busy, activity, send, stop } = useChat(config);
   const [mouthOpen, setMouthOpen] = useState(0);
-  const [hintDismissed, setHintDismissed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
   const overlay = isAndroidOverlay();
-  const composerRef = useRef<ChatInputHandle>(null);
   const muted = !isSpeechSupported() || !settings.voiceEnabled;
+  const voice = useVoiceInput(send);
 
   const speakerRef = useRef<Speaker | null>(null);
   const spokenRef = useRef<Set<string>>(new Set());
@@ -48,7 +43,6 @@ export function AvatarChat() {
   const dragRef = useRef({ active: false, moved: false, x: 0, y: 0 });
   const prevStatusRef = useRef(status);
 
-  // Marker so styles can adapt to the Android overlay (one connected surface).
   useEffect(() => {
     if (!overlay) return;
     document.documentElement.dataset.shell = 'android';
@@ -135,21 +129,6 @@ export function AvatarChat() {
     ensureTalking();
   }, [avatar, ensureTalking]);
 
-  useEffect(() => {
-    desktop.setExpanded(expanded);
-  }, [expanded]);
-
-  // Elapsed-time indicator while the agent works (agency surface).
-  useEffect(() => {
-    if (!busy) {
-      setElapsed(0);
-      return;
-    }
-    const started = Date.now();
-    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
-    return () => clearInterval(timer);
-  }, [busy]);
-
   // Proactive: announce the return after a drop (one short line, then fade).
   useEffect(() => {
     const previous = prevStatusRef.current;
@@ -162,60 +141,19 @@ export function AvatarChat() {
     return () => {};
   }, [status, messages.length, t]);
 
-  // Multimodal client cue: drop a text file to compose from its contents.
-  const onDrop = useCallback(async (event: ReactDragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setDragging(false);
-    const file = event.dataTransfer.files?.[0];
-    if (!file) return;
-    const looksText =
-      file.type.startsWith('text/') || /\.(md|txt|json|csv|log|ya?ml)$/i.test(file.name);
-    if (!looksText) return;
-    const text = (await file.text()).slice(0, 4000);
-    setExpanded(true);
-    requestAnimationFrame(() => composerRef.current?.setText(text));
-  }, []);
+  const lastReply = [...messages]
+    .reverse()
+    .find((message) => message.role === 'assistant' && !message.streaming && !message.error)?.text;
+  const caption = voice.listening
+    ? voice.transcript || t.voice.listening
+    : busy
+      ? activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)
+      : notice ?? lastReply ?? (messages.length === 0 ? t.hello : '');
 
-  const handleSend = useCallback(
-    (text: string) => {
-      setExpanded(true);
-      send(text);
-    },
-    [send],
-  );
-
-  const toggleExpanded = useCallback(() => {
-    if (dragRef.current.moved) {
-      dragRef.current.moved = false;
-      return;
-    }
-    setHintDismissed(true);
-    setExpanded((value) => !value);
-  }, []);
-
-  const showHint = !expanded && !hintDismissed && messages.length === 0;
+  const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
 
   return (
-    <div
-      className="avatar-chat"
-      data-expanded={expanded ? 'true' : 'false'}
-      data-avatar={avatar}
-      data-dragging={dragging ? 'true' : undefined}
-      onDragOver={(event) => {
-        event.preventDefault();
-        if (!dragging) setDragging(true);
-      }}
-      onDragLeave={(event) => {
-        if (event.currentTarget === event.target) setDragging(false);
-      }}
-      onDrop={onDrop}
-    >
-      {dragging ? (
-        <div className="avatar-chat__drop" aria-hidden="true">
-          {t.onboarding.drop}
-        </div>
-      ) : null}
-
+    <div className="avatar-chat" data-avatar={avatar} data-listening={voice.listening ? 'true' : undefined}>
       <div
         className="avatar-chat__grip"
         data-tauri-drag-region
@@ -237,25 +175,10 @@ export function AvatarChat() {
         </button>
       ) : null}
 
-      {expanded ? (
-        <div className="avatar-chat__bubbles" aria-live="polite">
-          {messages.length === 0 ? (
-            <p className="avatar-chat__hello">{t.hello}</p>
-          ) : (
-            <MessageList
-              messages={messages}
-              busy={busy}
-              onRetry={retryMessage}
-              onEdit={editMessage}
-            />
-          )}
-        </div>
-      ) : null}
-
-      {notice ? (
-        <div className="avatar-chat__notice" role="status">
-          {notice}
-        </div>
+      {caption ? (
+        <p className="avatar-chat__caption" aria-live="polite" data-state={voice.listening ? 'listening' : busy ? 'busy' : 'idle'}>
+          {caption}
+        </p>
       ) : null}
 
       <div
@@ -266,47 +189,41 @@ export function AvatarChat() {
         onPointerCancel={onDragEnd}
       >
         <CompanionBees />
-        <button
-          className="avatar-chat__char"
-          type="button"
-          title={expanded ? t.actions.collapse : t.actions.chat}
-          aria-label={expanded ? t.actions.collapse : t.actions.chat}
-          onClick={toggleExpanded}
-        >
+        <div className="avatar-chat__char">
           <AvatarCharacter state={avatar} mouthOpen={mouthOpen} style={settings.avatarStyle} />
-        </button>
-        <span
-          className="avatar-chat__pulse"
-          data-variant={status}
-          data-state={avatar}
-          aria-hidden="true"
-        />
-        {showHint ? <span className="avatar-chat__hint">{t.onboarding.hint}</span> : null}
+        </div>
+        <span className="avatar-chat__pulse" data-variant={status} data-state={avatar} aria-hidden="true" />
       </div>
 
-      {expanded ? (
-        <div className="avatar-chat__composer">
-          {busy ? (
-            <div className="avatar-chat__activity" role="status">
-              <span className="avatar-chat__activity-dots" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span className="avatar-chat__activity-text">
-                {activity ?? (avatar === 'thinking' ? t.avatar.thinking : t.avatar.answering)}
-              </span>
-              {elapsed >= 2 ? <span className="avatar-chat__activity-time">{elapsed}s</span> : null}
-            </div>
-          ) : null}
-          <ChatInput
-            ref={composerRef}
-            disabled={busy}
-            onSend={handleSend}
-            onStop={stop}
-            draftKey="avatar"
-          />
-        </div>
+      {voice.available ? (
+        <button
+          className="avatar-chat__talk"
+          type="button"
+          data-testid="bee-talk"
+          data-listening={voice.listening ? 'true' : undefined}
+          aria-pressed={voice.listening}
+          aria-label={talkLabel}
+          title={talkLabel}
+          onPointerDown={(event: ReactPointerEvent<HTMLButtonElement>) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            voice.begin();
+          }}
+          onPointerUp={() => voice.end(true)}
+          onPointerCancel={() => voice.end(false)}
+          onPointerLeave={() => voice.end(true)}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {voice.listening ? <Waveform active /> : <Mic size={16} aria-hidden="true" />}
+          <span>{talkLabel}</span>
+        </button>
+      ) : (
+        <p className="avatar-chat__novoice">{t.voice.unavailable}</p>
+      )}
+
+      {busy ? (
+        <button className="avatar-chat__stop" type="button" onClick={stop}>
+          {t.composer.stop}
+        </button>
       ) : null}
     </div>
   );

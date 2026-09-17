@@ -14,7 +14,7 @@ const fs = require('node:fs');
 const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
-const AVATAR_COLLAPSED = { width: 220, height: 280 };
+const AVATAR_COLLAPSED = { width: 300, height: 420 };
 const AVATAR_EXPANDED = { width: 380, height: 620 };
 // Packaged builds copy the web build to resources/bee-dist (extraResources).
 const DIST_DIR = app.isPackaged

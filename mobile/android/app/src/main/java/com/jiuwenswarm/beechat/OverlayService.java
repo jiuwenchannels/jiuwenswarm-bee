@@ -44,8 +44,8 @@ public class OverlayService extends Service {
     private static final String CHANNEL_ID = "bee_overlay";
     private static final int NOTIFICATION_ID = 42;
 
-    private static final int COLLAPSED_WIDTH_DP = 200;
-    private static final int COLLAPSED_HEIGHT_DP = 260;
+    private static final int COLLAPSED_WIDTH_DP = 260;
+    private static final int COLLAPSED_HEIGHT_DP = 400;
     private static final int EXPANDED_WIDTH_DP = 360;
     private static final int EXPANDED_HEIGHT_DP = 560;
 

@@ -62,13 +62,12 @@ export interface Strings {
     configure: string;
     speak: string;
     stopSpeaking: string;
-    collapse: string;
-    chat: string;
   };
   offline: (url: string) => string;
   voice: {
     pushToTalk: string;
     listening: string;
+    unavailable: string;
   };
   style: Record<AvatarStyle, string>;
   theme: {
@@ -127,10 +126,6 @@ export interface Strings {
     none: string;
     next: string;
     previous: string;
-  };
-  onboarding: {
-    hint: string;
-    drop: string;
   };
   proactive: {
     reconnected: string;

@@ -29,8 +29,8 @@ To pin one, set `VITE_JIUWENSWARM_URL` (and optionally `VITE_GATEWAY_PROTOCOL`).
 - Per-message actions: copy, copy as plain text, edit & resend, regenerate; timestamps + "edited" markers; error retry in place
 - Reactive bee avatar: idle / thinking / answering / error
 - **Character style is a setting**: **Classic** (the shipped mascot — now a transparent cut-out that bobs, blinks, pulses while speaking, and reacts) or **Animated** (the code-authored rigged SVG bee — blink, pointer gaze, lip-sync). Chosen in Settings → Appearance and applied across the website and the avatar view.
-- **Voice-first avatar view**: push-to-talk with a live mic-level waveform and barge-in (talking cancels the bee mid-sentence), onboarding, a live activity line, and drop-a-text-file-to-compose
-- **One obvious way (2026 pass)**: a single composer everywhere — type, or hold its one mic (Web Speech in browser/Android, offline whisper in the desktop shells). Voice/history/find/palette all live in **⚙ Settings** or the **⌘K** palette; the duplicate inline toggles (separate talk button, mute, language, character) are gone.
+- **Voice-first avatar view**: the floating avatar is a **voice companion** — one "Hold to talk" control, a live waveform, barge-in (talking cancels the bee mid-sentence), and a subtitle. No text box, no message list; the website is where you type.
+- **One obvious way (2026 pass)**: the **website** is a single composer — type, or hold its one mic (Web Speech in browser/Android, offline whisper in the desktop shells). The **floating avatar** is voice-only. Voice/history/find/palette all live in **⚙ Settings** or the **⌘K** palette; the avatar's duplicate inline toggles (separate talk button, mute, language, character) are gone.
 - Local **conversation history**: searchable sidebar grouped by day (Today / Previous 7 days / Older) with rename/delete, persisted across reloads, per-chat drafts
 - **Light / dark / system** themes plus a settings panel (runtime gateway URL, agent, mode, voice) — all client-side
 - Connection status shown only while connecting/reconnecting/offline (no permanent badge); auto-growing composer with stop-generation, starter prompts, and a keyboard hint
@@ -87,7 +87,10 @@ All framing lives in `bee/src/gateway/`.
 
 ## Desktop assistant avatar (Windows)
 
-The assistant as an **always-on-top desktop character**: a transparent, frameless window that floats over other windows and holds the chat *inline* — click the character to expand it into a bubble + input. Replies are **spoken** (TTS) with boundary-driven lip-sync; nothing opens in a separate window by default.
+The assistant as an **always-on-top desktop character**: a transparent, frameless
+window that floats over other windows and behaves as a **voice companion** — hold
+the button to talk, and the bee speaks its reply (with a subtitle). It is *not* a
+chat window: the website is where you type. The tray can still open the full app.
 
 Open `index.html#avatar` in the web app for the same view in the browser.
 
