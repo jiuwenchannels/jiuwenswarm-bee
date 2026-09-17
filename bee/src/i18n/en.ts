@@ -118,7 +118,6 @@ export const en: Strings = {
     placeholder: 'Type a command…',
     newChat: 'New chat',
     toggleTheme: 'Toggle theme',
-    switchLanguage: 'Switch language',
     openSettings: 'Open settings',
     focusComposer: 'Focus the message box',
     export: 'Export chat as Markdown',

@@ -118,7 +118,6 @@ export const zh: Strings = {
     placeholder: '输入命令…',
     newChat: '新对话',
     toggleTheme: '切换主题',
-    switchLanguage: '切换语言',
     openSettings: '打开设置',
     focusComposer: '聚焦输入框',
     export: '导出对话为 Markdown',

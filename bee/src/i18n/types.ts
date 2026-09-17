@@ -117,7 +117,6 @@ export interface Strings {
     placeholder: string;
     newChat: string;
     toggleTheme: string;
-    switchLanguage: string;
     openSettings: string;
     focusComposer: string;
     export: string;

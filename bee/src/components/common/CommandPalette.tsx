@@ -1,7 +1,7 @@
 import { Download, Languages, MessageSquare, Plus, Search, Settings, SunMoon } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLocaleContext, useStrings } from '../../i18n/LocaleContext';
+import { useStrings } from '../../i18n/LocaleContext';
 import { useFocusTrap } from '../../lib/useFocusTrap';
 import './CommandPalette.css';
 
@@ -34,16 +34,15 @@ export function CommandPalette({
   onFind: () => void;
 }) {
   const t = useStrings();
-  const { locale } = useLocaleContext();
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(panelRef, open);
 
-  // Name the target language in its own script (autonym), so the entry is
-  // readable even after switching to a language you cannot read.
-  const nextLanguage = locale === 'zh' ? 'English' : '中文';
+  // A stable, language-neutral label (the word "language" in both scripts), so
+  // the entry stays recognizable whichever UI language is active.
+  const languageLabel = 'Language · 语言';
 
   const commands = useMemo<Command[]>(
     () => [
@@ -51,18 +50,13 @@ export function CommandPalette({
       { id: 'find', label: t.command.find, icon: Search, run: onFind },
       { id: 'export', label: t.command.export, icon: Download, run: onExport },
       { id: 'theme', label: t.command.toggleTheme, icon: SunMoon, run: onToggleTheme },
-      {
-        id: 'language',
-        label: `${t.command.switchLanguage} · ${nextLanguage}`,
-        icon: Languages,
-        run: onSwitchLanguage,
-      },
+      { id: 'language', label: languageLabel, icon: Languages, run: onSwitchLanguage },
       { id: 'settings', label: t.command.openSettings, icon: Settings, run: onOpenSettings },
       { id: 'focus', label: t.command.focusComposer, icon: MessageSquare, run: onFocusComposer },
     ],
     [
       t,
-      nextLanguage,
+      languageLabel,
       onNewChat,
       onFind,
       onExport,
