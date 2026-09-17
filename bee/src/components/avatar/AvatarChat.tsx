@@ -176,6 +176,7 @@ export function AvatarChat() {
         : notice ?? (!activated ? t.hello : lastReply ? stripMarkdown(lastReply) : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
+  const working = busy && !voice.listening && !voice.processing;
 
   return (
     <div className="avatar-chat" data-avatar={avatar} data-listening={voice.listening ? 'true' : undefined}>
@@ -200,10 +201,24 @@ export function AvatarChat() {
         </button>
       ) : null}
 
-      {caption ? (
-        <p className="avatar-chat__caption" aria-live="polite" data-state={voice.listening ? 'listening' : busy ? 'busy' : 'idle'}>
-          {caption}
-        </p>
+      {caption || working ? (
+        <div
+          className="avatar-chat__caption"
+          aria-live="polite"
+          data-state={voice.listening ? 'listening' : busy ? 'busy' : 'idle'}
+        >
+          {caption ? <span className="avatar-chat__caption-text">{caption}</span> : null}
+          {working ? (
+            <span className="avatar-chat__working" role="status">
+              <span className="avatar-chat__working-dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              {activity ?? t.avatar[avatar]}
+            </span>
+          ) : null}
+        </div>
       ) : null}
 
       <div
@@ -244,17 +259,6 @@ export function AvatarChat() {
       ) : (
         <p className="avatar-chat__novoice">{t.voice.unavailable}</p>
       )}
-
-      {busy && !voice.listening && !voice.processing ? (
-        <p className="avatar-chat__working" role="status">
-          <span className="avatar-chat__working-dots" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          {activity ?? t.avatar[avatar]}
-        </p>
-      ) : null}
 
       {busy ? (
         <button className="avatar-chat__stop" type="button" onClick={stop}>

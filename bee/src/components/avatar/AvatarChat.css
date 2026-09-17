@@ -29,8 +29,10 @@
   min-height: 0;
   margin: 0;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
   text-align: center;
   overflow: hidden;
   padding: 8px 10px;
@@ -41,6 +43,11 @@
   font-size: 13px;
   line-height: 1.45;
   box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+}
+
+.avatar-chat__caption-text {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .avatar-chat__caption[data-state='listening'] {
@@ -127,13 +134,13 @@
   font-size: 12px;
 }
 
-/* Small "Buzz is thinking…" cue, shown under the talk button while it works. */
+/* Small "Buzz is thinking…" cue, shown inside the answer window. */
 .avatar-chat__working {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  margin: 4px 0 0;
+  margin: 0;
   color: var(--bee-text-muted);
   font-size: 12px;
 }
