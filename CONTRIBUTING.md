@@ -26,7 +26,6 @@ jiuwenswarm-bee/
 ├── docs/
 │   ├── user/                # End-user docs, per language (`en/`, `zh/`)
 │   └── dev/                 # Maintainer docs: architecture, naming, run modes, roadmap
-├── package.json             # npm workspaces root (apps/*)
 ├── CHANGELOG.md             # User-visible changes per release
 └── .github/workflows/       # CI
 ```
