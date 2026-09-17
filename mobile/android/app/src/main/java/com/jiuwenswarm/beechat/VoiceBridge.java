@@ -133,15 +133,35 @@ public class VoiceBridge {
         }
         main.post(
                 () -> {
-                    if (recognizer == null) {
+                    // Recreate the recognizer for every session: Android often
+                    // refuses to restart a used instance (ERROR_RECOGNIZER_BUSY),
+                    // which is why only the first push-to-talk worked.
+                    if (recognizer != null) {
+                        try {
+                            recognizer.cancel();
+                        } catch (Exception ignored) {
+                            // ignore
+                        }
+                        try {
+                            recognizer.destroy();
+                        } catch (Exception ignored) {
+                            // ignore
+                        }
+                        recognizer = null;
+                    }
+                    try {
                         recognizer = SpeechRecognizer.createSpeechRecognizer(context);
                         recognizer.setRecognitionListener(new Listener());
+                    } catch (Exception e) {
+                        listeningEvent("error");
+                        return;
                     }
                     Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                     intent.putExtra(
                             RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                     intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                    intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
                     if (lang != null && !lang.isEmpty()) {
                         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
                     }

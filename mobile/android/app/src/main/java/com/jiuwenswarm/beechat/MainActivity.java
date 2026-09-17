@@ -30,9 +30,18 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestOverlayPermissionOnce();
         requestNotificationPermissionOnce();
         requestAudioPermissionOnce();
+
+        // Avatar-only launch: with the overlay permission granted, start the
+        // floating bee and close this activity so the full screen never shows.
+        if (Settings.canDrawOverlays(this) && startOverlayService()) {
+            finishAndRemoveTask();
+            return;
+        }
+
+        // No overlay permission yet: keep the activity so the user can grant it.
+        requestOverlayPermissionOnce();
         installVoiceBridge();
     }
 
