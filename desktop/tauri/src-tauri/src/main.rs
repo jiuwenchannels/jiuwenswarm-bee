@@ -13,8 +13,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{
-    AppHandle, LogicalSize, Manager, PhysicalPosition, Size, WebviewUrl, WebviewWindowBuilder,
-    WindowEvent,
+    AppHandle, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
 
@@ -78,18 +77,6 @@ fn apply_click_through(app: &AppHandle, enabled: bool) {
 #[tauri::command]
 fn open_chat_command(app: AppHandle) {
     open_chat(&app);
-}
-
-#[tauri::command]
-fn set_avatar_expanded(app: AppHandle, expanded: bool) {
-    if let Some(window) = app.get_webview_window("avatar") {
-        let size = if expanded {
-            LogicalSize::new(380.0, 620.0)
-        } else {
-            LogicalSize::new(300.0, 420.0)
-        };
-        let _ = window.set_size(Size::Logical(size));
-    }
 }
 
 #[tauri::command]
@@ -239,7 +226,6 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             open_chat_command,
-            set_avatar_expanded,
             set_click_through,
             quit,
             voice_available,

@@ -16,7 +16,6 @@ const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 
 const AVATAR_COLLAPSED = { width: 300, height: 420 };
-const AVATAR_EXPANDED = { width: 380, height: 620 };
 // Packaged builds copy the web build to resources/bee-dist (extraResources).
 const DIST_DIR = app.isPackaged
   ? path.join(process.resourcesPath, 'bee-dist')
@@ -115,20 +114,6 @@ function createAvatarWindow() {
   });
 
   if (state.petHidden) avatarWindow.hide();
-}
-
-function setAvatarExpanded(expanded) {
-  if (!avatarWindow || avatarWindow.isDestroyed()) return;
-  const size = expanded ? AVATAR_EXPANDED : AVATAR_COLLAPSED;
-  const bounds = avatarWindow.getBounds();
-  const display = screen.getDisplayMatching(bounds).workArea;
-  // Anchor the bottom-right corner so the character stays put while growing.
-  let x = bounds.x + bounds.width - size.width;
-  let y = bounds.y + bounds.height - size.height;
-  x = Math.min(Math.max(x, display.x), display.x + display.width - size.width);
-  y = Math.min(Math.max(y, display.y), display.y + display.height - size.height);
-  avatarWindow.setBounds({ x, y, width: size.width, height: size.height });
-  saveState({ petX: x, petY: y });
 }
 
 function createChatWindow() {
@@ -321,7 +306,6 @@ ipcMain.handle('bee:transcribe', (_event, bytes, lang) => transcribeWav(bytes, l
 // --- IPC -----------------------------------------------------------------
 
 ipcMain.on('bee:open-chat', () => createChatWindow());
-ipcMain.on('bee:set-expanded', (_event, expanded) => setAvatarExpanded(Boolean(expanded)));
 ipcMain.on('bee:set-click-through', (_event, enabled) => setClickThrough(Boolean(enabled)));
 ipcMain.on('bee:log', (_event, message) => log(`[avatar] ${message}`));
 ipcMain.on('bee:hide-pet', () => {

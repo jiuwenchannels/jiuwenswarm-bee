@@ -6,7 +6,6 @@
  */
 
 interface ElectronBridge {
-  setExpanded?: (expanded: boolean) => void;
   setClickThrough?: (enabled: boolean) => void;
   openChat?: () => void;
   quit?: () => void;
@@ -23,7 +22,6 @@ interface TauriGlobal {
 
 /** Native overlay bridge exposed by the Android app (`OverlayService`). */
 interface AndroidOverlayBridge {
-  setExpanded?: (expanded: boolean) => void;
   moveBy?: (dx: number, dy: number) => void;
   close?: () => void;
 }
@@ -58,13 +56,6 @@ export function isAndroidOverlay(): boolean {
 
 export const desktop = {
   isDesktop,
-
-  /** Resize the avatar window between collapsed (avatar only) and expanded. */
-  setExpanded(expanded: boolean): void {
-    electron()?.setExpanded?.(expanded);
-    void tauri()?.core?.invoke('set_avatar_expanded', { expanded });
-    androidOverlay()?.setExpanded?.(expanded);
-  },
 
   /** Move the floating overlay window by a delta (Android overlay only). */
   moveBy(dx: number, dy: number): void {

@@ -46,8 +46,6 @@ public class OverlayService extends Service {
 
     private static final int COLLAPSED_WIDTH_DP = 260;
     private static final int COLLAPSED_HEIGHT_DP = 400;
-    private static final int EXPANDED_WIDTH_DP = 360;
-    private static final int EXPANDED_HEIGHT_DP = 560;
 
     /** Served origin; the web build is copied to {@code assets/public/}. */
     private static final String OVERLAY_URL = "https://localhost/public/index.html#avatar";
@@ -212,20 +210,6 @@ public class OverlayService extends Service {
                 });
     }
 
-    private void setExpanded(boolean expanded) {
-        applyWindowUpdate(
-                () -> {
-                    params.width = dp(expanded ? EXPANDED_WIDTH_DP : COLLAPSED_WIDTH_DP);
-                    params.height = dp(expanded ? EXPANDED_HEIGHT_DP : COLLAPSED_HEIGHT_DP);
-                    // Only while expanded must the window take focus, so the keyboard can appear.
-                    if (expanded) {
-                        params.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    } else {
-                        params.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    }
-                });
-    }
-
     private void moveBy(float dx, float dy) {
         applyWindowUpdate(
                 () -> {
@@ -249,11 +233,6 @@ public class OverlayService extends Service {
 
     /** Exposed to the web app as {@code window.AndroidBee} (see platform/desktop.ts). */
     private class BeeBridge {
-        @JavascriptInterface
-        public void setExpanded(final boolean expanded) {
-            OverlayService.this.setExpanded(expanded);
-        }
-
         @JavascriptInterface
         public void moveBy(final float dx, final float dy) {
             OverlayService.this.moveBy(dx, dy);
