@@ -6,10 +6,11 @@
  */
 
 export interface AndroidVoiceBridge {
-  speak?: (text: string) => void;
+  speak?: (text: string, rate?: number) => void;
   stopSpeaking?: () => void;
   startListening?: (lang: string) => void;
   stopListening?: () => void;
+  log?: (message: string) => void;
 }
 
 export type SpeechState = 'start' | 'end' | 'boundary';
@@ -27,6 +28,12 @@ export function androidVoice(): AndroidVoiceBridge | undefined {
 
 export function hasNativeVoice(): boolean {
   return Boolean(androidVoice());
+}
+
+/** Mirror a web-side event into the native logcat stream (no-op elsewhere). */
+export function voiceLog(message: string): void {
+  androidVoice()?.log?.(message);
+  if (typeof console !== 'undefined') console.log(`[voice] ${message}`);
 }
 
 /** Install the global callback object once (native TTS/recognition push into it). */

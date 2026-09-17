@@ -98,6 +98,8 @@ export interface Strings {
     avatar: string;
     voice: string;
     voiceHint: string;
+    speechRate: string;
+    speechRateHint: string;
     concise: string;
     conciseHint: string;
     gatewayUrl: string;
@@ -109,6 +111,7 @@ export interface Strings {
     modeHint: string;
     reset: string;
     close: string;
+    build: string;
   };
   command: {
     title: string;

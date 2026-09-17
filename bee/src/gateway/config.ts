@@ -48,7 +48,7 @@ function inferProtocol(url: string): GatewayProtocol {
 /** Build the connection settings a fresh install should start from. */
 export function envSettingsDefaults(): Omit<
   UserSettings,
-  'theme' | 'avatarStyle' | 'voiceEnabled' | 'conciseReplies'
+  'theme' | 'avatarStyle' | 'voiceEnabled' | 'speechRate' | 'conciseReplies'
 > {
   return {
     gatewayUrl: envExplicitUrl,
@@ -83,5 +83,6 @@ export const config: AppConfig = resolveConfig({
   agentId: readEnv(env.VITE_AGENT_ID, 'researcher'),
   mode: readEnv(env.VITE_AGENT_MODE, 'agent'),
   voiceEnabled: true,
+  speechRate: 1,
   conciseReplies: true,
 });

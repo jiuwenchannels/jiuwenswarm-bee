@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { type AppConfig, envSettingsDefaults, resolveConfig } from '../gateway/config';
+import { setSpeechRate } from '../platform/speakerStore';
 import { applyTheme, resolveTheme, systemPrefersDark, type ResolvedTheme } from '../theme/theme';
 import { type UserSettings, loadSettings, saveSettings } from './settings';
 
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: 'system',
   avatarStyle: 'mascot',
   voiceEnabled: true,
+  speechRate: 1,
   conciseReplies: true,
   ...envSettingsDefaults(),
 };
@@ -69,6 +71,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     applyTheme(resolvedTheme);
   }, [resolvedTheme]);
 
+  // Keep the shared read-aloud speaker at the user's chosen speed.
+  useLayoutEffect(() => {
+    setSpeechRate(settings.speechRate);
+  }, [settings.speechRate]);
+
   useLayoutEffect(() => {
     if (settings.theme !== 'system') return () => {};
     return subscribeToSystemTheme(() => setSystemDark(systemPrefersDark()));
@@ -83,6 +90,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         theme: 'system',
         avatarStyle: 'mascot',
         voiceEnabled: true,
+        speechRate: 1,
         conciseReplies: true,
         gatewayUrl,
         agentId,

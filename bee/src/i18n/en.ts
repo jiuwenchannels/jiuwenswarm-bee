@@ -99,6 +99,8 @@ export const en: Strings = {
     avatar: 'Character',
     voice: 'Speak replies',
     voiceHint: 'Read assistant answers aloud when your device supports it.',
+    speechRate: 'Speaking speed',
+    speechRateHint: 'How fast replies are read aloud.',
     concise: 'Short voice answers',
     conciseHint: 'In the avatar, silently ask for one–two sentence, plain-text replies.',
     gatewayUrl: 'Gateway URL',
@@ -110,6 +112,7 @@ export const en: Strings = {
     modeHint: 'Runtime mode sent with chat.send (product gateway).',
     reset: 'Reset to defaults',
     close: 'Close',
+    build: 'Build',
   },
   command: {
     title: 'Command palette',

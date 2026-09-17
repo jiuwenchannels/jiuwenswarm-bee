@@ -72,14 +72,16 @@ export function firstSentences(text: string, max: number, maxChars = 320): strin
 export class Speaker {
   private readonly callbacks: SpeakerCallbacks;
   private readonly native: boolean;
+  private readonly rate: number;
   private voice: SpeechSynthesisVoice | undefined;
   private queue: string[] = [];
   private speaking = false;
   private cancelled = false;
 
-  constructor(callbacks: SpeakerCallbacks = {}) {
+  constructor(callbacks: SpeakerCallbacks = {}, rate = 1) {
     this.callbacks = callbacks;
     this.native = hasNativeVoice();
+    this.rate = Math.min(2, Math.max(0.5, rate));
 
     if (this.native) {
       installNativeVoice();
@@ -109,7 +111,7 @@ export class Speaker {
   speak(text: string): void {
     if (this.native) {
       const clean = stripForSpeech(text);
-      if (clean) androidVoice()?.speak?.(clean);
+      if (clean) androidVoice()?.speak?.(clean, this.rate);
       return;
     }
     if (!isSpeechSupported()) return;
@@ -145,7 +147,7 @@ export class Speaker {
 
     const utterance = new SpeechSynthesisUtterance(sentence);
     if (this.voice) utterance.voice = this.voice;
-    utterance.rate = 1;
+    utterance.rate = this.rate;
     utterance.pitch = 1;
 
     utterance.onstart = () => {

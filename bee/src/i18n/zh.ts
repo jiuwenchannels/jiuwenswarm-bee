@@ -99,6 +99,8 @@ export const zh: Strings = {
     avatar: '形象',
     voice: '朗读回答',
     voiceHint: '设备支持时，朗读助手回答。',
+    speechRate: '语速',
+    speechRateHint: '朗读回答的速度。',
     concise: '语音简短回答',
     conciseHint: '在形象模式下，自动要求用一两句话的纯文本回答。',
     gatewayUrl: '网关地址',
@@ -110,6 +112,7 @@ export const zh: Strings = {
     modeHint: '随 chat.send 发送的运行模式（产品网关）。',
     reset: '恢复默认',
     close: '关闭',
+    build: '构建',
   },
   command: {
     title: '命令面板',

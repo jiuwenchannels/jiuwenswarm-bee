@@ -9,7 +9,17 @@ import { isSpeechSupported, Speaker } from './speech';
 
 let speaking = false;
 let speaker: Speaker | null = null;
+let currentRate = 1;
 const listeners = new Set<() => void>();
+
+/** Apply the user's speaking speed; rebuilds the shared speaker if it changes. */
+export function setSpeechRate(rate: number): void {
+  const next = Math.min(2, Math.max(0.5, rate));
+  if (next === currentRate) return;
+  currentRate = next;
+  speaker?.cancel();
+  speaker = null;
+}
 
 function emit(): void {
   for (const listener of listeners) listener();
@@ -24,10 +34,13 @@ function setSpeaking(value: boolean): void {
 function getSpeaker(): Speaker | null {
   if (!isSpeechSupported()) return null;
   if (!speaker) {
-    speaker = new Speaker({
-      onStart: () => setSpeaking(true),
-      onEnd: () => setSpeaking(false),
-    });
+    speaker = new Speaker(
+      {
+        onStart: () => setSpeaking(true),
+        onEnd: () => setSpeaking(false),
+      },
+      currentRate,
+    );
   }
   return speaker;
 }

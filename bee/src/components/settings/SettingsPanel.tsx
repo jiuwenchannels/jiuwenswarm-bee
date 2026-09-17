@@ -139,6 +139,24 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
               <p className="field__hint">{t.settings.voiceHint}</p>
             </div>
             <div className="field">
+              <label className="field__row" htmlFor="speech-rate">
+                <span className="field__label">{t.settings.speechRate}</span>
+                <span className="field__value">{settings.speechRate.toFixed(2)}×</span>
+              </label>
+              <input
+                id="speech-rate"
+                type="range"
+                className="range"
+                min={0.5}
+                max={2}
+                step={0.05}
+                value={settings.speechRate}
+                disabled={!settings.voiceEnabled}
+                onChange={(event) => update({ speechRate: Number(event.target.value) })}
+              />
+              <p className="field__hint">{t.settings.speechRateHint}</p>
+            </div>
+            <div className="field">
               <label className="field__row">
                 <span className="field__label">{t.settings.concise}</span>
                 <input
@@ -211,6 +229,9 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
           <button className="btn btn--ghost" type="button" onClick={reset}>
             {t.settings.reset}
           </button>
+          <span className="modal__build" title={t.settings.build}>
+            {__BUILD_ID__}
+          </span>
           <button className="btn btn--primary" type="button" onClick={applyConnection}>
             {t.actions.save}
           </button>

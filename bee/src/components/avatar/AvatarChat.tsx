@@ -119,26 +119,29 @@ export function AvatarChat() {
   }, [tick]);
 
   useEffect(() => {
-    const speaker = new Speaker({
-      onStart: () => {
-        speakingRef.current = true;
-        ensureTalking();
+    const speaker = new Speaker(
+      {
+        onStart: () => {
+          speakingRef.current = true;
+          ensureTalking();
+        },
+        onEnd: () => {
+          speakingRef.current = false;
+          ensureTalking();
+        },
+        onBoundary: () => {
+          boostRef.current = 1;
+          ensureTalking();
+        },
       },
-      onEnd: () => {
-        speakingRef.current = false;
-        ensureTalking();
-      },
-      onBoundary: () => {
-        boostRef.current = 1;
-        ensureTalking();
-      },
-    });
+      settings.speechRate,
+    );
     speakerRef.current = speaker;
     return () => {
       speaker.cancel();
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [ensureTalking]);
+  }, [ensureTalking, settings.speechRate]);
 
   // Speak each finished assistant reply once (voice on/off is a Setting). In
   // concise mode, only the first sentences are spoken so listening stays short.
