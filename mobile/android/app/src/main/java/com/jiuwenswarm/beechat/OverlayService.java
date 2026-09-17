@@ -49,7 +49,7 @@ public class OverlayService extends Service {
     private static final String CHANNEL_ID = "bee_overlay";
     private static final int NOTIFICATION_ID = 42;
 
-    private static final int COLLAPSED_WIDTH_DP = 260;
+    private static final int COLLAPSED_WIDTH_DP = 280;
     private static final int COLLAPSED_HEIGHT_DP = 400;
 
     /** Served origin; the web build is copied to {@code assets/public/}. */
@@ -99,7 +99,7 @@ public class OverlayService extends Service {
                         : new Notification.Builder(this);
         Notification notification =
                 builder.setContentTitle("BeeChat")
-                        .setContentText("Buzz is floating")
+                        .setContentText("Buzz is floating · your bee in the swarm")
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentIntent(contentIntent)
                         .setOngoing(true)

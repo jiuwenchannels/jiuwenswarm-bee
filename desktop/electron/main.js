@@ -164,6 +164,8 @@ function toggleAvatar() {
 function rebuildTray() {
   if (!tray) return;
   const menu = Menu.buildFromTemplate([
+    { label: 'BeeChat · JiuwenSwarm', enabled: false },
+    { type: 'separator' },
     { label: 'Show / hide assistant', click: toggleAvatar },
     { label: 'Open full chat window', click: createChatWindow },
     { type: 'separator' },

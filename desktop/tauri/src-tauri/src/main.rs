@@ -238,6 +238,7 @@ fn main() {
                 }
             }
 
+            let brand_item = MenuItem::with_id(app, "brand", "BeeChat · JiuwenSwarm", false, None::<&str>)?;
             let avatar_item = MenuItem::with_id(app, "avatar", "Show / hide assistant", true, None::<&str>)?;
             let chat_item = MenuItem::with_id(app, "chat", "Open full chat window", true, None::<&str>)?;
             let click_item = MenuItem::with_id(app, "click-through", "Toggle click-through", true, None::<&str>)?;
@@ -245,6 +246,8 @@ fn main() {
             let menu = Menu::with_items(
                 app,
                 &[
+                    &brand_item,
+                    &PredefinedMenuItem::separator(app)?,
                     &avatar_item,
                     &chat_item,
                     &click_item,
