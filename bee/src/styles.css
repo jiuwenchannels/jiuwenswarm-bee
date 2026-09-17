@@ -234,6 +234,7 @@ html[data-mode='avatar'] body {
   text-align: center;
   color: var(--bee-text-muted);
   margin: 0;
+  white-space: pre-line;
 }
 
 .app__retry {

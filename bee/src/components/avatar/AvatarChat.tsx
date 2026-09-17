@@ -173,7 +173,7 @@ export function AvatarChat() {
       ? t.voice.transcribing
       : busy
         ? justSent ?? ''
-        : notice ?? (!activated ? t.helloAvatar : lastReply ? stripMarkdown(lastReply) : '');
+        : notice ?? (!activated ? t.hello : lastReply ? stripMarkdown(lastReply) : '');
 
   const talkLabel = voice.listening ? t.voice.listening : t.voice.pushToTalk;
   const working = busy && !voice.listening && !voice.processing;

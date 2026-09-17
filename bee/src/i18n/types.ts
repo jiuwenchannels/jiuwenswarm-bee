@@ -15,10 +15,8 @@ export interface Strings {
   poweredBy: string;
   /** Credit link phrase shown beneath `poweredBy`. */
   attribution: string;
-  /** Greeting shown in the empty conversation state. */
+  /** Greeting shown in the empty conversation state (two lines at "\n"). */
   hello: string;
-  /** Greeting for the narrow avatar subtitle (pre-split into two lines). */
-  helloAvatar: string;
   /** Short brand line, used for the avatar tooltip and sidebar footer. */
   tagline: string;
   status: Record<GatewayStatus, string>;
